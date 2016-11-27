@@ -1,0 +1,140 @@
+---
+title: "Lecture 3: Exploratory Data Analysis "
+output: html_document
+---
+####Intro to Data Science for Public Policy, Spring 2016
+#####*by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy*
+<br>
+
+
+Novice data scientists all too often default to a familiar machine learning model and jump straight into building an application before thoroughly interrogating the data. By foregoing *exploratory data analysis* (EDA), analysts may skip perhaps the most formative step in the technical exercise of a data science question that forces one to ask meticulous contextual, quality-concerned questions that ensure that a data product is well-designed from a technical lens. 
+
+###So, what is EDA?
+Much of exploratory data analysis is visual in nature to provide an organic understanding of the shape and quality of information, capitalizing on the visual pattern detection that which human minds are adept.  In many respects, exploratory data analysis allows analysts to bound their problem by the limitation of the data, but by first identifying the bounds of the data through analysis. A practice that was promoted by statistician John Tukey, EDA has become a pillar of data disciplines.
+
+> *Numerical quantities focus on expected values, graphical summaries on unexpected values.*
+>   <br>     - John Tukey
+
+The practice of EDA can be described by high-level goals associated with common questions. Each of these questions can be answered through a graphical or numerical technical approach.
+
+
+| **Goal**  | **Common Questions** |
+|--------------------+-----------------------------------------------------------------------------------|
+| Assess the data types  |  - Are the data categorical, numerical, factor, strings, other? <br> - What manipulations will you need to perform to get the data into usable shape?  |
+| Understand the empirical distributions | - Does the data fall into a commonly recognized shape? <br> - Is it unimodal, bimodal? <br> - Is there any indication of time-dependence? |
+| Detect outliers, missingness and errors | - Are there anomalous values? <br> - Do records spike or occur during odd times? <br> - How complete is the data? <br> - Which variables need to be standardized and cleaned?  | 
+| Check the assumptions | - How exactly is the data collected? <br> - Does the data reflect what would be expected?|
+| Identify important variables | -Which variables are correlated with one another?  |
+| Formulate data-bounded hypotheses| - Which variables are most correlated?|
+
+###Common Techniques
+EDA typically 
+- Simple Statistics
+
+- Graphical Approaches
+
+
+###Example Data 
+- American Community Survey
+- GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
+
+
+##Types
+```{r, echo=FALSE}
+
+
+library(ggplot2)
+library(gridExtra)
+datagen <- function(n, mu, sd, p_list){
+  x1    <- rnorm(n, mu, sd) #master variable
+  df <- data.frame(x1)
+  
+  for(p in p_list){
+    
+    #Set up parameters
+    theta <- acos(p)  # corr angle
+    x2    <- rnorm(n, mu, sd)  # create a random dataset
+    ds     <- cbind(x1, x2) 
+    cent  <- scale(ds, center=TRUE, scale=FALSE)   # centered columns (mean 0)
+    
+    Imat   <- diag(n)                               # identity matrix
+    Q    <- qr.Q(qr(cent[ , 1, drop=FALSE]))      # QR-decomposition, just matrix Q
+    P    <- tcrossprod(Q)          # = Q Q'       # projection onto space defined by x1
+    x2o  <- (Imat - P) %*% cent[ , 2]                 # x2ctr made orthogonal to x1ctr
+    Xc2  <- cbind(cent[ , 1], x2o)                # bind to matrix
+    Y    <- Xc2 %*% diag(1/sqrt(colSums(Xc2^2)))  # scale columns to length 1
+    
+    x <- Y[ , 2] + (1 / tan(theta)) * Y[ , 1]     # new correlated vec
+    cor(x1, x)  
+    df <- cbind(df,x) #
+  }
+  colnames(df)<- c("x",paste0("x",p_list))
+  return(df)
+}
+```
+
+###Univariate 
+```{r, message=FALSE, warning=FALSE}
+#Create simulated data
+  df <- datagen(1000, 0, 50, c(0.1,0.5,0.7,0.9))
+#Rename variables
+  colnames(df)<-c("y","x1","x2","x3","x4")
+#Groups
+  df$group <- 0
+  df$group[df$x3>0.05] <-1
+
+#Graphs
+  base <- ggplot(df, aes(y)) 
+  
+#Histogram
+  m1 <- base + ggtitle("(a) Histogram")+  geom_histogram(colour = "white", fill = "navy")
+  
+#K-density
+  m2 <-  base + ggtitle("(b) Kernel Density")+ geom_density(colour = "white", fill = "navy")
+  
+#Violin Plot
+  m3 <- ggplot(df, aes(factor(group),y))  + geom_violin(colour = "navy", fill = "navy")  + ggtitle("(c) Violin plot")
+
+#Boxplot
+  m4 <- ggplot(df, aes(factor(group),y)) + geom_boxplot(colour = "navy", fill = "navy")  + ggtitle("(d) Boxplot")
+
+#Arrange graphs into 2 columns
+  grid.arrange(m1, m2, m3, m4, ncol=2)
+```
+
+###Bivariate Graphs
+```{r,  message=FALSE, warning=FALSE}
+
+##Scatter plot
+p = ggplot(df,aes(x=x4,y=y))  +
+  xlab("x4") +
+  ylab("y")
+p1 = p + geom_point() + ggtitle("(a) scatter")
+p2 = p + geom_point(alpha = 0.1, colour="navy") +
+  theme_bw() + ggtitle("(b) scatter (alpha = 0.1)")
+
+##Hexbin 
+p3 = p +
+  stat_bin_hex(colour="white", na.rm=TRUE,alpha=0.9) +
+  scale_fill_gradientn(colours=c("lightgrey","navy"), name = "Frequency", na.value=NA) + 
+  guides(fill=FALSE) + ggtitle("(c) Hex bin plot")
+
+#Scatter by Group
+p4  = ggplot(df,aes(x=x4,y=y,colour=as.factor(round(x2*10,1)*20)))+
+      ggtitle("(d) scatter by group") + theme(legend.position="none") +
+      geom_point(alpha = 0.3)
+
+#Contour graph
+p5  = p + ggtitle("(e) contour")+ 
+      geom_density2d() + 
+      theme_bw()
+
+#Scatter plot with regression line (locally weighted smoother)
+p6 = ggplot(df, aes(x=x4, y=y)) + ggtitle("(f) scatter + regression line")+
+    geom_point(shape=1,alpha = 0.6, colour="navy") + 
+    geom_smooth() 
+
+#Arrange graphs
+  grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3)
+ 
+```

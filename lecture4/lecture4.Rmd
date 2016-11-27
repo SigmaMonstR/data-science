@@ -1,0 +1,76 @@
+---
+title: "Lectures 3 + 4: Exploratory Data Analysis"
+output: html_document
+---
+
+```{r, echo=FALSE, warnings = FALSE, messages=FALSE, id="asd"}
+# Load package
+library(networkD3)
+
+# Create fake data
+src <-    c("1 : investigate", "2 : ask","3 : design", "4 : collect", "5 : explore", "6 : reshape", "7 : model", "8 - communicate","9 - deploy", "5 : explore","5 : explore","5 : explore","5 : explore","5 : explore")
+target <- c("2 : ask","3 : design", "4 : collect",  "5 : explore", "6 : reshape", "7 : model", "8 - communicate", "9 - deploy",   "10 - refine","central tendency","data distribution","outliers","patterns","data formats")
+networkData <- data.frame(src, target)
+
+# Plot
+simpleNetwork(networkData,  charge = -500, opacity=1,linkDistance = 30, fontSize = 14,width='100%', height='300px', zoom=T)
+```
+ 
+
+Lecture 3/4: Exploratory Data Analysis
+detection of mistakes • checking of assumptions • preliminary selection of appropriate models • determining relationships among the explanatory variables, and • assessing the direction and rough size of relationships between explanatory and outcome variables.
+
+Univariate EDA
+Categorical or Discrete Data
+- Tab
+- Prop.table
+
+Numerical Data
+- summary()
+- mean()
+- median()
+- sd()
+- var()
+- range()
+- IQR()
+- quantile()
+
+Graphical
+- ggplot examples: http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/
+- par(mfrow = c(2,1)) 
+    - hist()
+- boxplot
+    - boxplot(numeric~group, data=df, main=“Title”, 
+    -    xlab="Number of Cylinders", ylab="Miles Per Gallon")
+    - boxplot(len~supp*dose, data=ToothGrowth, notch=TRUE, 
+    -   col=(c("gold","darkgreen")),
+    -   main="Tooth Growth", xlab="Suppliment and Dose")
+- 2-way relationships
+    - scatter
+    - scatterplot matrix 
+- High density
+    - scatter with density
+- Correlation matrix
+- 
+
+Bivariate
+- Correlation 
+    - corrplot
+- Covariance
+
+
+
+```{r, warning=FALSE, message=FALSE}
+##QQPLOT
+par(mfrow=c(2,2))
+
+for(k in c(5,20,100,100)){
+  pois = rpois(k,lambda=21)
+  norm = rnorm(length(pois), mean(pois), sd(pois))
+  qqplot(norm,pois, main=paste0("n=",k), aspect=1)
+  lines(norm,norm)
+}
+
+
+
+```

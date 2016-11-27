@@ -1,0 +1,139 @@
+ ---
+title: "Lecture 3: Data Quality "
+output: html_document
+---
+
+## Lecture 3: Data Quality
+
+The quality of data can be a selling point or achilles heel of a data science project.
+
+Checking data quality
+- Missingness
+- Standardized values
+- Visual checks
+
+The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output. We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
+
+##### Create a random dataset
+Consider a dataset of *n* individuals from a  community. The data follows individuals over a 100-month period. 
+```{r}
+
+n = 10000
+
+set.seed(123)
+
+##Create main dataset with age, education and gender
+df <- data.frame(id=seq(1,n,1), 
+                age = sample(25:85,n, replace=T), 
+                education = sample(c("High School","H.S.","High School","High School","HS","College","Bachelor","Bachelor's","Master's",NA),n,replace=T),
+                gender = sample(c("M","F","-999"),n,replace=T)
+                )
+
+##Simulate missing data. Add 100 columns (1 to 100) of 
+##randomly generated numbers using runif() that represent follow up data collection
+##Non-response (-999) grows in a sigmoid fashion over time.
+for(k in 1:100){
+  
+  #Each month is returned as a vector, drawn from 
+  # a distribution of randomly generated numbers
+  # where the occurence of non-response (-999) grows over time
+  temp = sample(c(rep(-999,k^2),
+           runif(round(10000/k),400,10000)),10000, replace=TRUE)
+  
+  #Vector is assigned a name in sequence ("inc1", "inc2",...)
+  assign(paste0("inc",k),temp)
+  
+  #Result is column binded to the main dataset
+  df <- cbind(df,mget(paste0("inc",k)))
+  
+}
+
+
+```
+
+##### Examine dataset
+```{r}
+#Retrieve first few rows
+  head(df,1)
+
+#Obtain structure of dataset
+  str(df)
+
+#obtain summary for first 10 variables
+  summary(df[,1:10]) 
+
+```
+
+
+##### Check for steps in dataset
+```{r}
+#Check education
+  table(df$education)
+  table(df$education, useNA = "always")
+  unique(df$education)
+
+#Check gender
+  table(df$gender)
+  table(df$gender, useNA = "always")
+```
+
+
+##### Standardize levels in a dataset
+```{r}
+
+str(df$education)
+
+hs <- c("H.S.","High School","HS")
+college <- c("Bachelor","Bachelor's","College")
+
+levels(df$education)[levels(df$education) %in% hs ] <- "High School"
+levels(df$education)[levels(df$education) %in% college ] <- "College"
+levels(df$education)[levels(df$education)=="Master's"] <- "Graduate"
+ 
+```
+
+
+##### Calculate missingness over time
+
+We'll now write a simple function to return the proportion of records that are missing responses (-999) for a given month in the dataset. This new function 'missing' takes the following arguments:
+
+- k: index number of a column
+- dataframe: name of dataframe
+
+```{r}
+  missing <- function(k){
+    mean(df[,k]==-999)
+  }
+```
+
+To test this, let's look at column 95:
+
+```{r}
+  missing(95)
+```
+
+To put this to the test, we'll now put this to the test. Using lapply(), we can loop through all months of data (columns 5 to 104) and return a list containing the percent missing per month. 
+
+```{r}
+count <- lapply(5:ncol(df), FUN = missing)
+
+```
+
+Since lapply returns a list object, we'll need to apply unlist() to convert the object into a vector, then add it into a data frame with row labels for each month.
+
+```{r}
+count <- data.frame(month = 1:100, pct_missing = unlist(count))
+plot(count)
+```
+
+
+###Exercise 3.1: 
+GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
+Get data: [NOAA GHCN-M](https://www.kaggle.com/noaa/global-historical-climatology-network)
+
+```{r}
+
+```
+
+Weather: Matching human-reported weather events to radar events over time and space
+
