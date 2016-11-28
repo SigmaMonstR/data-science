@@ -27,7 +27,7 @@ The practice of EDA can be described by high-level goals associated with common 
 | Identify important variables | -Which variables are correlated with one another?  |
 | Formulate data-bounded hypotheses| - Which variables are most correlated?|
 
-###Common Workflow
+###A Workflow
 EDA typically involves the following three 
 
 - Data structure
@@ -35,34 +35,33 @@ EDA typically involves the following three
 - Graphical Approaches
 
 
-###Example Data 
-- American Community Survey
+###Data For Context
+To put EDA into context, we will rely upon the American Community Survey ([ACS](http://www.census.gov/programs-surveys/acs/)), which is one of the most relied upon public data sources in the United States. A survey that is produced by the U.S. Census Bureau, the ACS provides a highly detailed socioeconomic snapshot of households and communities, allowing for data-driven insight to inform public policy as well as business decisions. For this lesson, we will examine
 
-```{r}
-##American Population Survey -- Iowa Popualtion survey, 2015
+Note: While each record is associated with a sampling weight, we will treat each record with equal weight. We will also only focus on one state in this exercise -- in this case, we have selected Iowa. The same analysis can be replicated for other states.
 
+#####Get data, unpack, read into dataframe named 'acs'
+```{r, warning=FALSE, message=FALSE}
 temp <- tempfile()
 download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip",temp, mode="wb")
 unz <- unzip(temp, exdir=getwd())
 acs <- read.csv(unz[1])
-
 ```
-- GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
 
-## (1) Data Structure
-```{r}
+
+###(1) Data Structure
+```{r, eval=FALSE}
 colnames(acs)
 str(acs) 
 ```
 
-
-## (2) Statistical Measures
+###(2) Statistical Measures
 [Statistical]
 summarize 
 - check for central tendency
 - spread or dispersion of data
 
-###The usual suspects
+####The usual suspects: quantitative variables
 | Measure | Formula | Definition | R Function |Example |
 |---------+-----------+---------------------+---------+-------------|
 | Mean or Average | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | A measure of central tendency formulated as the sum of all values. Also known as the 'expected value'. | mean()| `r paste0("mean(c(1,3,5,7,9)) = ", mean(c(1,3,5,7,9)))`|
@@ -75,78 +74,52 @@ summarize
 | Missing |  $$ x_i = NA $$ | Number of values that are NA. Note that in some cases, -9999 or similar representation may represent missingness.| sum(is.na()) | `r paste0("sum(is.na((c(1,3,5,7,9))) = ", sum(is.na((c(1,3,NA,5,7,9,NA)))))`|
 
 
+####The usual suspects: discrete variables
+| Measure | Formula | Definition | R Function |Example |
+|---------+-----------+---------------------+---------+-------------|
+| Mean or Average | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | A measure of central tendency formulated as the sum of all values. Also known as the 'expected value'. | mean()| `r paste0("mean(c(1,3,5,7,9)) = ", mean(c(1,3,5,7,9)))`|
+| Median |  Value at $$(\frac{n+1}{2})^{th} $$ position| A measure of central tendency based on the 'middle value' or 50th percentile of a random variable.  | median() | `r paste0("median(c(1,3,5,7,9)) = ", median(c(1,3,5,7,9)))`|
 
 
-
-## (3) Graphical Approaches
+###(3) Graphical Approaches
 [Text goes here]
-```{r, echo=FALSE}
 
+####Univariate 
+[Goals]
+```{r, message=FALSE, warning=FALSE}
 
 library(ggplot2)
 library(gridExtra)
-datagen <- function(n, mu, sd, p_list){
-  x1    <- rnorm(n, mu, sd) #master variable
-  df <- data.frame(x1)
-  
-  for(p in p_list){
-    
-    #Set up parameters
-    theta <- acos(p)  # corr angle
-    x2    <- rnorm(n, mu, sd)  # create a random dataset
-    ds     <- cbind(x1, x2) 
-    cent  <- scale(ds, center=TRUE, scale=FALSE)   # centered columns (mean 0)
-    
-    Imat   <- diag(n)                               # identity matrix
-    Q    <- qr.Q(qr(cent[ , 1, drop=FALSE]))      # QR-decomposition, just matrix Q
-    P    <- tcrossprod(Q)          # = Q Q'       # projection onto space defined by x1
-    x2o  <- (Imat - P) %*% cent[ , 2]                 # x2ctr made orthogonal to x1ctr
-    Xc2  <- cbind(cent[ , 1], x2o)                # bind to matrix
-    Y    <- Xc2 %*% diag(1/sqrt(colSums(Xc2^2)))  # scale columns to length 1
-    
-    x <- Y[ , 2] + (1 / tan(theta)) * Y[ , 1]     # new correlated vec
-    cor(x1, x)  
-    df <- cbind(df,x) #
-  }
-  colnames(df)<- c("x",paste0("x",p_list))
-  return(df)
-}
-```
 
-###Univariate 
-```{r, message=FALSE, warning=FALSE}
-#Create simulated data
-  df <- datagen(1000, 0, 50, c(0.1,0.5,0.7,0.9))
-#Rename variables
-  colnames(df)<-c("y","x1","x2","x3","x4")
-#Groups
-  df$group <- 0
-  df$group[df$x3>0.05] <-1
+test <- acs[acs$PERNP<= mean(acs$PERNP, na.rm=T)+2*sd(acs$PERNP, na.rm=T),]
 
 #Graphs
-  base <- ggplot(df, aes(y)) 
-  
+base <- ggplot(acs, aes(AGEP)) 
+
 #Histogram
-  m1 <- base + ggtitle("(a) Histogram")+  geom_histogram(colour = "white", fill = "navy")
-  
+m1 <- base + ggtitle("(a) Histogram")+  geom_histogram(colour = "white", fill = "navy") + labs(x = "Age")
+
 #K-density
-  m2 <-  base + ggtitle("(b) Kernel Density")+ geom_density(colour = "white", fill = "navy")
-  
+m2 <-  base + ggtitle("(b) Kernel Density")+ geom_density(colour = "white", fill = "navy") + labs(x = "Age")
+
 #Violin Plot
-  m3 <- ggplot(df, aes(factor(group),y))  + geom_violin(colour = "navy", fill = "navy")  + ggtitle("(c) Violin plot")
+m3 <- ggplot(acs, aes(factor(HICOV),AGEP))  + geom_violin(colour = "navy", fill = "navy")  + ggtitle("(c) Violin plot") + labs(x = "Age")
 
 #Boxplot
-  m4 <- ggplot(df, aes(factor(group),y)) + geom_boxplot(colour = "navy", fill = "navy")  + ggtitle("(d) Boxplot")
+m4 <- ggplot(acs, aes(factor(HICOV),AGEP)) + geom_boxplot(colour = "grey", fill = "navy")  + ggtitle("(d) Boxplot") + labs(x = "Age")
+
+#Density overlap
+m5 <- ggplot(acs, aes(AGEP, fill = factor(HICOV), colour = factor(HICOV))) +
+  geom_density(alpha = 0.1) + labs(x = "Age") + ggtitle("(e) Kernel Overlay")
 
 #Arrange graphs into 2 columns
-  grid.arrange(m1, m2, m3, m4, ncol=2)
+grid.arrange(m1, m2, m3, m4, m5, layout_matrix = cbind(c(1, 4),c(2,5),c(3,5)), ncol=3)
 ```
 
 
-###Thought exercise
+####Thought exercise: Combining statistical thinking and graphical analysis
 >You've been asked to take a look at load times for an internet search website. 
-> - Which of the following three graphs best represents the distribution of latencies? 
-> - Where would the *mean* be relative to the *median*?
+<br>- Which of the following three graphs best represents the distribution of latencies? <br>- Where would the *mean* be relative to the *median*?
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=2}
 a = rnorm(100000,0,1)^2
@@ -160,39 +133,45 @@ hist(c, probability=TRUE, xlab="Time (s)",main="Option #3", ylab="% Web Accesses
 
 ```
 
-###Bivariate Graphs
+####Bivariate Graphs
+[Examine relationships]
 ```{r,  message=FALSE, warning=FALSE}
 
 ##Scatter plot
-p = ggplot(df,aes(x=x4,y=y))  +
-  xlab("x4") +
-  ylab("y")
-p1 = p + geom_point() + ggtitle("(a) scatter")
-p2 = p + geom_point(alpha = 0.1, colour="navy") +
+p = ggplot(acs,aes(x=AGEP,y=log(PERNP)))  +
+  xlab("Age") +
+  ylab("log(earnings)")
+p1 = p + geom_point(size=1) + ggtitle("(a) scatter")
+p2 = p + geom_point(alpha = 0.1, colour="navy", size=1) +
   theme_bw() + ggtitle("(b) scatter (alpha = 0.1)")
 
 ##Hexbin 
 p3 = p +
   stat_bin_hex(colour="white", na.rm=TRUE,alpha=0.9) +
   scale_fill_gradientn(colours=c("lightgrey","navy"), name = "Frequency", na.value=NA) + 
-  guides(fill=FALSE) + ggtitle("(c) Hex bin plot")
+  guides(fill=FALSE) + ggtitle("(c) hex-bin plot")
 
 #Scatter by Group
-p4  = ggplot(df,aes(x=x4,y=y,colour=as.factor(round(x2*10,1)*20)))+
-      ggtitle("(d) scatter by group") + theme(legend.position="none") +
-      geom_point(alpha = 0.3)
+p4  = ggplot(acs,aes(x=AGEP,y=log(PERNP),colour=as.factor(HICOV)))+
+  ggtitle("(d) scatter by group") + theme(legend.position="none") +
+  geom_point(alpha = 0.3, size=1) +
+  xlab("Age") + ylab("log(earnings)")
 
 #Contour graph
 p5  = p + ggtitle("(e) contour")+ 
-      geom_density2d() + 
-      theme_bw()
+  geom_density2d() + 
+  theme_bw()
 
 #Scatter plot with regression line (locally weighted smoother)
-p6 = ggplot(df, aes(x=x4, y=y)) + ggtitle("(f) scatter + regression line")+
-    geom_point(shape=1,alpha = 0.6, colour="navy") + 
-    geom_smooth() 
+p6 = ggplot(acs, aes(x=AGEP, y=log(PERNP))) + ggtitle("(f) scatter + regression line")+
+  geom_point(shape=1,alpha = 0.6, colour="navy",size=1) + 
+  geom_smooth() + xlab("Age") + ylab("log(earnings)")
 
 #Arrange graphs
-  grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3)
+grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3)
  
 ```
+
+
+###Exercise Data
+- GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
