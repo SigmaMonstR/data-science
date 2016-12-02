@@ -1,0 +1,99 @@
+---
+title: "Lecture 1: Preliminaries"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+
+The objective of the first lecture is to overcome the coefficient of static friction in using R for data science. Students will learn to execute simple R scripts to read, write, and extract data elements.
+
+##Overview
+###Data Science and its many possibilities
+[5 examples of how data science]
+
+[text goes here]
+
+##Overview
+###Why code matters
+[text goes here]
+
+###RMarkdown
+[screen shots]
+
+[text goes here]
+```{r,  message=FALSE, warning=FALSE}
+#
+ 
+```
+
+###Github
+Getting started with Github
+
+[text goes here]
+```{r,  message=FALSE, warning=FALSE}
+#
+ 
+```
+
+##Basic R Operations
+###Data types and classes, including matrix, data.frame, list, and vectors
+[text goes here]
+```{r,  message=FALSE, warning=FALSE}
+#
+ 
+```
+
+###Extracting rows, columns, and specific elements from a data frame
+[text goes here]
+```{r,  message=FALSE, warning=FALSE}
+#
+ 
+```
+
+###Basic operations (e.g., sum, mean) on rows; useful as consistency checks.
+[text goes here]
+```{r,  message=FALSE, warning=FALSE}
+#
+ 
+```
+
+##Data Formats
+###Formats
+- Data formats map to different fields
+
+| **Abbreviation**  | **Name + Description** | **Type** |**Example** | **Fields of Use ** | 
+|-------+---------------------+---------+--------------------------------------+--------------------|-------|
+| CSV | Comma Separated Values | Tabular | state, pop_mil <br> California, 38.8 <br> Delaware, 0.936 | Widely used format in most fields|
+| TSV | Tab Separated Values | Tabular | state    pop_mil <br> California    38.8 <br> Delaware    0.936 | Widely used format in most fields|
+| JSON  | JavaScript Object Notation | Tabular | [{"state": "California", "pop_mil": 38.8},<br>{"state": "Delaware", "pop_mil": 0.936}] | A common format provided from APIs |
+| XML | Extensible Markup Language | Tabular | \<data><br>&nbsp;&nbsp; \<rec> <br> &nbsp; &nbsp;&nbsp;   \<state>California \</state><br> &nbsp; &nbsp;&nbsp;   \<pop_mil>38.8 \<pop_mil><br> &nbsp;&nbsp;\</rec> <br> &nbsp;&nbsp; \<rec> <br> &nbsp; &nbsp;&nbsp;   \<state>Delaware \</state><br> &nbsp; &nbsp;&nbsp;   \<pop_mil>0.936 \<pop_mil><br> &nbsp;&nbsp;\</rec><br> \<\data>| Widely used format in most fields|
+| SHP | Shapefile | Spatial | Contains four files: .shp, .shx, .sbn, .dbf   | Common format for GIS |
+| GeoJSON | GeoJSON | Spatial  |   | Common format for web-based GIS |
+| TIFF | Tagged Image File Format | Spatial + Imagery  |   | Common format for representing grid-based|
+| HDF | Hierarchical Data Format | Spatial + Imagery  |   | Common format for representing grid-based|
+| NetCDF | Network Common Data Form (NetCDF) for sharing array-oriented scientific data | Spatial + Imagery  |   | Common format for representing grid-based|
+
+###Read data from CSV and JSON
+####CSV
+```{r}
+
+```
+
+####JSON
+```{r}
+
+```
+
+###Write data to CSV and JSON
+
+##Example
+###Example application
+```{r}
+
+```
+###Exercise Data
+-Health from the Demographic and Health Surveys or Census data.
