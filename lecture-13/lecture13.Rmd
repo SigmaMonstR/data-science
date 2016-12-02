@@ -1,0 +1,38 @@
+---
+title: "Lecture 13: Interactivity"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+Lecture 13: Export results and interactivity
+
+Often times, users like to interact with a product as opposed to reading curated results. Enter interactivity -- a well-proven mode of displaying results.
+
+##Overview
+###Three examples of interactive data science
+```{r}
+#
+```
+
+##Shiny
+####An Intro to R Shiny
+[text goes here]
+```{r}
+#
+```
+
+####Building a simple interactive tool
+[text goes here]
+```{r}
+#
+```
+
+####Example application
+[text goes here]
+```{r}
+#
+```

@@ -1,0 +1,30 @@
+---
+title: "Lecture 10: Data storytelling with visualizations"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+Often times, the model is not enough to communicate the value of the data analysis. A well-designed visualization can illustrate patterns and allow target audiences to establish a connection with the analytical effort at hand.
+
+
+##Overview
+###Three examples of the presentation layer
+####Static visualizations: ggplot2
+[text goes here]
+```{r}
+#
+```
+
+####Interactive visualizations: dygraphs, plotly, networkd3, threejs
+[text goes here]
+```{r}
+#
+```
+
+####Example application
+- Phone gyroscopic data: time series
+- Global trade flows: network map

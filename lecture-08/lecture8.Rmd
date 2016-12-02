@@ -1,0 +1,96 @@
+---
+title: "Lecture 8: Classifiers"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
+
+Lecture objectives
+
+##Overview
+###Three common classification problems in public policy:
+####Example #1
+[Example goes here]
+
+####Example #2
+[Example goes here]
+
+####Example #3
+[Example goes here]
+
+##Classifiers
+###What are they?
+[text goes here]
+
+###Structure of a classification problem
+- Target variables
+- Input variables
+- Objective function and evaluation measures
+- model experiment design
+- Cross validation versus train/validate/test
+
+###Framing Dataset
+[text goes here]
+
+###Types of classifiers
+[text goes here]
+
+```{r}
+#
+```
+
+####Decision Trees
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
+```{r}
+#
+```
+
+####Logistic Regression
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
+```{r}
+#
+```
+
+
+####K-Nearest Neighbors
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
+```{r}
+#
+```
+
+##Applications of classifiers
+###Appropriate uses of classification techniques
+[text goes here]
+
+```{r}
+#
+```
+###Scoring
+[text goes here]
+
+```{r}
+#
+```
+
+###prediction and prioritization
+[text goes here]
+
+```{r}
+#
+```
+
+###Propensity score matching
+[text goes here]
+
+```{r}
+#
+```
+
+
+###Exercise Data
+- [Labor and wage analysis]

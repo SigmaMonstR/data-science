@@ -1,0 +1,84 @@
+---
+title: "Lecture 5: Introduction to Supervised Learning"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
+
+Lecture objectives
+
+##Overview
+###Three common data science problems in public policy:
+####Supervised: Scoring or prediction for application
+[Example goes here]
+
+####Supervised: Causal inference and evaluation for understanding
+[Example goes here]
+
+####Unsupervised: Clustering for structure
+[Example goes here]
+
+##Supervised Learning
+###What is it?
+[text goes here]
+###Structure of a supervised learning project
+- Target variables
+- Input variables
+- Objective function and evaluation measures
+- model experiment design
+- Cross validation versus train/validate/test
+
+###Regression versus classifiers
+[text goes here]
+
+###Ordinary Least Squares (OLS)
+[text goes here]
+
+####Graphical Illustration
+[text goes here]
+
+####Formulation
+[text goes here]
+
+####Assumptions
+[text goes here]
+
+```{r}
+#
+```
+
+####In Action (in R)
+- Linear models in R
+```{r}
+#
+```
+
+####Exporting results tables
+```{r}
+#
+```
+
+####Limitations
+- The limits of correlation coefficients and R-squared statistics
+```{r}
+#
+```
+
+###Experiment Design
+[Train/validate/test]
+```{r}
+#
+```
+
+##Example application
+```{r}
+#
+```
+###Exercise Data
+- Labor and wage analysis, innate ability. (David Card data set.)
+- Economic data from BEA
