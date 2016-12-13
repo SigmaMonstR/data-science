@@ -122,8 +122,8 @@ print(long)
 
 This relatively simple example offers an overture to non-core `R` functions.  The standard `R` functions are extended through external packages.  For example, the `rename()` function is provided through the `plyr` package and abstracts away the list indexing idiosyncracies of renaming columns.  It packages the previous reassignments into more readable code:
 
-```{r comment=NA, cache=TRUE}
-suppressMessages(library(plyr)) # suppress messages upon loading package
+```{r comment=NA, cache=TRUE, message=FALSE}
+library(plyr)
 long <- reshape(wide, idvar="id", timevar="t", direction="long")
 rename(long, c("income.1"="income", "vote.1"="vote"))
 ```

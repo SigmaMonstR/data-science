@@ -1,0 +1,115 @@
+---
+title: "Lecture 6: Simulation and Propensity Scores"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+The objective of any good data science is to avoid work.  Any work.  And especially math.  Why spend time working out a closed-form solution when you can simulate the answer just as easily?  Consider, for example, trying to calculate the [standard errors on a complicated regression model](http://www.ssc.wisc.edu/~bhansen/econometrics/Econometrics2011.pdf#page=256)?  It is far easier to simulate the answer, rather than calculate it directly.  
+
+This lecture will offer a cursory review of calculating a consistent estimate of a policy treatment through simulation and propensity score matching.  Entire books have been written about this subject, and this lecture doesn't come close to a full treatment.  However, as an illustration of the value of simulation in data science, the propensity score applications are particularly expository.
+
+We first set up a **data generating process**.  Normally, in the real world, we don't observe the data generating process directly.  It is a complex and unobservable function of variables, which may or may not be observed.  We try to back out components of these variables for empirical analysis of policy impacts.  
+
+Let $D_i$ be the indicator of treatment for observation
+$i = 1, 2, \ldots, N$; let $Y_i$ be the outcome variable; and let
+$X_i$ be the vector of observable characteristics, which affect the
+propensity for receiving treatment:
+\begin{equation}
+\label{eq:basic}
+Y_i = \delta D_i + \beta X_i + \epsilon_i, \hspace{6pt}\mbox{with}\hspace{6pt} \epsilon_i \sim N(0,1)
+\end{equation} 
+
+Assume further that there are three observable characteristics $x_1,
+x_2, x_3 \sim Unif(0,1)$ and that treatment is determined by the
+following rule: 
+
+\begin{equation}
+D_i = \Bigg \{ \begin{array}{rl} 
+	1 & \mbox{if $\, 2(x_{1i} + x_{2i} + x_{3i}) + u_i > 4$}, \\ 
+	0 & \mbox{otherwise}
+\end{array}
+\end{equation}
+
+where $u_i \sim N(0,1)$.  Note that if we run
+a linear regression without conditioning on $X_i$, the treatment
+effect will be biased, since the composite error term will be
+correlated with both treatment and outcome.  With this framework, we
+can construct a data set of size $N = 5000$ in order to examine the
+behavior of various estimation techniques.
+
+```{r comment=NA, cache=TRUE}
+N <- 5000; eps <- rnorm(N); u <- rnorm(N)
+x1 <- runif(N); x2 <- runif(N); x3 <- runif(N)
+D <- ifelse(2*(x1 + x2 + x3) + u > 4, 1, 0)
+Y <- D + x1 + x2 + x3 + eps
+summary(D); summary(Y)
+```
+
+Roughly one quarter of the observations received treatment, and the
+outcome variable has about a ten unit spread, centered around 1.5
+or 2. 
+
+For reference, we estimate to basic, linear models by ordinary least
+squares.  First, we do not condition on the $X$ covariates, which will
+yield biased estimates of the treatment effect --- which is known.  We
+bootstrap the distribution of the estimated treatment effect.  We
+sample $n = 500$ observations from the distribution, estimate the
+impact effect, and repeat for $B=5000$ iterations.  Note that we do
+not iterate using a `for` loop, but rather by applying the `ols`
+function, defined below, to a range of indices using `sapply` to keep
+the code compact and readable.
+
+
+```{r comment=NA, cache=TRUE}
+n <- 500; B <- 5000
+X <- cbind(1, D)
+
+ols <- function(i) {
+	idx <- sample.int(N,n)
+	Xs <- X[idx,]
+	b <- solve(t(Xs) %*% Xs) %*% t(Xs) %*% Y[idx]
+	b[2]
+}
+
+res.ols <- data.frame(impact=sapply(1:B, ols), method=c("ols"))
+```
+
+Before we graph the distribution, let's perform the same process for
+the estimated impact, conditioning on $X$.  This should yield a
+consistent estimator for the treatment effect $\delta$, since by
+construction there is no three-way covariation between the error,
+outcome, *and* treatment, after conditioning on the observables.
+
+```{r comment=NA, cache=TRUE}
+X.ext <- cbind(1, D, x1, x2, x3)  
+
+mult.ols <- function(i) {
+	idx <- sample.int(N,n)
+	Xs <- X.ext[idx,]
+	b <- solve(t(Xs) %*% Xs) %*% t(Xs) %*% Y[idx]
+	b[2]
+}
+
+res.mult <- data.frame(impact=sapply(1:B, mult.ols), method=c("mult.ols"))
+total.res <- rbind(res.ols, res.mult)
+```
+
+Now we can plot the two distributions of impact estimates, based on
+the method of estimation.  The vertical line in Figure \ref{fig:ols}
+indicates the true, known impact effect.  It is clear that the OLS
+estimates with omitted variables overstate the treatment effect, since
+there is selection into the treatment group.
+
+
+```{r plots, message=FALSE, cache=TRUE}
+library(ggplot2)
+p <- ggplot(total.res, aes(x=impact, fill=method))
+p <- p + geom_histogram(position="identity")
+p + geom_vline(xintercept = 1)
+```
+
+
