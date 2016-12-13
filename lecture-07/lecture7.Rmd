@@ -1,0 +1,9 @@
+---
+title: "Lecture 7: Regression discontinuity and difference-in-difference estimation"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---

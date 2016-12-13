@@ -1,0 +1,46 @@
+---
+title: "Lecture 11: Web Service APIs"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+The purpose of this section is to showcase the ability to scrape and
+process web data using `R`.  The section notes draw heavily from a
+[post](http://schamberlain.github.com/2012/08/get-ecoevo-journal-titles/) on a great blog by Pascal Mickelson and Scott Chamberlain, two
+biologists and experienced `R` users.
+
+Suppose we want to find the number of available economics journals.
+There are too many.  Definitely.  But suppose we want to find out just
+how many.  To do this, we can visit crossref.org, which is a
+citation-linking network with a list of all journals and their Digital
+Object Identifiers (DOIs).  We will query the list from within `R` and
+then parse the returned content to list journals with certain
+attributes.  For this, we'll need to load the following libraries:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+library(XML)
+library(RCurl)
+library(stringr)
+
+options(show.error.messages = FALSE)
+```
+
+Note the useful option for code with loops, especially loops over
+remote queries, to globally suppress error messages.  The next step is
+to repeatedly query crossref.org for journal titles.  Try to copy and
+paste the base URL address (`baseurl`) into your browser:
+[`http://oai.crossref.org/OAIHandler?verb=ListSets`](http://oai.crossref.org/OAIHandler?verb=ListSets).  The result is a
+long XML form.  The function =getURL= in the following code pulls this
+response into `R` as a string, and the outer functions `xmlParse` and
+`xmlToList` convert the output into an `R` data structure.  There are
+too many entries to fit into a single query, so the `while` loop
+continues to query until there are no more results.  The final results
+are stored in `nameslist`.  We will review the code in section.
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+
+```
