@@ -13,24 +13,34 @@ The objective of the first lecture is to overcome the coefficient of static fric
 
 ##Overview
 ###Data Science and its many possibilities
-[5 examples of how data science]
+- Computer vision 
+- Language
+- Forecasting
+- Scoring
 
-[text goes here]
 
-##Overview
-###Why code matters
-[text goes here]
 
-###RMarkdown
+###What is data science?
+[definition goes here]
+- Comms
+
+
+
+##Software Tools and Code Languages
+
+Common languages 
+- R, Python, Julia, Jav
+
+###Installing RStudio
 [screen shots]
+- IDE
 
-[text goes here]
 ```{r,  message=FALSE, warning=FALSE}
 #
  
 ```
 
-###Github
+###Getting started with Github
 Getting started with Github
 
 [text goes here]
@@ -39,30 +49,25 @@ Getting started with Github
  
 ```
 
-##Basic R Operations
-###Data types and classes, including matrix, data.frame, list, and vectors
-[text goes here]
+##Get started with R
+###Read in data
+[Basic operations]
+- Example of solar energy production
+
+The amount of sunlight impacting the array during the past minute.  
+
 ```{r,  message=FALSE, warning=FALSE}
-#
- 
+df <- read.csv("https://s3.amazonaws.com/net-zero/2015-data-files/PV-hour.csv")
+df$Timestamp <- strptime(df$Timestamp, "%Y-%m-%d %H:%M:%S")
+df$month <- format(df$Timestamp, "%m")
+
+library(ggplot2)
+ggplot(df, aes(factor(month),PV_PVInsolationHArray)) + geom_boxplot(colour = "grey", fill = "navy")  + ggtitle("Boxplot") + labs(x = "Period")
+
 ```
 
-###Extracting rows, columns, and specific elements from a data frame
-[text goes here]
-```{r,  message=FALSE, warning=FALSE}
-#
- 
-```
 
-###Basic operations (e.g., sum, mean) on rows; useful as consistency checks.
-[text goes here]
-```{r,  message=FALSE, warning=FALSE}
-#
- 
-```
-
-##Data Formats
-###Formats
+###Data Formats
 - Data formats map to different fields
 
 | **Abbreviation**  | **Name + Description** | **Type** |**Example** | **Fields of Use ** | 
@@ -76,19 +81,6 @@ Getting started with Github
 | TIFF | Tagged Image File Format | Spatial + Imagery  |   | Common format for representing grid-based|
 | HDF | Hierarchical Data Format | Spatial + Imagery  |   | Common format for representing grid-based|
 | NetCDF | Network Common Data Form (NetCDF) for sharing array-oriented scientific data | Spatial + Imagery  |   | Common format for representing grid-based|
-
-###Read data from CSV and JSON
-####CSV
-```{r}
-
-```
-
-####JSON
-```{r}
-
-```
-
-###Write data to CSV and JSON
 
 ##Example
 ###Example application

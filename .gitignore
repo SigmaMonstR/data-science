@@ -1,4 +1,11 @@
+<<<<<<< Updated upstream
 *.DS_Store
 *_site/*
 *.sass-cache/*
 */*_cache/*
+=======
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+>>>>>>> Stashed changes
