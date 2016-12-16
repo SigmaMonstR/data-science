@@ -13,6 +13,8 @@ process web data using `R`.  The section notes draw heavily from a
 [post](http://schamberlain.github.com/2012/08/get-ecoevo-journal-titles/) on a great blog by Pascal Mickelson and Scott Chamberlain, two
 biologists and experienced `R` users.
 
+### Scraping
+
 Suppose we want to find the number of available economics journals.
 There are too many.  Definitely.  But suppose we want to find out just
 how many.  To do this, we can visit crossref.org, which is a
@@ -39,8 +41,153 @@ response into `R` as a string, and the outer functions `xmlParse` and
 `xmlToList` convert the output into an `R` data structure.  There are
 too many entries to fit into a single query, so the `while` loop
 continues to query until there are no more results.  The final results
-are stored in `nameslist`.  We will review the code in section.
+are stored in `nameslist`.  
+
+First, cut and paste the `baseurl` string in the browser to view what is returned.  This returned data structure is called eXtensible Markup Language (XML).  The `XML` library has parsers to convert XML into native `R` data structures (like lists).  
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-
+baseurl <- "http://oai.crossref.org/OAIHandler?verb=ListSets"
+xml.query <- xmlParse(getURL(baseurl)) # grab and parse the returned data
+sets <- xmlToList(xml.query) # convert the returned data structure into an R list
 ```
+
+Most of the following work is reverse engineering.  The data for each web service is returned with different levels of nesting or with different data types.  The returned data from CrossRef is complicated.  The journal names are stored in a named list, tagged with the key `ListSets`.  The tenth name can be extracted with the following, nested dictionary query:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+sets[['ListSets']][10][['set']][['setName']]
+```
+
+To grab all journal names, the same extraction must to be applied to all elements within `sets[['ListSets']]`:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+journal.names <- sapply(sets[['ListSets']], function (x) { x[['setName']] })
+head(journal.names)
+```
+
+It's still a named list.  To convert it into a standard, easy-to-manipulate list, we can change the format of the returned object:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+journal.names <- as.character(journal.names)
+head(journal.names)
+```
+
+There is a slight complication.  If the returned object does not contain a journal name, even though it's listed at the same nesting level as a journal, then extracting a key-value pair that is tagged with `setName` will return `NULL`.  And `as.character(NULL)` &#8594; `"NULL"`. Let's filter out any journal name that is `"NULL"`.
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+journal.names <- Filter(function(x) {x != "NULL"}, journal.names)
+length(journal.names)
+```
+
+There are more than 1,000 journals on CrossRef.  The base URL represents just one of many queries.  Only 1,000 results are returned at a time.  How do we adjust the URL to get the *next* 1,000 results?  There is a token that is stored in the response, which indicates where we should look next:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+sets[["request"]][[".attrs"]][["resumptionToken"]]
+```
+
+Each page of results indicates the location of the next page of results via the resumption token.  The following list is called using a new `baseurl`:
+
+[`http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken=1911d489-5fda-4a32-9aa2-7398057d1dc2`](http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken=1911d489-5fda-4a32-9aa2-7398057d1dc2)
+
+The final script, then, collects the results from each page (one thousand at a time) until there are no longer results available.
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+# set initial values for variables to be used in while-loop
+token <- NULL
+continue <- TRUE
+nameslist <- list()
+
+while (continue == TRUE) {
+
+  baseurl <- "http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken="
+  url <- paste(baseurl, token, sep = "")
+  xml.query <- xmlParse(getURL(url))
+  sets <- xmlToList(xml.query)
+  journal.names <- sapply(sets[['ListSets']], function (x) { x[['setName']] })
+  journal.names <- as.character(journal.names)
+  journal.names <- Filter(function(x) {x != 'NULL'}, journal.names)
+
+  # concatenate the new journal names to the old, master list; reassign as master list.
+  nameslist <- c(nameslist, journal.names)
+  
+  # If getting the resumption token throws an error, save the error to stop the process.
+  err <- try(token <- sets[["request"]][[".attrs"]][["resumptionToken"]])
+
+  if (class(err) == "try-error") { 
+  	continue <- FALSE
+  }
+  
+ }
+```
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+nameslist <- unlist(nameslist)
+length(nameslist)
+```
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+sample(nameslist, 5)
+```
+
+Suppose we want to do something with this compiled data.  How many journal titles contain the word "economic" -- either lower or upper case?  We use *regular expressions* to examine each element of the list:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+econtitles <- nameslist[str_detect(nameslist, "^[Ee]conomic|\\s[Ee]conomic")]
+length(econtitles)
+```
+
+What in the hell? So many! I suppose that this is a good thing: at least one of the 461 journals should accept my crappy papers. If I blindly throw a dart in a bar, it may not hit the dartboard, but it will almost certainly hit one of the 461 patrons. Here is a random sample of ten journals:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+sample(econtitles, 10)
+```
+
+What are other things we can do with the data? Suppose we wanted to compare the relative frequencies of different subjects within journal titles. This offers a decent example for section, since we can refactor some of the code we already developed — a useful skill for writing clean code. We have already figured out how to count the number of journals for a particular regular expression. We can refactor the code into the following function, which accepts a regular expression and returns the length of the collection containint matching strings:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+countJournals <- function(regex) {
+  titles <- as.character(nameslist[str_detect(nameslist, regex)])
+  return(length(titles))
+}
+```
+
+Now the tedious process of converting a list of subjects into the appropriate regular expressions. If we have time, we’ll write a function to do this conversion for us.  For now, use this:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+subj = c("economic", "business", "policy", "environment", "engineer", "history")
+regx = c(
+	"^[Ee]conomic|\\s[Ee]conomic", 
+	"^[Bb]usiness|\\s[Bb]usiness",
+	"^[Pp]olicy|\\s[Pp]olicy", 
+	"^[Ee]nvironment|\\s[Ee]nvironment",
+	"^[Ee]ngineer|\\s[Ee]ngineer", 
+	"^[Hh]istory|\\s[Hh]istory"
+)
+
+(subj.df <- data.frame(subject = subj, regex = regx))
+```
+
+Finally, we simply apply our refactored function to the regular expressions, and graph the result:
+
+```{r comment=NA, cache=TRUE, message=FALSE}
+library(ggplot2)
+subj.df[["count"]] <- sapply(regx, countJournals)
+ggplot(data = subj.df, aes(x = subject, y = count)) + geom_bar(stat="identity")
+```
+
+### Importance to data science for public policy
+
+A fair question is, "How is this helpful for public policy?"  Often, the most difficult part of policy analysis is compiling the data; and web scraping becomes an invaluable tool to assemble an analysis-ready data set.  Even if the scraping part is easy, the skill of reverse engineering a complex data object to build an `R` data frame is highly valuable. 
+
+Consider, for example, the Code of Federal Regulations.  The CFR is released in machine-readable form as an [XML document](https://www.gpo.gov/fdsys/bulkdata/CFR/).  Backing out the structure is difficult.  In fact, multiple projects like [this one](https://www.law.cornell.edu/cfr/text) and [this one](https://github.com/usgpo/bulk-data/blob/master/CFR-XML_User-Guide.md) were established to help parse or search the CFR.	The code in previous sections is a small sample of what is required to manage the CFR in `R`.
+
+Other examples include [scraping election results](https://blog.openelections.net/2015/02/18/tackling-georgia-election-results-in-atlanta/) or [investigating food inspections](https://blog.openelections.net/2015/02/18/tackling-georgia-election-results-in-atlanta/).
+
+#### Exercise 11.1
+
+1. Create a histogram of the revenue for at least 200 of the highest-earning nonprofits related to "policy" in the United States. Restrict the histogram to organizations with annual revenue less than $10 million. Use the [ProPublica Nonprofit Explorer API](https://projects.propublica.org/nonprofits/api).
+
+**Hints**:
+
+- Use the `jsonlite` package.
+- Set the `q` parameter to `policy`; set the `sort_order` parameter to `desc`; and set the `order` parameter to `revenue`.
+
