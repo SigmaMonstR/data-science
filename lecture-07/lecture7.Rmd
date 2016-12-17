@@ -1,5 +1,5 @@
 ---
-title: "Lecture 7: Regression discontinuity and difference-in-difference estimation"
+title: "Lecture 7: Introducing causality"
 subtitle: "Intro to Data Science for Public Policy, Spring 2016"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
 output: 
@@ -8,4 +8,32 @@ output:
     toc: yes
 ---
 
+You will be asked to evaluate the impact of a policy.  Maybe not in this course, but certainly in the practice of public policy.  Identifying the causal impact of public policy on a particular social outcome is incredibly difficult.  People devote their entire professional career to this pursuit.  The entire discipline of empirical econometrics is primarily concerned with parsing causality from social data.  The objective of this lecture is to introduce the difficulty in identifying causal impact, and present a few general techniques that may help.
 
+We asked a dozen economists at top universities -- UChicago, Harvard, Berkeley, and Stanford -- to identify difference between data science for public policy and empirical economics.  The primary response was *causality*.  Data scientists tell stories with data that may inform public policy; but empirical economists focus almost entirely on identifying a precise estimate of the impact.  Where the work of data scientists is broad and relatively shallow, the work of empirical economists is realtively narrow and deep.  An auxilliary objective of this lecture is to introduce data scientists to the work of empirical economists, so that you will know when to ask for help to do your job better.
+
+### Correlation vs. Causation
+
+Correlation between two variables may be caused by many forces, but we will examine three primary causes: randomness, cointegration, and external forces.
+
+1. **Randomness**.  *Every time Wales win the rugby grand slam, a Pope dies, except for 1978 when Wales were really good, and two Popes died.*  [This paper](http://www.bmj.com/content/337/bmj.a2768.abstract) misattributes causation of Welsh rugby performance on Papal health.  The causation 
+
+
+There is also an issue of reverse causality.
+
+
+#### Exercise 7.1
+
+1. Use [Google Correlate](https://www.google.com/trends/correlate) to identify spurious correlations in search terms that someone may mistakenly link to a causal relationship.  
+
+### Watch out
+
+Parsing causation from correlation is way more difficult when dealing with complicated social data.  Social data is almost always incomplete.  The dimensions are limited, either by cost or by feasible collection.  How do you collect informaiton on innate ability or motivation?  The 
+
+
+### Extensibility
+
+
+#### Exercise 7.
+
+1. Write a code snippet that 
