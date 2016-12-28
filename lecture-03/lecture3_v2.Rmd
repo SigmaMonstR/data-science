@@ -7,15 +7,76 @@ output:
     theme: journal
     toc: yes
 ---
-Novice data scientists all too often default to a familiar machine learning model and jump straight into building an application before thoroughly interrogating the data. By foregoing *exploratory data analysis* (EDA), analysts may skip perhaps the most formative step in the technical exercise of a data science question that forces one to ask meticulous contextual, quality-concerned questions that ensure that a data product is well-designed from a technical lens. 
 
-###So, what is EDA?
-Much of exploratory data analysis is visual in nature to provide an organic understanding of the shape and quality of information, capitalizing on the visual pattern detection that which human minds are adept.  In many respects, exploratory data analysis allows analysts to bound their problem by the limitation of the data, but by first identifying the bounds of the data through analysis. A practice that was promoted by statistician John Tukey, EDA has become a pillar of data disciplines.
 
-> *Numerical quantities focus on expected values, graphical summaries on unexpected values.*
->   <br>     - John Tukey
+Mobile technologies have lowered the bar to using lightweight sensors that measure the physical world and have opened new applications of data in daily life. From a smart phone's accelerometer, it’s possible to track distinct patterns in one’s activity based on the fluctuations in acceleration ($\frac{m}{s^{2}}$). In fact, many of these technologies have become commonly available, enabling physical fitness activity monitoring to characterizing transportation quality. Below is a set of exercise measurements from an smartphone accelerometer that lasted approximately 6.5 minutes and graphed at a frequency of 5 hertz (five readings per second). 
 
-The practice of EDA can be described by high-level goals associated with common questions. Each of these questions can be answered through a graphical or numerical technical approach.
+Can you visually identify distinct patterns? What makes those patterns distinct?
+
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+setwd("/Users/jeff/Documents/Github/data-science/lecture-03/example_data")
+files <- list.files()[1]
+
+
+#install.packages("dygraphs")
+library(dygraphs)
+library(xts)
+
+for(i in files){
+  temp <- read.csv(i)
+  temp$accel <- sqrt(temp$user_acc_x.G.^2 + temp$user_acc_y.G.^2 + temp$user_acc_z.G.^2)
+  temp <- temp[!is.na(temp$accel) & temp$accel!="",]
+  #print(nrow(temp))
+
+  temp$timestamp.unix. <- round(temp$timestamp.unix./0.2,0)*0.2
+  temp <- temp[,c("timestamp.unix.","accel")]
+  temp_val <- aggregate(x = temp$accel, by=list(temp$timestamp.unix.), FUN=mean, na.rm=TRUE)
+  colnames(temp_val) <- c("time","accel")
+
+  temp_val <- temp_val[(nrow(temp_val)-2300):nrow(temp_val),]
+  temp_val$time <- temp_val$time - min(temp_val$time) 
+  
+  temp_val <- temp_val[order(temp_val$time),]
+  temp_val[,1] <- as.POSIXct(as.numeric(as.character(temp_val[,1])),origin="2016-01-01")
+  
+  xts_temp <- xts(temp_val[,2], order.by=temp_val[,1])
+  assign(gsub(".csv","",i),xts_temp)
+}
+
+dygraph(exercise,  group = "other", height=250) %>% dyLegend( show = "never") %>% dyAxis("y", label = "m/s^2", valueRange = c(0, 1)) 
+
+```
+
+
+
+Over the short time sample, the graphs indicate four distinct types of acceleration patterns. If we manually extract samples from these periods, we can quantify the patterns in terms of their central tendencies. Idle periods have near zero acceleration, walking periods have acceleration around 0.2 with tight dispersion, running periods hover around 0.6 +/- 0.2, and descending stairs vary widely. Given how these basic insights, we can experiment with various methods of *feature extraction*, or ways to distill and represent useful signal from the raw data. We can also begin to formulate hypotheses for how to model and represent the patterns and relationships in the data. 
+
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(gridExtra)
+
+idle <- temp_val[250:350,]
+walk <- temp_val[45:175,]
+run <- temp_val[1135:1200,]
+stairs <- temp_val[1400:1700,]
+
+p = ggplot(idle,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line() + ylim(0, 1) + ggtitle(paste("Idle: mu = ", round(mean(idle[,2]),2),", +/- = ",round(sd(idle[,2])*1.96,2),", max = ",round(max(idle[,2]),2))) + theme(plot.title = element_text(size = 10))
+
+p1 = ggplot(walk,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line() + ylim(0, 1) + ggtitle(paste("Walk: mu = ", round(mean(walk[,2]),2),", +/- = ",round(sd(walk[,2])*1.96,2),", max = ",round(max(walk[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+p2 = ggplot(run,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line() + ylim(0, 1) + ggtitle(paste("Run: mu = ", round(mean(run[,2]),2),", +/- = ",round(sd(run[,2])*1.96,2),", max = ",round(max(run[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+p3 = ggplot(stairs,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line() + ylim(0, 1) + ggtitle(paste("Descend Stairs: mu = ", round(mean(stairs[,2]),2),", +/- = ",round(sd(stairs[,2])*1.96,2),", max = ",round(max(stairs[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+grid.arrange(p,p1,p2,p3, ncol=2)
+```
+
+
+This is the basis of *exploratory data analysis* or *EDA* -- the first look at a dataset. Much of exploratory data analysis is focused on formulating hypotheses, assessing data structures, and understanding the quirks and tolerances of data in order to develop useful and insightful applications of the data. This is achieved by using visual techniques (e.g. histograms, other graphs) to identify outliers and assess the distribution of variables as well as statistical measures help to understand central tendency among other properties of the data. A well-conducted EDA would yield critical insights into how the data can and should be processed, methods for feature extraction to represent usable signal in the data, and options for operationalizing a strategy for solving the problem at hand. 
+
+We can break EDA into a series of high-level goals, each of which is associated with analytical tasks that help piece together a clearer picture of what is contained in the data. Each of these questions can be answered through a graphical or numerical technical approach.
 
 
 | **Goal**  | **Common Questions** |
@@ -27,35 +88,51 @@ The practice of EDA can be described by high-level goals associated with common 
 | Identify important variables | -Which variables are correlated with one another?  |
 | Formulate data-bounded hypotheses| - Which variables are most correlated?|
 
-###A Workflow
-EDA typically involves the following three 
+This chapter will equip you with the skills to explore the data in an efficient and thoughtful manner. We begin with an overview of three main issues that are investigated through EDA, then reinforce by walking through an example workflow.
 
-- Data structure
-- Simple Statistics
-- Graphical Approaches
+<hr>
 
 
-###Data For Context
-To put EDA into context, we will rely upon the American Community Survey ([ACS](http://www.census.gov/programs-surveys/acs/)), which is one of the most relied upon public data sources in the United States. A survey that is produced by the U.S. Census Bureau, the ACS provides a highly detailed socioeconomic snapshot of households and communities, allowing for data-driven insight to inform public policy as well as business decisions. For this lesson, we will examine
+##Three things
+While there are many approaches to EDA, there are three considerations that underlie effective discovery: data structure, statistical measures, and graphical summaries. 
 
-Note: While each record is associated with a sampling weight, we will treat each record with equal weight. We will also only focus on one state in this exercise -- in this case, we have selected Iowa. The same analysis can be replicated for other states.
+###Structure
+The structure of the data dictates the amount and type of processing required to make data usable and wieldy. Typically, data should be in matrix or tabular form, which allows for data to be manipulated and analyzed. However, at times, the raw data may be in an unstructured format (e.g. raw text) or in different structured formats (e.g. satellite imagery), requiring processing, reshaping and/or feature extraction so that the data is usable.
 
-#####Get data, unpack, read into dataframe named 'acs'
-```{r, warning=FALSE, message=FALSE}
-temp <- tempfile()
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip",temp, mode="wb")
-unz <- unzip(temp, exdir=getwd())
-acs <- read.csv(unz[1])
+####Where to start
+To start, we'll create a dummy data set, then run the `str()` method to produce a structural summary of each variable in a dataset.
+```{r}
+
+wide <- data.frame(person_id = 1:12, #Count from 1 to 12
+                   sex = round(runif(12)),
+                   age = as.character(rnorm(12,40,10)),
+                   weight = sample(c(rep(-9999, 10),round(rnorm(12,120,30))),12),
+                   program = rep(c("a","b"),6),
+                   participation = rep(c("in","out",NA),4))
+
+
+str(wide)
+```
+
+There are a number of key things to keep in mind, including:
+
+- <u> Some numbers are formatted as factors rather than integers</u>. In particular, *age* will need to be converted by using a nested function `as.numeric(as.character(data$age))` as factors need to be converted to strings before being converted to numbers.
+- <u> Some numbers are coded as numeric but represent discrete values in order to keep the file sizes smaller</u>. For example, *sex* is coded as a binary integer, but represents two values: 0 = Female, 1 = Male.
+- <u> Check for missing values</u>. Missing values are often coded as `NA` or a large negative number in cases where values should be non-zero positive such as `-9999`. This will require some cleaning to standardize values. 
+
+At 
+While `str()` provides a fairly comprehensive overview, `colnames()` returns the column names and `dim()` returns the dimensions of the data.
+
+```{r}
+
+colnames(data)
+dim(data)
 ```
 
 
-###(1) Data Structure
-```{r, eval=FALSE}
-colnames(acs)
-str(acs) 
-```
+###Statistical Measures
+John Tukey, one of the great statisticians of the 20th Century, advocated for EDA as the first step in working with data and has since become standard practice. From his perspective,  *Numerical quantities focus on expected values, graphical summaries on unexpected values.* 
 
-###(2) Statistical Measures
 [Statistical]
 summarize 
 - check for central tendency
@@ -81,17 +158,14 @@ summarize
 | Median |  Value at $$(\frac{n+1}{2})^{th} $$ position| A measure of central tendency based on the 'middle value' or 50th percentile of a random variable.  | median() | `r paste0("median(c(1,3,5,7,9)) = ", median(c(1,3,5,7,9)))`|
 
 
-###(3) Graphical Approaches
+###Graphical Approaches
 [Text goes here]
 
 ####Univariate 
 [Goals]
-```{r, message=FALSE, warning=FALSE}
 
-library(ggplot2)
-library(gridExtra)
+```{r, message=FALSE, warning=FALSE, eval=F}
 
-test <- acs[acs$PERNP<= mean(acs$PERNP, na.rm=T)+2*sd(acs$PERNP, na.rm=T),]
 
 #Graphs
 base <- ggplot(acs, aes(AGEP)) 
@@ -135,7 +209,7 @@ hist(c, probability=TRUE, xlab="Time (s)",main="Option #3", ylab="% Web Accesses
 
 ####Bivariate Graphs
 [Examine relationships]
-```{r,  message=FALSE, warning=FALSE}
+```{r,  message=FALSE, warning=FALSE, eval=F}
 
 ##Scatter plot
 p = ggplot(acs,aes(x=AGEP,y=log(PERNP)))  +
@@ -173,5 +247,6 @@ grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3)
 ```
 
 
-###Exercise Data
+###Homework 
 - GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
+

@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+Mobile technologies have lowered the bar to using sensors and have opened new applications of data in daily life. From raw accelerometer readings, it’s possible to track distinct patterns in one’s activity based on the fluctuations in acceleration ($\frac{m^{2}}{s}$) are three readings from an iPhone accelerometer. How would you go about understanding the patterns and structures in the data? 
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+setwd("/Users/jeff/Documents/Github/data-science/lecture-03/example_data")
+files <- list.files()
+
+
+#install.packages("dygraphs")
+library(dygraphs)
+library(xts)
+
+for(i in files){
+  temp <- read.csv(i)
+  temp$accel <- sqrt(temp$user_acc_x.G.^2 + temp$user_acc_y.G.^2 + temp$user_acc_z.G.^2)
+  temp <- temp[!is.na(temp$accel) & temp$accel!="",]
+  #print(nrow(temp))
+
+  temp$timestamp.unix. <- round(temp$timestamp.unix./0.2,0)*0.2
+  temp <- temp[,c("timestamp.unix.","accel")]
+  temp_val <- aggregate(x = temp$accel, by=list(temp$timestamp.unix.), FUN=mean, na.rm=TRUE)
+  colnames(temp_val) <- c("time","accel")
+
+  temp_val <- temp_val[(nrow(temp_val)-2300):nrow(temp_val),]
+  temp_val$time <- temp_val$time - min(temp_val$time) 
+  
+  temp_val <- temp_val[order(temp_val$time),]
+  temp_val[,1] <- as.POSIXct(as.numeric(as.character(temp_val[,1])),origin="2016-01-01")
+  
+  xts_temp <- xts(temp_val[,2], order.by=temp_val[,1])
+  assign(gsub(".csv","",i),xts_temp)
+}
+
+dygraph(exercise,  group = "other", height=150) %>% dyLegend( show = "never")
+dygraph(`easyjet landing berlin`,  group = "other", height=150)  %>% dyLegend( show = "never")
+dygraph(walking, group = "other", height=150)  %>% dyLegend( show = "never") %>% dyRangeSelector()
+
+
+
+
+
+```
