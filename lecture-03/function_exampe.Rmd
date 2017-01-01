@@ -1,0 +1,56 @@
+---
+title: "Loops, functions, and more"
+author: "Name"
+date: "December 31, 2016"
+output: html_document
+---
+
+Description goes here
+
+- write functions
+- building
+- error handling
+- loops
+
+```{r, eval=FALSE}
+function_name <- function(parameter1, parameter2){
+  #Script goes here
+}
+```
+
+
+```{r, eval=FALSE}
+function_name <- function(parameter1, parameter2){
+  #Script goes here
+}
+```
+
+
+
+```{r}
+val <- 1:500
+series <- data.frame(id = val, val = cos(val/100000) + cos(val/1000) + cos(val/100), rand=runif(length(val)) )
+series$test <- series$val
+series$test[series$rand<0.4] <- NA
+
+plot(series$id,series$val, type="l")
+lines(series$id,series$test, type="l", col="green")
+
+window <- 10
+
+for(k in window:(nrow(series)-window)){
+  if(is.na(series$test[k])){
+    series$new[k] <- mean(series$test[(k-10):(k+10)], na.rm=T)
+  } 
+}
+plot(series$id,series$test, type="l")
+points(series$id,series$new, col="green")
+
+
+test
+plot(series$id,series$new, type="l")
+window_avg <- function(x, i, k){
+  for(k in )
+  x[(i-k):i]
+}
+```

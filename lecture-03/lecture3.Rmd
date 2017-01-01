@@ -7,15 +7,74 @@ output:
     theme: journal
     toc: yes
 ---
-Novice data scientists all too often default to a familiar machine learning model and jump straight into building an application before thoroughly interrogating the data. By foregoing *exploratory data analysis* (EDA), analysts may skip perhaps the most formative step in the technical exercise of a data science question that forces one to ask meticulous contextual, quality-concerned questions that ensure that a data product is well-designed from a technical lens. 
 
-###So, what is EDA?
-Much of exploratory data analysis is visual in nature to provide an organic understanding of the shape and quality of information, capitalizing on the visual pattern detection that which human minds are adept.  In many respects, exploratory data analysis allows analysts to bound their problem by the limitation of the data, but by first identifying the bounds of the data through analysis. A practice that was promoted by statistician John Tukey, EDA has become a pillar of data disciplines.
 
-> *Numerical quantities focus on expected values, graphical summaries on unexpected values.*
->   <br>     - John Tukey
+Mobile technologies have lowered the bar to using lightweight sensors that measure the physical world and have opened new applications of data in daily life. From a smart phone's accelerometer, it’s possible to track distinct patterns in one’s activity based on the fluctuations in acceleration ($\frac{m}{s^{2}}$). In fact, many of these technologies have become commonly available, enabling physical fitness activity monitoring to characterizing transportation quality. Below is a set of exercise measurements from an smartphone accelerometer that lasted approximately 6.5 minutes and graphed at a frequency of 5 hertz (five readings per second). 
 
-The practice of EDA can be described by high-level goals associated with common questions. Each of these questions can be answered through a graphical or numerical technical approach.
+Can you visually identify distinct patterns? What makes those patterns distinct?
+
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+setwd("/Users/sigmamonstr/Github/data-science/lecture-03/example_data")
+files <- list.files()[1]
+
+#install.packages("dygraphs")
+library(dygraphs)
+library(xts)
+
+for(i in files){
+  temp <- read.csv(i)
+  temp$accel <- sqrt(temp$user_acc_x.G.^2 + temp$user_acc_y.G.^2 + temp$user_acc_z.G.^2)
+  temp <- temp[!is.na(temp$accel) & temp$accel!="",]
+  #print(nrow(temp))
+
+  temp$timestamp.unix. <- round(temp$timestamp.unix./0.2,0)*0.2
+  temp <- temp[,c("timestamp.unix.","accel")]
+  temp_val <- aggregate(x = temp$accel, by=list(temp$timestamp.unix.), FUN=mean, na.rm=TRUE)
+  colnames(temp_val) <- c("time","accel")
+
+  temp_val <- temp_val[(nrow(temp_val)-2300):nrow(temp_val),]
+  temp_val$time <- temp_val$time - min(temp_val$time) 
+  
+  temp_val <- temp_val[order(temp_val$time),]
+  temp_val[,1] <- as.POSIXct(as.numeric(as.character(temp_val[,1])),origin="2016-01-01")
+  
+  xts_temp <- xts(temp_val[,2], order.by=temp_val[,1])
+  assign(gsub(".csv","",i),xts_temp)
+}
+
+dygraph(exercise,  group = "other", height=250) %>% dyLegend( show = "never") %>% dyAxis("y", label = "m/s^2", valueRange = c(0, 1)) 
+
+```
+
+
+Over the short time sample, the graphs indicate four distinct types of acceleration patterns. If we manually extract samples from these periods, we can quantify the patterns in terms of their central tendencies. Idle periods have near zero acceleration, walking periods have acceleration around 0.2 with tight dispersion, running periods hover around 0.6 +/- 0.2, and descending stairs vary widely. Given how these basic insights, we can experiment with various methods of *feature extraction*, or ways to distill and represent useful signal from the raw data. We can also begin to formulate hypotheses for how to model and represent the patterns and relationships in the data. 
+
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(gridExtra)
+
+idle <- temp_val[250:350,]
+walk <- temp_val[45:175,]
+run <- temp_val[1135:1200,]
+stairs <- temp_val[1400:1700,]
+
+p = ggplot(idle,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line(colour = "navy") + ylim(0, 1) + ggtitle(paste("Idle: mu = ", round(mean(idle[,2]),2),", +/- = ",round(sd(idle[,2])*1.96,2),", max = ",round(max(idle[,2]),2))) + theme(plot.title = element_text(size = 10))
+
+p1 = ggplot(walk,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line(colour = "navy") + ylim(0, 1) + ggtitle(paste("Walk: mu = ", round(mean(walk[,2]),2),", +/- = ",round(sd(walk[,2])*1.96,2),", max = ",round(max(walk[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+p2 = ggplot(run,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line(colour = "navy") + ylim(0, 1) + ggtitle(paste("Run: mu = ", round(mean(run[,2]),2),", +/- = ",round(sd(run[,2])*1.96,2),", max = ",round(max(run[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+p3 = ggplot(stairs,aes(x=time, y= accel  ))  + geom_point(size=1) + geom_line(colour = "navy") + ylim(0, 1) + ggtitle(paste("Descend Stairs: mu = ", round(mean(stairs[,2]),2),", +/- = ",round(sd(stairs[,2])*1.96,2),", max = ",round(max(stairs[,2]),2)))+ theme(plot.title = element_text(size = 10))
+
+grid.arrange(p,p1,p2,p3, ncol=2)
+```
+
+
+This is the basis of *exploratory data analysis* or *EDA* -- the first look at a dataset. Much of exploratory data analysis is focused on formulating hypotheses, assessing data structures, and understanding the quirks and tolerances of data in order to develop useful and insightful data-driven applications. This is achieved by using visual techniques (e.g. histograms, other graphs) to identify outliers and assess the distribution of variables as well as statistical measures help to understand central tendency among other properties of the data. A well-conducted EDA would yield critical insights into how the data can and should be processed, methods for feature extraction to represent usable signal in the data, and options for operationalizing a strategy for solving the problem at hand. 
+
+We can break EDA into a series of high-level goals, each of which is associated with analytical tasks that help piece together a clearer picture of what is contained in the data. Each of these questions can be answered through a graphical or numerical technical approach.
 
 
 | **Goal**  | **Common Questions** |
@@ -27,172 +86,407 @@ The practice of EDA can be described by high-level goals associated with common 
 | Identify important variables | -Which variables are correlated with one another?  |
 | Formulate data-bounded hypotheses| - Which variables are most correlated?|
 
-###Common Workflow
-EDA typically involves the following three 
-
-- Data structure
-- Simple Statistics
-- Graphical Approaches
+This chapter will equip you with the skills to explore the data in an efficient and thoughtful manner. There are three considerations that underlie effective discovery: data structure, statistical measures, and graphical summaries. We begin with an overview of elements of EDA, then reinforce by walking through an example workflow. 
+<hr>
 
 
-###Example Data 
-- American Community Survey
+
+
+##Structure
+The structure of the data dictates the amount and type of processing required to make data usable and wieldy. Typically, data should be in matrix or tabular form -- a basic requirement for data to be manipulated and analyzed. However, at times, the raw data may be in an unstructured format (e.g. raw text) or in different structured formats (e.g. satellite imagery, long form), requiring processing, reshaping and/or feature extraction so that the data is usable.
+
+####Where to start
+To start, we'll create a simulated dataset, containing five variables: sex, age, weight, program, and status.
+```{r, echo=FALSE}
+library(DT)
+```
+```{r}
+num_recs <- 1200 
+
+long = expand.grid(seq(1,num_recs), c("sex","age", "weight", "program", "status"))
+colnames(long) <- c("person_id", "field")
+long$values <- c( round(runif(num_recs)),
+                  round(rnorm(num_recs,40,10)),
+                  sample(c(rep(-9999, num_recs), round(rnorm(num_recs,120,20))),num_recs),
+                  rep(c("a","b"),num_recs/2),
+                  rep(c("in",NA,"out"),num_recs/3))
+long <- long[order(long$person_id),]
+ 
+head(long, 10)
+```
+
+Using the `str()` method (below), we can produce a structural summary of each variable in a dataset. There are a few common things to keep in mind:
+
+- <u>Is the data in the right *shape*?</u>. The data is 'stacked' or in 'long' form, which means that each row contains a value (`values`) that corresponds to a person-variable combination (`person_id` and `field`). Notice that while there are numeric and character values, all variables are coded as characters. In order to analyze the data, each field should be represented in a separate column. This process is known as *reshaping* from *long* to *wide* form and is pre-requisite.
+- <u>Are there discrete variables that are coded as integers?</u>. Numeric codes often are used in order to keep the data files smaller. For example, `sex` is coded as a binary integer, but represents two values: 0 = Female, 1 = Male. In some case, it may be helpful to recode using the text value for ease of interpretation
+- <u>Are there missing values?</u>. Missing values are often coded as `NA` or a large negative number in cases where values should be non-zero positive such as `-9999`. This will require some cleaning to standardize values and at times imputation.
+- <u>Which variables should be numeric?</u>. At times, numeric variables will be formatted as strings and factors. 
+
 
 ```{r}
-##American Population Survey -- Iowa Popualtion survey, 2015
+str(long)
+```
 
+####Example of structural fixes
+Data should be in wide form. To do so, we can rely on the `reshape()` method to create a column for each of the `field` variables.
+
+```{r}
+head(long)
+wide <- reshape(long, idvar = c("person_id"), timevar="field", direction="wide")
+head(wide)
+```
+
+When using `colnames()`, we can see that the reshaped dataset contains "values." as a prefix. For conciseness, we'll remove the prefix using `gsub()` to replace the *string pattern* with "" or blank.
+
+```{r}
+#get column names
+  colnames(wide)
+
+#rename by removing "values."
+  colnames(wide) <- gsub("values.","",colnames(wide))
+  
+#get column names
+  colnames(wide)
+```
+
+
+Lastly, variables should be recoded and reformatted into the appropriate format. These basic fixes help ensure the usability of the dataset.
+
+```{r}
+#re-code sex
+  wide$sex[wide$sex=="1"] <- "male"
+  wide$sex[wide$sex=="0"] <- "female"
+
+#Character to numeric
+  wide$age <- as.numeric(wide$age)
+  wide$weight <- as.numeric(wide$weight)
+  
+#Recode -9999 to NA
+  wide$weight[wide$weight== -9999] <- NA
+
+```
+
+<hr>
+
+##Univariate data analysis
+The tools and techniques used to analyze can be distinguished into univariate (concerning one data series at a time) or multivariate (concerning two or more data series at a time). To start, we will focus on univariate techniques, starting with statistics, then moving into graphical methods.
+
+###Statistics for continuous variables
+The shape and properties of a continous variables will vary greatly. These *moments*, or common attributes of data, should influence how an analyst will treat the data. Four continuous distributions are plotted below:
+
+- The first graph looks similar to a box, indicating that there is an equal chance that a value can take on any value between 0 and 1.
+- The second graph follows a bell curve ( also known as a 'normal distribution' or 'Gaussian distribution') with a central peak and symmetrical tails. 
+- The third graph peaks to the left with a longer tail to the right.
+- The fourth graph peaks to the right with a longer tail to the left.
+
+While graphical techniques are useful, and are the topic of the next section in this chapter, sample statistics can concisely summarize the contents of data in a way that are insightful and comparable.
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3}
+x1 <- runif(100000)
+p1 = qplot(x1, geom="histogram") + ggtitle("Random Distribution") + labs(x = "(1)") + theme(plot.title = element_text(size = 10))
+x2 <- rnorm(100000,50,2)
+p2 = qplot(x2, geom="histogram")  + ggtitle("Normal Distribution") + labs(x = "(2)") + theme(plot.title = element_text(size = 10))
+x3 <- rbeta(10000,1,8,ncp=2)
+p3 = qplot(x3, geom="histogram")  + ggtitle("Beta Distribution") + labs(x = "(3)") + theme(plot.title = element_text(size = 10))
+x4 <- rbeta(10000,8,1,ncp=2)
+p4 = qplot(x4, geom="histogram")  + ggtitle("Beta Distribution") + labs(x = "(4)") + theme(plot.title = element_text(size = 10))
+
+grid.arrange(p1, p2, p3, p4, ncol=2)
+
+```
+
+How can we quantitatively tell these variables apart? Sample statistics are particularly helpful with characterizing central tendency, spread, skewness and kurtosis.
+
+####Central tendency
+Data with any amount of signal typically tends towards a central value or location. This means that values will *peak* or *cluster* around a central point, but need not be symmetrically distributed around that central point. There are two common measures that are used to characterize central tendency: the mean and the median.
+
+The mean, also known as the *arithmetic mean* or *average*, is simply the sum of all values in `x` divided by the sample size `n`. Since the calculation takes into account *all* values in `x`, means are sensitive to outliers and extreme values. Often times, the mean is the main statistic used to describe what is typical of a sample or population as it is considered to be the *expected value*. For example: 
+
+- Average age of a cohort entering graduate school
+- Average speed of vehicles traveling down a highway segment
+- Average number of days to close a complaint
+
+The median or *P50* is also used as a method of indicate central tendency based on indexed position in a variable. It is computed as the 50th percentile value: sort all values from lowest to highest, then find the value at the $(\frac{n+1}{2})^{th}$ position. Essentially, the median is denotes the position at which 50% of values are above and below. Medians are robust to outliers, meaning that the change in the magnitude of values above or below the 50th percentile point may change, but the median may stay the same. 
+
+| Measure | Formula | Definition | When to use | R Function |Example |
+|---------+-----------+--------------+--------------+---------+-------------|
+| Mean or Average | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | A measure of central tendency formulated as the sum of all values. Also known as the 'expected value'. | The general de facto choice | mean()| `r paste0("mean(c(1,3,5,7,9)) = ", mean(c(1,3,5,7,9)))`|
+| Median |  Value at $$(\frac{n+1}{2})^{th} $$ position| A measure of central tendency based on the 'middle value' or 50th percentile of a random variable.  | When data appears to be skewed or asymmetrical | median() | `r paste0("median(c(1,3,5,7,9)) = ", median(c(1,3,5,7,9)))`|
+
+Typically, it's helpful to consider and compare both median and mean values as they provide context. Revisiting the four distributions, we can compare the means and medians. In graphs 1 and 2, the distributions are symmetrical, thus one would expect the mean to be approximately equal to the mean. In graph 3, the longer tail to the right pulls the mean above the median, whereas in graph 4, the left tail pulls the mean below the median.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3}
+p1 = qplot(x1, geom="histogram") + ggtitle(paste("mean = ", round(mean(x1),2),"; p50 = ", round(median(x1),2))) + labs(x = "(1)") + theme(plot.title = element_text(size = 10))
+p2 = qplot(x2, geom="histogram")   + ggtitle(paste("mean = ", round(mean(x2),2),"; p50 = ", round(median(x2),2))) + labs(x = "(2)") + theme(plot.title = element_text(size = 10))
+x3 <- 100*rbeta(10000,1,8,ncp=1)
+p3 = qplot(x3, geom="histogram")   + ggtitle(paste("mean = ", round(mean(x3),2),"; p50 = ", round(median(x3),2))) + labs(x = "(3)") + theme(plot.title = element_text(size = 10))
+x4 <- 100*rbeta(10000,8,1,ncp=1)
+p4 = qplot(x4, geom="histogram")   + ggtitle(paste("mean = ", round(mean(x4),2),"; p50 = ", round(median(x4),2))) + labs(x = "(4)") + theme(plot.title = element_text(size = 10))
+
+grid.arrange(p1, p2, p3, p4, ncol=2)
+
+```
+
+
+####Spread
+Just as important as central tendency is the spread or dispersion, or measures that gauge the variability of data relative to a central point. There are a number of measures that commonly are focused upon, such as variance and the interquartile range, and all help piece together a comprehensive understanding of a given data series.
+
+Perhaps the simplest measures are those that are based on positions of records. The *minimum* and *maximum* are the smallest and largest values of a continuous variable. The minimum and maximum are also known as the *P0* and *P100*. The arithmetic difference between those values is the *range*. Similar to the range is the *Interquartile Range* or *IQR*, which is the arithmetic difference in values between the *P75* and *P25*. Examining the IQR gives a sense of the density of the center mass of a distribution, or the middle 50%. Together, these basic measures can contextualize the shape and density of a variable, especially comparing between subpopulations. For example, the income range of group A is $100,000 and group B is $2,000,000, indicating that the top and bottom of group A are closely distributed whereas there are large outliers in group B. 
+
+In addition, the *variance* of a data series contains key information about variability around the mean. Variance is defined as the *average squared difference between each value of a series and its mean*. The differences are squared in order to (1) preserve the information as simply adding the differences would net to zero, (2) emphasize differences from the mean. While the variance is a key part of statistics, it's not particularly interpretable without some additional transformations. The *standard deviation* is the square-root of the variance, which has the same units as the original data and can be used to contextualize dispersion of data relative to the mean. In fact, standard deviations are used as a unit of analysis. Under a normal distribution using the mean as a point of reference, +/- 1.96 standard deviations should contain 95% of records and +/- 3 standard deviations should contain 99.7% of records. These benchmarks are commonly used to identify outliers.
+
+
+
+| Measure | Formula | Definition | R Function |Example |
+|---------+-----------+---------------------+---------+-------------|
+| Minimum |  $$ \operatorname{argmin}(x_i)$$ | The smallest value of a random variable. | min()| `r paste0("min(c(1,3,5,7,9))")`|
+| Maximum |  $$ \operatorname{argmax}(x_i)$$ | The largest value of a random variable.  | max()| `r paste0("max(c(1,3,5,7,9))")`|
+| Range |  $$\operatorname{argmax}(x_i) - \operatorname{argmin}(x_i)$$ | Difference of its largest and smallest data values| range()| `r paste0("range(c(1,3,5,7,9))")`|
+| IQR |  P75 - P50 | Difference of the 75th percentile and 25th percentile value| IQR()| `r paste0("IQR(c(1,3,5,7,9))")`|
+| Variance | $$ s^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i-\mu)^2$$ | A measure of dispersion around the mean. | var() | `r paste0("var(c(1,3,5,7,9))")`|
+| Standard Deviation | $$ s = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (x_i-\mu)^2}$$ | The square root of the variance. | sd() | `r paste0("sd(c(1,3,5,7,9))")`|
+
+
+####Skewness + Kurtosis
+[Debating if this should be used]
+
+| Measure | Formula | Definition | R Function |Example |
+|---------+-----------+---------------------+---------+-------------|
+| Skewness | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | Measure of symmetry | library(e1071)<br> kurtosis()| `example`|
+| Kurosis | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | Measure of peakedness relative to Gaussian distribution | library(e1071)<br> skewness()| `example`|
+
+
+###Statistics of Discrete Variables
+- Cross tabulations
+- Row proportions
+- Column proportions
+
+###Graphical Approaches
+While sample statistics help to determine expected values and overall trends of continuous variables, graphical and visual approaches help to identify unexpected values -- where are there outliers and unusual quirks of the data. In this section, we will explore univariate and bivariate graphs and their application in EDA.
+
+####Univariate graphs
+```{r, message=FALSE, warning=FALSE}
 temp <- tempfile()
 download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip",temp, mode="wb")
 unz <- unzip(temp, exdir=getwd())
-acs <- read.csv(unz[1])
-
-```
-- GHCN-M: Missing values analysis in matrix of weather anomalies from 1880 to Present
-
-## (1) Data Structure
-```{r}
-colnames(acs)
-str(acs) 
+df <- read.csv(unz[1])
 ```
 
 
-## (2) Statistical Measures
-[Statistical]
-summarize 
-- check for central tendency
-- spread or dispersion of data
+#####Histograms and kernel density graphs
+The most commonly used graph to visualize univariate data is the histogram. Essentially, histograms will break a continuous variable into equal sized *bins* based on the range of values, then graph the number of observations in each bin. This practice of *binning* or *discretizing* add a second dimension to a continuous variable that is needed to visualize patterns. Typically the number of bins is determined automatically when using functions such as `hist()`. 
 
-###The usual suspects
-| Measure | Formula | Definition | R Function |Example |
-|---------+-----------+---------------------+---------+-------------|
-| Mean or Average | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | A measure of central tendency formulated as the sum of all values. Also known as the 'expected value'. | mean()| `r paste0("mean(c(1,3,5,7,9)) = ", mean(c(1,3,5,7,9)))`|
-| Median |  Value at $$(\frac{n+1}{2})^{th} $$ position| A measure of central tendency based on the 'middle value' or 50th percentile of a random variable.  | median() | `r paste0("median(c(1,3,5,7,9)) = ", median(c(1,3,5,7,9)))`|
-| Variance | $$ \sigma^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i-\mu)^2$$ | A measure of dispersion around the mean. | var() | `r paste0("var(c(1,3,5,7,9)) = ", var(c(1,3,5,7,9)))`|
-| Standard Deviation | $$ \sigma = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (x_i-\mu)^2}$$ | The square root of the variance. | sd() | `r paste0("sd(c(1,3,5,7,9)) = ", sd(c(1,3,5,7,9)))`|
-| Minimum |  $$ \operatorname{argmin}(x_i)$$ | The smallest value of a random variable. | min()| `r paste0("min(c(1,3,5,7,9)) = ", min(c(1,3,5,7,9)))`|
-| Maximum |  $$ \operatorname{argmax}(x_i)$$ | The largest value of a random variable.  | max()| `r paste0("max(c(1,3,5,7,9)) = ", max(c(1,3,5,7,9)))`|
-| Range |  $$\operatorname{argmax}(x_i) - \operatorname{argmin}(x_i)$$ | Difference of its largest and smallest data values| range()| `r paste0("range(c(1,3,5,7,9)) = ", range(c(1,3,5,7,9)))`|
-| Missing |  $$ x_i = NA $$ | Number of values that are NA. Note that in some cases, -9999 or similar representation may represent missingness.| sum(is.na()) | `r paste0("sum(is.na((c(1,3,5,7,9))) = ", sum(is.na((c(1,3,NA,5,7,9,NA)))))`|
+While normal distributions are the best known probability distribution, a pure normal distribution is fairly rare in the wild. In social data, it's more common to see long tails as seen below. Thus, data is often times *transformed* using mathematical functions in order to reshape the distribution of values. For data with large peaks to the left and long tails, common transformations include the natural logarithm (`log()`), logarithm base 2 (`log2()`) or logarithm base 10 (`log10()`). In the graph below, we use the `log10()` transformation to *stretch* the data to the right so that it is more normally or symmetrically distributed.
 
+```{r, message=FALSE, warning=FALSE, fig.height=2.5}
+#Set up format
+  par(mfrow=c(1,2))
 
-
-
-
-## (3) Graphical Approaches
-[Text goes here]
-```{r, echo=FALSE}
-
-
-library(ggplot2)
-library(gridExtra)
-datagen <- function(n, mu, sd, p_list){
-  x1    <- rnorm(n, mu, sd) #master variable
-  df <- data.frame(x1)
-  
-  for(p in p_list){
-    
-    #Set up parameters
-    theta <- acos(p)  # corr angle
-    x2    <- rnorm(n, mu, sd)  # create a random dataset
-    ds     <- cbind(x1, x2) 
-    cent  <- scale(ds, center=TRUE, scale=FALSE)   # centered columns (mean 0)
-    
-    Imat   <- diag(n)                               # identity matrix
-    Q    <- qr.Q(qr(cent[ , 1, drop=FALSE]))      # QR-decomposition, just matrix Q
-    P    <- tcrossprod(Q)          # = Q Q'       # projection onto space defined by x1
-    x2o  <- (Imat - P) %*% cent[ , 2]                 # x2ctr made orthogonal to x1ctr
-    Xc2  <- cbind(cent[ , 1], x2o)                # bind to matrix
-    Y    <- Xc2 %*% diag(1/sqrt(colSums(Xc2^2)))  # scale columns to length 1
-    
-    x <- Y[ , 2] + (1 / tan(theta)) * Y[ , 1]     # new correlated vec
-    cor(x1, x)  
-    df <- cbind(df,x) #
-  }
-  colnames(df)<- c("x",paste0("x",p_list))
-  return(df)
-}
+#Basic histogram
+  hist(df$WAGP, main = "Wages")
+  hist(log10(df$WAGP), main = "log10(Wage)")
 ```
 
-###Univariate 
-```{r, message=FALSE, warning=FALSE}
-#Create simulated data
-  df <- datagen(1000, 0, 50, c(0.1,0.5,0.7,0.9))
-#Rename variables
-  colnames(df)<-c("y","x1","x2","x3","x4")
-#Groups
-  df$group <- 0
-  df$group[df$x3>0.05] <-1
+The `hist()` function provides rudimentary stylings for histograms. For more advanced stylings, the `ggplot2` library offers more convenient and easier to use stylistic options. In the example below, the log10 transformation is applied using `scale_x_log10()`.
 
-#Graphs
-  base <- ggplot(df, aes(y)) 
+```{r, message=FALSE, warning=FALSE, fig.height=2}
+#Histogram using ggplot2
+  ggplot(df, aes(WAGP))  + 
+      ggtitle("Histogram") +  
+      geom_histogram(colour = "white", fill = "navy") + 
+      labs(x = "log10(Wage)") + 
+      scale_x_log10()
   
-#Histogram
-  m1 <- base + ggtitle("(a) Histogram")+  geom_histogram(colour = "white", fill = "navy")
-  
+```
+
+An alternative to histograms is the *kernel density plot*, which applies a technique known as *kernel-density estimation* as opposed to binning. Using ggplot2, we can apply the `geom_density()` argument to use the kernel density plot. The plot is notably smoother and organic when compared to histograms.
+
+```{r, message=FALSE, warning=FALSE, fig.height=2}
 #K-density
-  m2 <-  base + ggtitle("(b) Kernel Density")+ geom_density(colour = "white", fill = "navy")
-  
-#Violin Plot
-  m3 <- ggplot(df, aes(factor(group),y))  + geom_violin(colour = "navy", fill = "navy")  + ggtitle("(c) Violin plot")
-
-#Boxplot
-  m4 <- ggplot(df, aes(factor(group),y)) + geom_boxplot(colour = "navy", fill = "navy")  + ggtitle("(d) Boxplot")
-
-#Arrange graphs into 2 columns
-  grid.arrange(m1, m2, m3, m4, ncol=2)
-```
-
-
-###Thought exercise
->You've been asked to take a look at load times for an internet search website. 
-> - Which of the following three graphs best represents the distribution of latencies? 
-> - Where would the *mean* be relative to the *median*?
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=2}
-a = rnorm(100000,0,1)^2
-b = rnorm(100000,7,2)
-c = log(a)-min(log(a))
-
-par(mfrow=c(1,3))
-hist(a, probability=TRUE, xlab="Time (s)",main="Option #1", ylab="% Web Accesses", col="navy")
-hist(b, probability=TRUE,  xlab="Time (s)",main="Option #2", ylab="% Web Accesses", col="navy")
-hist(c, probability=TRUE, xlab="Time (s)",main="Option #3", ylab="% Web Accesses", col="navy")
+  ggplot(df, aes(WAGP))  + 
+      ggtitle("Kernel Density") + 
+      geom_density(colour = "white", fill = "navy") + 
+      labs(x = "log10(Wage)") + 
+      scale_x_log10()
 
 ```
 
-###Bivariate Graphs
-```{r,  message=FALSE, warning=FALSE}
+Both histograms and kernel density graphs are helpful for developing a notional understanding of the shape of data. Due to binning, the individual bins of a histograms correspond to an actual number of observations whereas kernel densities can be used to illustrate the organic shape of the distribution. However, neither provide quantitative benchmarks such as the mean or quantiles.
+
+
+##Multivariate Data
+Much of data analysis focuses on the possibilities of combining two or more data series in order to uncover relationships and patterns as well as inform modeling hypotheses. In this section, we will focus on using correlation statistics and bivariate graphs to identify patterns.
+
+####Correlation of continuous variables
+In everyday rhetoric, the term *correlation* is relatively loosely used. In statistics, it commonly has a specific definition, specifically, the *Pearson Product-Moment Correlation Coefficient* or *Correlation Coefficient* for short -- a measure of relatedness. It is defined as:
+
+$$\rho(X,Y) = \frac{cov(X,Y)}{\sigma{_X}\sigma{_Y}} $$
+
+where $\rho$ denotes the correlation coefficient, *cov* is the covariance of two variables (X and Y) as defined as $(X - \mu_X)(Y - \mu_Y)$, and $\sigma$ is the standard deviation of each X and Y. The correlation coefficient is bound between -1 and 1, where:
+
+- -1 indicates perfectly negative linear relationship (as X increases, Y decreases proportionally)
+- 0 indicates no relationship (X and Y are not related)
+- +1 indicates perfectly positive linear relationship (as X increases, Y increases proportionally)
+
+```{r, echo=FALSE , fig.height=2.5}
+correlatedValue = function(x, r){
+  r2 = r**2
+  ve = 1-r2
+  SD = sqrt(ve)
+  e  = rnorm(length(x), mean=0, sd=SD)
+  y  = r*x + e
+  return(y)
+}
+
+x = rnorm(1000)
+ym1 = correlatedValue(x=x, r=-1)
+ym05 = correlatedValue(x=x, r=-0.5)
+y0 = correlatedValue(x=x, r=0)
+yp05 = correlatedValue(x=x, r=0.5)
+yp1 = correlatedValue(x=x, r=1)
+examp <- data.frame(x, ym1, ym05,y0, yp05, yp1)
+
+g1 = ggplot(examp, aes(x=x,y=ym1))  + geom_point(size=0.5) + ggtitle("rho = -1.0") + ylab("y")
+g2 = ggplot(examp, aes(x=x,y=ym05))  + geom_point(size=0.5) + ggtitle("rho = -0.5") + ylab("y")
+g3 = ggplot(examp, aes(x=x,y=y0))  + geom_point(size=0.5) + ggtitle("rho = 0.0") + ylab("y")
+g4 = ggplot(examp, aes(x=x,y=yp05))  + geom_point(size=0.5) + ggtitle("rho = +0.5") + ylab("y")
+g5 = ggplot(examp, aes(x=x,y=yp1))  + geom_point(size=0.5) + ggtitle("rho = +1.0") + ylab("y")
+
+grid.arrange(g1,g2,g3,g4,g5, ncol=5)
+```
+
+
+In practice, it's fairly simply to calculate and explore relationships by using `cor()`. For example, what if we were to compare age (AGEP) with retirement income (RETP). Notice that we use the `complete.obs` option to use only records that have values for both `AGEP` and `RETP`. The correlation coefficient is +0.226 indicating only a slight correlation.
+
+```{r}
+  cor(df$AGEP, df$RETP, use="complete.obs")
+```
+
+How do we examine a much broader set of variables such as WAGP - wage income, PERNP - personal income, RETP - retirement income, SSIP - supplemental security income, PAP - public assistance income, SEMP - self-employment income, and OIP - all other income. The `cor()` function can accept a dataframe or matrix of continuous variables and outputs a `k x k` matrix of pairwise correlation coefficients. The diagonal will always be filled with `1` as a correlation of a variable with itself will be the highest possible value. Values above the diagonal are identical to values below. 
+
+```{r, message=FALSE, warning=FALSE}
+select <- df[, c("AGEP","WAGP","PERNP", "SEMP")]
+cor(select, use="complete.obs")
+```
+
+The correlation matrix may be a bit overwhelming to decipher. We may use the `corrplot` package to visualize the size of correlations. In this case, we can see that the strongest correlations are PERNP, WAGP, and SEMP.
+
+```{r, message=FALSE, warning=FALSE, fig.height=2.5}
+library(corrplot)
+M <- cor(select, use="complete.obs")
+corrplot(M, method="ellipse")
+```
+
+
+####Bivariate plots: continuous vs continuous
+The simplest bivariate graph is the scatter plot, which graphs points placing one variable on the horizontal axis and another on the vertical axis. The intersection of the values fall on a two-dimensional canvas, exposing relationships between variables. Below, a simple scatter plot shows the non-linear relationship between log-transformed personal income and age, suggesting that wages may reach a ceiling as one gets older.
+
+```{r, message=F, warning = F, fig.height=2.5}
+  plot(df$AGEP, log10(df$PERNP))
+```
+
+In data science, often times, the amount of the data will push the limits of traditional graphs and require more stylized ways to derive empirical insight:
+
+- Graph (a) plots a traditional scatter plot with much of the plot saturated with points. This is generally good when strong linear trends are present or with relatively few data points.
+- Graph (b) is another scatter plot with an adjusted `alpha`, also known as opacity. In graphs, changing the opacity in a graph without any overlapping points makes the entire image look faint. In cases where points overlap, the opacity values add up, thereby darkening areas with overlapping points. This style is particularly useful when there is a high volume of points.
+- Graph (c) is a scatter plot, but uses a *locally weighted smoother* to show the direction of local relationships and the variability around the trend line. This style can be used to find candidate transformations and non-linear specifications for the modeling phase.
+- Graph (d) is a hexbin plot, which converts a graphical canvas into equal hexagonal bins, counts the number of values in each discrete bin and color codes based on the counts. This style is particularly useful when there is a high volume of points.
+- Graph (e) is a contour graph that bins the graph into distinct regions where concentric regions towards the middle are larger values. This is useful for geographic or spatial data, particulary for terrain data.
+
+
+```{r, message=FALSE, warning=FALSE}
+
+#Base data for plot
+p = ggplot(df,aes(x=AGEP,y=log10(PERNP)))  +
+      xlab("Age") +
+      ylab("log(earnings)") 
 
 ##Scatter plot
-p = ggplot(df,aes(x=x4,y=y))  +
-  xlab("x4") +
-  ylab("y")
-p1 = p + geom_point() + ggtitle("(a) scatter")
-p2 = p + geom_point(alpha = 0.1, colour="navy") +
-  theme_bw() + ggtitle("(b) scatter (alpha = 0.1)")
+p1 = p + geom_point(size=0.2) + 
+      ggtitle("(a) traditional scatter")
+
+##Scatter plot with transparency
+p2 = p + geom_point(alpha = 0.1, colour="navy", size=0.2) +
+      theme_bw() + 
+      ggtitle("(b) scatter (alpha = 0.1)")
+
+#Scatter plot with regression line (locally weighted smoother)
+p3 = p + ggtitle("(c) scatter + regression line")+
+      geom_point(alpha = 0.1, colour="navy",size=1) + 
+      geom_smooth() + xlab("Age") + ylab("log(earnings)")
 
 ##Hexbin 
-p3 = p +
-  stat_bin_hex(colour="white", na.rm=TRUE,alpha=0.9) +
-  scale_fill_gradientn(colours=c("lightgrey","navy"), name = "Frequency", na.value=NA) + 
-  guides(fill=FALSE) + ggtitle("(c) Hex bin plot")
-
-#Scatter by Group
-p4  = ggplot(df,aes(x=x4,y=y,colour=as.factor(round(x2*10,1)*20)))+
-      ggtitle("(d) scatter by group") + theme(legend.position="none") +
-      geom_point(alpha = 0.3)
+p4 = p + stat_bin_hex(colour="white", na.rm=TRUE,alpha=0.9) +
+      scale_fill_gradientn(colours=c("lightgrey","navy"), name = "Frequency") + 
+      guides(fill=FALSE) + ggtitle("(d) hex-bin plot")
 
 #Contour graph
 p5  = p + ggtitle("(e) contour")+ 
       geom_density2d() + 
       theme_bw()
 
-#Scatter plot with regression line (locally weighted smoother)
-p6 = ggplot(df, aes(x=x4, y=y)) + ggtitle("(f) scatter + regression line")+
-    geom_point(shape=1,alpha = 0.6, colour="navy") + 
-    geom_smooth() 
+
 
 #Arrange graphs
-  grid.arrange(p1,p2,p3,p4,p5,p6, ncol=3)
+grid.arrange(p1,p2,p3,p4,p5, ncol=3)
  
 ```
+
+
+
+#####Comparing subpopulations
+A common task in EDA is the search for *separability* -- when data cluster in such a way that can help distinguish one group from another. This helps with identifying qualities that distinguish one subpopulation from another and factors that may be included in a modeling strategy. Side-by-side graphical comparisons, such as violin and boxplots, and graph overlays are powerful tools in showing differences. 
+
+To illustrate this, let's create a variable for whether a respondent holds a bachelor's degree. These two levels can be used to stratify a dataset into subpopulations for comparison.
+```{r}
+df$college <- NA
+df$college[df$SCHL<21] <- "Less than bachelor's"
+df$college[df$SCHL>=21] <- "With bachelor's"
+```
+
+The natural shape of kernel density plots lend themselves to easier comparison. As seen below, we two kernel density plots are overlaid. Using the `fill` and `colour` parameters, the kernel densities are color-coded for ease of inspection. Notice that distributions are differently distributed, with college graduates generally earning higher wages. 
+
+```{r, fig.height=2.5}
+ggplot(df, aes(WAGP, fill = factor(college), colour = factor(college))) +
+      geom_density(alpha = 0.1) + ##alpha controls opacity
+      labs(x = "log10(Wage)") + 
+      ggtitle("Kernel Overlay") + 
+      scale_x_log10()  
+```
+
+What if there are many subpopulations? If there are more than a couple of sub-groups, other side-by-side comparisons lend themselves for easier interpretation and reduce clutter. 
+
+```{r}
+df$SCHL2[df$SCHL<16 ] <- "1 - Less than HS"
+df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "2 - HS"
+df$SCHL2[df$SCHL==21] <- "3 - Undergraduate Degree"
+df$SCHL2[df$SCHL>21] <- "4 - Graduate Degree"
+```
+
+Two data scientist favorites are the violin plot and the boxplot. The *violin plot* (left) is a kernel density graph rotated onto a vertical axis with the probability density plotted symmetrically across the vertical axis. *Boxplots* display the distribution of the data following key summary statistics, namely the median, 25th percentile/first quartile and the 75th percentile/third quartile. On the right, the median is denoted by the gray horizontal line in each blue box, and the upper and lower edges of the box are the 75th and 25th percentiles, respectively, also referred to as the shoulders of the distribution. Points to the top and the bottom are outliers, which are points located outside the body of the distribution (usually a distance of over 1.5-times the IQR above 75th percentile and below the 25th percentile). Both graphs are quite useful. The violin plot shows the shape of the distribution, whereas the boxplot allows for comparison of center mass.
+
+```{r, message=FALSE, warning=FALSE, fig.height=2.5}
+
+#Violin
+vio <- ggplot(df, aes(factor(SCHL2), WAGP))  + 
+          geom_violin(colour = "navy", fill = "navy")   + 
+          labs(x = "log10(Wage)") + 
+          ggtitle("Violin Plot") + 
+          scale_y_log10()
+
+#Boxplot
+box <- ggplot(df, aes(factor(SCHL2), WAGP)) + 
+          geom_boxplot(colour = "grey", fill = "navy")   + 
+          labs(x = "log10(Wage)") + 
+          ggtitle("Boxplot") + 
+          scale_y_log10()
+
+#Plot side by side
+grid.arrange(vio, box, ncol = 2)
+```
+
+
+##Assignments
+- Play the [*Guess The Correlation* Game](http://guessthecorrelation.com/) for 5 minutes. This game challenges players to guess the coefficient correlation based on randomly assigned scatter plots of two continuous variables. 
+

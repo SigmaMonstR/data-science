@@ -17,7 +17,7 @@ Note: While each record is associated with a sampling weight, we will treat each
 
 ###Get data 
 ```{r, echo=FALSE}
-setwd("/Users/jeff/Documents/Github/data-science/lecture-03/")
+setwd("/Users/sigmamonstr/Github/data-science/lecture-03")
 
 ```
 ```{r, warning=FALSE, message=FALSE}
