@@ -1,76 +1,156 @@
 ---
-title: "Lectures 3 + 4: Exploratory Data Analysis"
-output: html_document
+title: "Lecture 4: EDA, Functions and Control Structures"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
 ---
 
-```{r, echo=FALSE, warnings = FALSE, messages=FALSE, id="asd"}
-# Load package
-library(networkD3)
 
-# Create fake data
-src <-    c("1 : investigate", "2 : ask","3 : design", "4 : collect", "5 : explore", "6 : reshape", "7 : model", "8 - communicate","9 - deploy", "5 : explore","5 : explore","5 : explore","5 : explore","5 : explore")
-target <- c("2 : ask","3 : design", "4 : collect",  "5 : explore", "6 : reshape", "7 : model", "8 - communicate", "9 - deploy",   "10 - refine","central tendency","data distribution","outliers","patterns","data formats")
-networkData <- data.frame(src, target)
+Much of data science requires developing specialized code to handle the eccentricities of a dataset. Re-running blocks of code is required, often times on multiple data samples and subpopulations. It's simply not scalable to manually change variables and assumptions of the code everytime. In this lecture, we will extend EDA by writing custom functions and using control structures. 
 
-# Plot
-simpleNetwork(networkData,  charge = -500, opacity=1,linkDistance = 30, fontSize = 14,width='100%', height='300px', zoom=T)
-```
- 
+##Functions
+Functions are generalizable sets of code that can be used to calculate a single value, process an entire dataset, print graphs, among other things. A strong software engineering habit involves building narrowly defined functions and low-level functions that can be put together to do high-level tasks. 
 
-Lecture 3/4: Exploratory Data Analysis
-detection of mistakes • checking of assumptions • preliminary selection of appropriate models • determining relationships among the explanatory variables, and • assessing the direction and rough size of relationships between explanatory and outcome variables.
+A typical function is constructed as follows. The function name is assigned, followed by a list of parameters that will be used as inputs into the function, followed by the script that will be executed using the input parameters. 
 
-Univariate EDA
-Categorical or Discrete Data
-- Tab
-- Prop.table
-
-Numerical Data
-- summary()
-- mean()
-- median()
-- sd()
-- var()
-- range()
-- IQR()
-- quantile()
-
-Graphical
-- ggplot examples: http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/
-- par(mfrow = c(2,1)) 
-    - hist()
-- boxplot
-    - boxplot(numeric~group, data=df, main=“Title”, 
-    -    xlab="Number of Cylinders", ylab="Miles Per Gallon")
-    - boxplot(len~supp*dose, data=ToothGrowth, notch=TRUE, 
-    -   col=(c("gold","darkgreen")),
-    -   main="Tooth Growth", xlab="Suppliment and Dose")
-- 2-way relationships
-    - scatter
-    - scatterplot matrix 
-- High density
-    - scatter with density
-- Correlation matrix
-- 
-
-Bivariate
-- Correlation 
-    - corrplot
-- Covariance
-
-
-
-```{r, warning=FALSE, message=FALSE}
-##QQPLOT
-par(mfrow=c(2,2))
-
-for(k in c(5,20,100,100)){
-  pois = rpois(k,lambda=21)
-  norm = rnorm(length(pois), mean(pois), sd(pois))
-  qqplot(norm,pois, main=paste0("n=",k), aspect=1)
-  lines(norm,norm)
+```{r, eval=FALSE}
+function.name <- function(parameter1, parameter2){
+  #Script goes here
+  return([output goes here])
 }
+```
 
+####Example: Mean
+The `mean()` method is a pre-built function that accepts a vector `vec`, sums all values in `vec`, divides by the length of `vec`, then returns the result that is passed through `return()`. 
 
+```{r}
+#Create dataset
+  df <- data.frame(id = 1:100,
+                   value = rnorm(100,10,10),
+                   group = round(runif(100)*3))
+
+#Function
+  mean2 <- function(vec){
+      res <- sum(vec)/length(vec)
+      return(res)
+  }
+
+#Example
+  mean2(df$value)
+```
+
+##If Statement
+Suppose you're examining a dataset and find erroneous or missing values. After some examination and brilliant thinking you develop a way to handle those values. However, it requires 
+```{r, eval=FALSE}
+if(statement){
+  #If statement true, run script goes here
+} else {
+  #else, run script goes here
+}
+```
+
+####
+
+##Loops
+
+Loops can be used to run the same statement of code multiple times for a list or index of values. Each iteration uses the same code, but may change certain parameters. 
+
+Let's take the following example. The code block essentially says "print values  1 through 5", where `i` is an *index value*. When executing the statement, R will push the first value in the sequence of 1:5 into the index (in this case, it's the number 1), then the code block in between the `{}` (curly brackets) will be executed, treating `i` as if it's the number 1. Upon executing the code without error, R will advance to the next value in the sequence and repeat the process until all values in the sequence have been completed.
+
+```{r}
+for(i in 1:5){
+  print(i)
+}
+```
+
+We can do the same for a vector or list of values. In the example below, the vector `news` contains six terms. Using a forloop, we can print out each word in the vector.
+
+```{r}
+news <- c("The","Dow","Is","Up","By","400pts")
+for(i in news){
+  print(i)
+}
+```
+
+###What can you do with loops?
+Loops are a critical part of all parts of data science, enabling data cleaning, optimization, and automation. Loops are helpful when an function cannot be applied globally, meaning that each element, column, observation or iteration needs to be done on its own. For example, taking the sum of a random variable `x` can be done without looping as R is designed to operate with column-wise functionality. However, a moving average of 10 records would require a forloop.
+
+####Example: EIA Gasoline Spot Price Data
+What if we had a time series dataset with a fair amount of random variability and swings in volume? This sounds very much like financial and economic data -- it's often filled with noise. Let's take the [US Energy Information Administration's]() spot price data, specifically the retail [gasoline data](http://www.eia.gov/dnav/pet/xls/PET_PRI_SPT_S1_D.xls). 
+
+```{r, message=FALSE, warning=FALSE}
+
+#Call library to open XLS
+  library(gdata)
+
+#Read in data
+  df <- read.xls("http://www.eia.gov/dnav/pet/xls/PET_PRI_SPT_S1_D.xls", sheet = 2, skip=2, header = TRUE)
+
+#Inspect and clean up date
+  head(df,3)
+  df <- df[1000:2000,1:3] 
+  colnames(df) <- c("date","ny.values","us.gulf.values")
+  df$date <- as.Date(as.character(df$date), "%b %d, %Y")
+
+#Plot the data
+  library(ggplot2)
+  ggplot(df, aes(date,ny.values)) + geom_line()
+```
+
+To smooth the series `ny.values` using a simple moving average, we can do the following:
+
+```{r, message=FALSE, warning=FALSE, fig.height = 3}
+size <- 14 #variable used to select window size
+df$new <- NA
+#Loop range from *size* to number of rows *nrow(df)* minus *size*
+for(i in size:nrow(df)){
+  
+    #Extract values of *x* from positions i-size to i
+    extract <- df$ny.values[(i-size):i]
+    
+    #Calculate mean of *extract*, store to the ith value of *new*
+    df$new[i] <- mean(extract)
+}
+  
+#Plot result
+ ggplot(df, aes(date,ny.values)) + geom_line(colour="grey") +
+    geom_line(data = df, aes(x=date, y=new))
 
 ```
+
+It's also possible to use loops within loops. What if we wanted to compare multiple window sizes, we can *nest* one loop inside another. In this case, looping through different potential window sizes helps with identifying the optimal window size.
+```{r, message=FALSE, warning=FALSE}
+#Vector of windows to be tested
+  windows <- c(7, 14, 28, 84)
+
+#Outer loop (index value = *size*)
+for(size in windows){
+  df$new <- NA
+  
+  #inner loop (index value = *i*)
+  for(i in size:nrow(df)){
+      extract <- df$ny.values[(i-size):i]
+      df$new[i] <- mean(extract)
+  }
+
+  #Calculate correlation
+    cor_val <- round(cor(df$new, df$ny.values, use="complete.obs"),2)
+  
+  #Plot graph
+  g <- ggplot(df, aes(date,ny.values)) + 
+        geom_line(colour="grey") +
+        geom_line(data = df, aes(x=date, y=new)) + 
+        ggtitle( paste("rho =", cor_val))
+  assign(paste0("g",size), g)
+}
+  
+#Compare
+  library(gridExtra)
+  grid.arrange(g7, g14, g28, g84, ncol=2)
+```
+
+
+
