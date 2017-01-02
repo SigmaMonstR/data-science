@@ -18,12 +18,15 @@ A class of techniques known as computer vision is becoming more common for organ
 
 The disciplines of machine learning, pattern detection and data analysis are part of what is now called "data science", an interdisciplinary field that uses statistics and computer science to take advantage of insights in data. Data scientists are often experts in computer programming or 'coding', mathematics, and communication. Programming is required to design and assemble information into actionable applications. The mathematics takes on more complex forms (e.g. machine and statistical learning) that are the engines that support the value-added insight of the applications. Communication is the social interface between the pure technical and the users. Together, these three skills can greatly advance the cause of a given subject matter domain. Data science skills led to the creation of ['People you may know' on LinkedIn](https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century)  and satellite-based market intelligence at [Orbital Insight](https://orbitalinsight.com/orbital-insight-correctly-predicts-retail-sales-miss-hit-rate-grows-78/). In public policy, there has been an emergence of smart applications that support public operations from [fire risk prediction for public safety](http://www.smithsonianmag.com/innovation/how-data-and-good-algorithm-can-help-predict-where-fires-will-start-180954436/) to [tracking deforestation from satellites](http://www.forbes.com/sites/alexknapp/2015/04/22/satellite-data-and-a-i-will-be-deployed-to-predict-and-prevent-deforestation/#35c3f6987fdb). 
 
-####Anatomy of a Data Science project
-```{r}
-###Code goes here
-```
-[Diagram of types of data science tasks]
-[typical workflow]
+###Anatomy of a Data Science project
+The anatonomy of a data science can be described using verbs, clustered into four steps.
+
+- **<u>investigate/ask/design/collect</u>**. The goal in this step is to determine if there is indeed a data project to be undertaken. This requires understanding the client or user's needs and problems, exposing the context of those problems, determining whether the problem lends itself to a data-driven approach, and collecting the necessary data.  Typically, this work is done in conjunction with designers and operations experts to understand the context in which a data science project could work, taking into account the political issues that may influence the deployment of a data science project as well as the availability of data to develop the work. Often times, this step requires an expert with years of practice to to accurately assess if a problem can be solved using a data science approach and will not be covered in this course.
+- **<u>explore/clean/reshape/analyze</u>**. The second step involves understanding the collected data, particularly its quirks, eccentricities, and reliable qualities. By conducting on *exploratory data analysis*, a data scientist will develop an intuitive understanding of the tolerances of the data, opportunities to clean and improve the data as well as reshape it for application. These tasks are covered in Lectures 1 through 4 with a particular emphasis on building and wrangling information.
+- **<u>model/learn</u>**. The third step involves combining data to quantify predictable relationships or surface latent patterns that exist in the data. For cases where data are *labeled* or contain a target or dependent variable that one would like to better understand, a class of techniques known as *supervised learning* can be used to *train* an algorithm to find the relationship between input features or variables to reliably predict that target. Supervised learning methods can be used to quantify or assess causality using quasi-experimental methods, which is more common for program evaluation and social sciences, or be directly applied to *score* incoming data in order to help field operations through risk management and prioritization. In either case, supervised learning methods rely on objective functions or error functions to find the relative best answer.  Examples of supervised learning include linear regression and classifers. For data that do not contain labels or target data, *unsupervised learning* can be used to surface *clusters* or patterns by examining the proximity of records and natural breaks in input variables. K-means clustering and hierarchical clustering are common examples of unsupervised learning. These core techniques will be covered in Lectures 5 through 9.
+- **<u>communicate/visualize/refine/deploy</u>**. The last step is focused on engaging and productizing the first three steps, mainly through communicating the insights and value proposition, often times through interactive visualizations and application development. Visualization should support insight as well as help users and clients develop their own organic understanding. In deployment, data science projects will often times be the underlying *engine* of an application -- the algorithmic intelligence that turns a web application into a smart application. Lectures 10 through 13 will focus on the last mile of data science projects.
+
+Needless to say, none of this can be achieved without code.
 
 ###Ok, so where do I start?
 To be contributor that can drive impact, the first step is to master assembly. In this course, we do so by first overcoming the coefficient of static friction in using a programming language, specificallt the statistical programming language [R](https://cran.r-project.org/) for statistics and data science. It should be noted that are a number of other open source languages, or programming code that is freely available and may be redistributed and modified, that are suitable for data science such as [Python](https://www.python.org/) and [Julia](http://julialang.org/). Typically, expert data scientists will be versed in more than one language, but R is a suitable language to start than any.
@@ -50,12 +53,9 @@ Upon installing, open the software and your screen should look approximately lik
 Upon installing, open the software and your screen should look approximately like the following:
 ![screencap of R console](img/RStudio.jpg)
 
-<hr>
-
 
 ##Fundamentals of R programming
-
-R is an object-oriented programming (OOP) language where...
+R is an object-oriented programming (OOP) language that supports statistical analysis, graphing and data processing. It is an *interpreted language* that allows users to enter code into a command line interface. It also supports scripting. Throughout this course, follow along the examples by entering the commands into the command line or executing through your script editor. It may seem repetitive, but a large part of doing data science is committing the mechanics to muscle memory.
 
 To start, let's set a `variable` x to the number `1`. Notice that assignments are expressed using `<-`. To check that the assignment worked, we'll use `print()` to write `people` to the console output.
 
@@ -350,15 +350,11 @@ ggplot(df, aes(factor(month),PV_PVInsolationHArray)) +
 From this graph, we can see the peak sunlight months are between May and August where May and August. The third quartile (the upper end of each box) is protracted in May and August, indicating that there are hourly periods where the light is more intense during those months. 
 
 
+###RMarkdown
+Virtually all class notes will be written in R Markdown, a lightweight markup language that can weave text and R code together. Notes will come with both an R Markdown file and a "knitted" HTML file (the R Markdown file run and stored as an HTML web page). Class assignments should be submitted in RMarkdown. Review the following  [tutorial](http://rmarkdown.rstudio.com/r_notebooks.html) to get a feel for how this works.
+
 ###Getting started with Github
-Getting started with Github
-
-[text goes here]
-```{r,  message=FALSE, warning=FALSE}
-#
- 
-```
-
+We will be using Github to access course materials as well as keeping track of the progress on your class project. To get started with Github, review this [tutorial](https://guides.github.com/activities/hello-world/).
 
 ##Appendix: Data Formats
 There are many data storage formats that vary across fields and use cases. The table below provides an overview of the data storage type, format and use.
