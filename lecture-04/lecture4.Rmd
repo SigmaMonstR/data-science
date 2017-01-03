@@ -42,20 +42,52 @@ The `mean()` method is a pre-built function that accepts a vector `vec`, sums al
   mean2(df$value)
 ```
 
-##If Statement
-Suppose you're examining a dataset and find erroneous or missing values. After some examination and brilliant thinking you develop a way to handle those values. However, it requires 
-```{r, eval=FALSE}
-if(statement){
+##Control Structures
+Variables are typically treated differently based on their quality and characteristics. In order to accomplish analytical and programming tasks, control structures are used to determine how a program will treat a given variable given conditions and parameters. In this section, we will cover two commonly used control structures: if...else statements and for loops.
+
+###If and If...Else Statement
+If statements evaluate a logical statement, then execute a script based on whether the evaluated statement is true or false. If the statement is `TRUE`, then the code block is executed.
+
+```{r}
+budget <- 450
+if(budget > 400){
   #If statement true, run script goes here
-} else {
-  #else, run script goes here
+  print("You're over budget. Cut back.")
 }
 ```
 
-####
+In cases where there are two or more choices, if...else statements would be appropriate. In addition to the `if()` statement, an `else` statement is included to handle cases where the logical statement is `FALSE`.
 
-##Loops
 
+```{r, eval=FALSE}
+budget <- 399  
+if(budget >= 400){
+  #If statement true, run script goes here
+  print("You're over budget. Cut back.")
+} else {
+  #else, run script goes here
+  print("You're under budget, but watch it.")
+}
+```
+
+The complexity of these statements can be as simple as `if(x > 10){ print("Hello")}` more complex trees:
+
+```{r}
+age <- 23
+  
+if(age <= 12){
+    print("kid")
+  } else if(age >12 && age <20) {
+    print("teenager")
+  } else if(age >=20 && age <65) {
+    print("adult")
+  } else{
+    print("senior")
+  }
+```
+
+
+###For-loops
 Loops can be used to run the same statement of code multiple times for a list or index of values. Each iteration uses the same code, but may change certain parameters. 
 
 Let's take the following example. The code block essentially says "print values  1 through 5", where `i` is an *index value*. When executing the statement, R will push the first value in the sequence of 1:5 into the index (in this case, it's the number 1), then the code block in between the `{}` (curly brackets) will be executed, treating `i` as if it's the number 1. Upon executing the code without error, R will advance to the next value in the sequence and repeat the process until all values in the sequence have been completed.
@@ -66,7 +98,7 @@ for(i in 1:5){
 }
 ```
 
-We can do the same for a vector or list of values. In the example below, the vector `news` contains six terms. Using a forloop, we can print out each word in the vector.
+We can do the same for a vector or list of values. In the example below, the vector `news` contains six terms. Using a for-loop, we can print out each word in the vector.
 
 ```{r}
 news <- c("The","Dow","Is","Up","By","400pts")
@@ -122,6 +154,7 @@ for(i in size:nrow(df)){
 ```
 
 It's also possible to use loops within loops. What if we wanted to compare multiple window sizes, we can *nest* one loop inside another. In this case, looping through different potential window sizes helps with identifying the optimal window size.
+
 ```{r, message=FALSE, warning=FALSE}
 #Vector of windows to be tested
   windows <- c(7, 14, 28, 84)
@@ -152,5 +185,6 @@ for(size in windows){
   grid.arrange(g7, g14, g28, g84, ncol=2)
 ```
 
+Note that there are some pre-canned functions that can assist with smoothing; However, coding the function from scratch will provide you with greater flexibility to tackle the task at hand.
 
 
