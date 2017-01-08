@@ -1,10 +1,6 @@
----
-title: "PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017 "
-subtitle:  Jeff Chen (jc2817@georgetown.edu) and Dan Hammer ()
-output:
-  pdf_document: default
-  html_notebook: default
----
+
+# PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017 
+
 
 #### Course Description
 

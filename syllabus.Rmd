@@ -38,7 +38,7 @@ Students are expected to sign up for a Github account (https://github.com). Read
 #### Workload and assignments
 
 Students will be evaluated on the basis of five problem sets (60%) and one final project (40%). Late
-problem sets will be penalized by 10% per day late. All problem sets will be submitted electronically. The final project will be due on Monday May 8th. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
+problem sets will be penalized by 10% per day late. All problem sets will be submitted electronically. The final project assignment details will be made available in late March and the final product will be due on Monday May 8th. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
 
 
 ### Course Outline
@@ -144,6 +144,10 @@ Supervised learning is the most relied upon class of techniques that enable caus
 
 - Economic data from BEA
 
+*Homework Assignment*
+
+- TBA
+
 ##### Lecture 6: Simulations, selection bias 
 
 Formal statistics offers methods to calculate closed-form, analytical answers to the limits of OLS regression.  Data science offers a more immediate and arguably a more accessible solution: simulate conditions and examine the outcomes.  We begin to use the early visualizations techniques taught in a previous lecture for analysis.
@@ -190,6 +194,10 @@ Classification models are one of the workhorses of data science. Classifiers ena
 *Example application*
 
 - Classifying physical activity using a smart phone accelerometer
+
+*Homework Assignment*
+
+- TBA
 
 ##### Lecture 9: Unsupervised learning 
 
@@ -247,6 +255,9 @@ There are many cases where you will rely on data or services that aren’t store
 - Extracting elevation data from the Google Elevation API
 - Identifying the characteristics of farmers’ markets in the Southwest United States.
 
+*Homework Assignment*
+
+- TBA
 
 ##### Lecture 12:  Spatial Data and Maps
 
