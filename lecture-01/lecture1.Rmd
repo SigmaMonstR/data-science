@@ -1,9 +1,12 @@
 ---
-title: "Lecture 1: Preliminaries"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
-author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+title: 'Lecture 1: Preliminaries'
+author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---
