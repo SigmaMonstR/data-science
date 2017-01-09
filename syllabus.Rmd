@@ -1,6 +1,6 @@
 ---
-title: "PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017 "
-subtitle:  Jeff Chen (jc2817@georgetown.edu) and Dan Hammer ()
+title: "PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017"
+subtitle:  Jeff Chen ([jc2817@georgetown.edu](mailto:jc2817@georgetown.edu)) and Dan Hammer ([dan.hammer@georgetown.edu](mailto:dan.hammer@georgetown.edu))
 output:
   pdf_document: default
   html_notebook: default
@@ -43,7 +43,7 @@ problem sets will be penalized by 10% per day late. All problem sets will be sub
 
 ### Course Outline
 
-Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.
+Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.  The section outlines are subject to change up to one week before the lecture.  Please continue to review the syllabus throughout the course.
 
 #### Section 1: Fundamentals
 Data science is about designing and building data products that derive insight. This first section will focus on developing fundamental skills required to build effective products.
