@@ -68,6 +68,7 @@ The objective of the first lecture is to overcome the coefficient of static fric
 
 - Graphing photovoltaic energy data from the National Institute of Standard and Technology's Net Zero Energy Residential Test Facility
 
+
 ##### Lecture 2: Data manipulation
 
 The objective of this lecture is to present the most important and fundamental elements of data manipulation.  These core operations include sort, merge, reshape, and collapse.  We will also present loops through multiple rows or columns, and other alternatives to operate on partitions of data frames.
@@ -84,22 +85,8 @@ The objective of this lecture is to present the most important and fundamental e
 8. Looping through basic operations (bonus: same idea without loops)
 
 
-##### Lecture 3: Exploratory Data Analysis (EDA)
-The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
 
-*Lecture objectives*
-
-1. Understanding data structures
-2. Statistical measures
-3. Graph and visual analytics 
-
-*Example application*
-
-- Finding health coverage patterns using the US Census American Community Survey
-- Conducting analysis of missing values analysis  of weather anomalies from 1880 to Present using the National Oceanographic and Atmospheric Administration's GHCN-M
-
-
-##### Lecture 4: Functions and Control Structures 
+##### Lecture 3: Functions and Control Structures 
 Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
 
 *Lecture objectives*
@@ -115,6 +102,21 @@ Building upon basic data manipulation and high level analytical tasks, this sess
 *Homework Assignment*
 
 - TBA
+
+##### Lecture 4: Exploratory Data Analysis (EDA)
+The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
+
+*Lecture objectives*
+
+1. Understanding data structures
+2. Statistical measures
+3. Graph and visual analytics 
+
+*Example application*
+
+- Finding health coverage patterns using the US Census American Community Survey
+- Conducting analysis of missing values analysis  of weather anomalies from 1880 to Present using the National Oceanographic and Atmospheric Administration's GHCN-M
+
 
 
 ##### Section 2: Data Analysis + Modeling

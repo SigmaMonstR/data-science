@@ -1,0 +1,173 @@
+---
+title: "Test Script"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+##Demo
+To put EDA into context, we will rely upon the American Community Survey ([ACS](http://www.census.gov/programs-surveys/acs/)), which is one of the most relied upon public data sources in the United States. A survey that is produced by the U.S. Census Bureau, the ACS provides a highly detailed socioeconomic snapshot of households and communities, allowing for data-driven insight to inform public policy as well as business decisions. The data dictionary containing variable definitions and descriptions can be found [here](http://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict15.txt).
+
+For this lesson, we will examine ...
+
+Note: While each record is associated with a sampling weight, we will treat each record with equal weight. We will also only focus on one state in this exercise -- in this case, we have selected Iowa. The same analysis can be easily replicated for other states if not the entire United States.
+
+###Get data 
+```{r, echo=FALSE}
+setwd("/Users/sigmamonstr/Github/data-science/lecture-03")
+
+```
+```{r, warning=FALSE, message=FALSE}
+temp <- tempfile()
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip",temp, mode="wb")
+unz <- unzip(temp, exdir=getwd())
+acs <- read.csv(unz[1])
+```
+
+###Examine data structure
+
+```{r}
+colnames(acs)[1:20] #Show variable names 1 through 20 
+str(acs[,1:20] )#Show variable structure names 1 through 20 
+```
+
+While it is a good habit to learn to dig and search through the data dictionary, a simple script named 'check_dict.R' has been written to help sort through the dictionary with ease. This has been provided in the [Lecture 3 Github repository](https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-03). The script can be loaded using one of the two following commands that use the `source()` method to read in the script:
+
+```{r, message=FALSE, warning=FALSE}
+#Use if repository has been cloned onto your local drive
+  source("check_dict.R")
+
+#Use if repository has not been cloned
+  source("https://raw.githubusercontent.com/GeorgetownMcCourt/data-science/master/lecture-03/check_dict.R")
+```
+
+To use the function, simply type `check_dict([variable-name])` or `check_dict([variable-name], TRUE)` to have the results render as an HTML table. For example, what do "AGEP" and "ESR" represent? Using this function it becomes easier to check.
+```{r,  message=FALSE, warning=FALSE}
+check_dict("AGEP")
+check_dict("ESR")
+```
+
+###Extract Variables and Clean Up
+To make the analysis a bit more manageable, 14 variables have been selected. The analysis has been limited to ages 16 and above.
+
+```{r}
+var_list <- c("HICOV","RAC1P","MAR","SEX","ESR","CIT","AGEP","PINCP","POVPIP","WKHP","SCHL")
+df_extract <- acs[acs$AGEP>=16, var_list]
+
+```
+
+###Statistical check
+To get a quick overview of the distribution of values, we can use the `summary()` function to understand the distribution of values and spot data import errors.
+```{r, warning=FALSE, message=FALSE}
+summary(df_extract)
+```
+Right off the bat, 
+
+HICOV, SEX , RAC1P, MAR, SEX, ESR, CIT should be factors
+AGEP, PINCP, POVPIP, WKHP should be numeric
+
+
+```{r, eval=FALSE}
+#Label factors manually
+  check_dict("MAR")
+  df_extract$MAR <- factor(df_extract$MAR,labels=c("Married","Widowed","Divorced","Separated", "Never married or under 15 yrs old"))
+```
+
+```{r, warning=FALSE}
+#Loop through variables
+  factors_list <- c("HICOV", "SEX", "RAC1P", "MAR", "ESR", "CIT")
+  for(k in factors_list){
+    print(k)
+    a <- check_dict(k)
+    a <- a[grep("( \\.)",a[,3]),]
+    a$code <- as.numeric(substr(a$Definition,1, regexpr("( \\.)",a[,3])-1))
+    lab <- a[a$code %in% unique(df_extract[[k]]),c("Definition")]
+    df_extract[[k]] <- factor(df_extract[[k]],labels=lab)
+  }
+  
+```
+###Clean up
+```{r}
+df_extract$hs <- 0
+df_extract$hs[df_extract$SCHL>=21] <- 1
+
+df_extract$coverage <- NA
+df_extract$coverage[df_extract$HICOV == 2] <- 1
+df_extract$coverage[df_extract$HICOV == 1] <- 0
+```
+
+```{r, warning=FALSE, message=FALSE}
+##Comparisons relative to target variable
+prop.table(table(df_extract$hs, df_extract$coverage),1)
+
+# RAC1P		1	
+# Recoded detailed race code
+# 1 .White alone		
+# 2 .Black or African American alone	
+# 3 .American Indian alone		
+# 4 .Alaska Native alone		
+# 5 .American Indian and Alaska Native tribes specified; or American
+# .Indian or Alaska Native, not specified and no other races
+# 6 .Asian alone		
+# 7 .Native Hawaiian and Other Pacific Islander alone
+# 8 .Some Other Race alone		
+# 9 .Two or More Races		
+prop.table(table(df_extract$RAC1P, df_extract$coverage),1)
+
+# Employment status recode
+# b .N/A (less than 16 years old)
+# 1 .Civilian employed, at work
+# 2 .Civilian employed, with a job but not at work
+# 3 .Unemployed
+# 4 .Armed forces, at work
+# 5 .Armed forces, with a job but not at work
+# 6 .Not in labor force
+prop.table(table(df_extract$ESR, df_extract$coverage),1)
+
+#Marital status
+#1 .Married
+#2 .Widowed
+#3 .Divorced
+#4 .Separated
+#5 .Never married or under 15 years old
+prop.table(table(df_extract$MAR, df_extract$coverage),1)
+
+
+#Marital status
+#1 .Married
+#2 .Widowed
+#3 .Divorced
+#4 .Separated
+#5 .Never married or under 15 years old
+prop.table(table(df_extract$MAR, df_extract$coverage),1)
+
+```
+
+Age and coverage
+```{r, warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot(df_extract, aes(x=AGEP, y=coverage))+
+      geom_smooth() + labs(x = "Age (years)", y = "% Without Coverage  (1.0 = 100%)")
+```
+
+Four stories in four graphs
+```{r, warning=FALSE, message=FALSE}
+library(gridExtra)
+
+p1 <- ggplot(df_extract, aes(x=AGEP, y=coverage))+ 
+      geom_smooth() + labs(x = "Age (years)", y = "% Without Coverage (1.0 = 100%)")
+
+p2 <-ggplot(df_extract, aes(x=log(PINCP), y=coverage))+
+  geom_smooth() + labs(x = "log(Personal Income)", y = "% Without Coverage (1.0 = 100%)")
+
+p3 <- ggplot(df_extract, aes(x=WKHP, y=coverage))+
+  geom_smooth() + labs(x = "Hours Worked Per Week", y = "% Without Coverage (1.0 = 100%)")
+
+p4 <-  ggplot(df_extract, aes(x=POVPIP, y=coverage))+
+  geom_smooth() + labs(x = "Poverty Level (100 = at level)", y = "% Without Coverage (1.0 = 100%)")
+
+grid.arrange(p1,p2,p3,p4, ncol=2)
+```
