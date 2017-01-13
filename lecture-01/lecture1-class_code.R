@@ -20,7 +20,7 @@
 ##Vectors
   people <- c(134, 542, 324, 102, 402, 383, 853) #set x as a vector
   print(people)
-
+  asd <- c(1,2,3)
 ##Paste
   tot_people = sum(people) #Sum of x
   num_offices = length(people) #count number of elements
@@ -42,7 +42,8 @@
 
 
 #####Quick Exercise
-#Using the `people` and `units` variables, write a print statement that provides the average number of people served.
+#Using the `people` and `units` variables, write a print statement that
+#provides the average number of people served.
 #What would the total number of staff be if doubled? How about halved?
 
 ##Double
@@ -101,7 +102,7 @@
   cities[c(1,4)]
 
 #Obtain the third through fifth cities
-  cities[3:5]
+  cities[3:6]
 
 ###**Exercise: How to get cities with populations of > 2 million
 
@@ -121,12 +122,14 @@
 mat[2:3,c(1,3)]
 
 #####Data frames
-If a dataset will have more than one data type, consider using data frames. To create a data frame, use the `data.frame()` to put two or more vectors together. 
+#If a dataset will have more than one data type, consider using data frames. To create a data frame, use the `data.frame()` to put two or more vectors together. 
 
-  df <- data.frame(city = cities, population = pop, area = area)
+  df <- data.frame(city = cities, 
+                   population = pop, 
+                   area = area)
 
 #Being able to call a variable by name using the compact $ operator
-    df$cities
+    df$city
     df$population
 
 #Check column names

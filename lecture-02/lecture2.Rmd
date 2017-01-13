@@ -1,5 +1,5 @@
 ---
-title: "Lecture 2: Data Manipulation"
+title: "Lecture 2:  Data Manipulation"
 subtitle: "Intro to Data Science for Public Policy, Spring 2016"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
 output: 
@@ -8,8 +8,300 @@ output:
     toc: yes
 ---
 
+To most, the following looks like part of a speech:
 
-In this course, we will maingly work with data sets that are rectangular.  Rows of the data table are analytical units, like countries or voters.  Columns are attributes of the units, like GDP or gender.  An example of a data table is voter composition by county, with information on population, ethnicity, and economic characteristics.  The county is the analytical unit and the metric of population is an attribute.  This example data represents a basis data set.  Analysis of the data set requires *views* onto the table -- pulling out subsets for analysis.
+*Now, one place to start is serious financial reform.  Look, I am not interested in punishing banks.  I'm interested in protecting our economy.  A strong, healthy financial market makes it possible for businesses to access credit and create new jobs. It channels the savings of families into investments that raise incomes.  But that can only happen if we guard against the same recklessness that nearly brought down our entire economy. 
+We need to make sure consumers and middle-class families have the information they need to make financial decisions.  We can't allow financial institutions, including those that take your deposits, to take risks that threaten the whole economy.*
+
+But to a data scientist, it looks like an opportunity to structure a dataset:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(rvest)
+  library(plyr)
+  library(DT)
+speech <- "Now, one place to start is serious financial reform.  Look, I am not interested in punishing banks.  I'm interested in protecting our economy.  A strong, healthy financial market makes it possible for businesses to access credit and create new jobs. It channels the savings of families into investments that raise incomes.  But that can only happen if we guard against the same recklessness that nearly brought down our entire economy. We need to make sure consumers and middle-class families have the information they need to make financial decisions.  We can't allow financial institutions, including those that take your deposits, to take risks that threaten the whole economy. "
+ stripped <- gsub("[[:punct:]]","",speech)
+  stripped <- gsub("[[:digit:]]","",stripped)
+  stripped <- gsub("[^[:graph:]]"," ",stripped)
+  bag <- strsplit(stripped," ")
+  bag <- tolower(trimws(unlist(bag)))
+  
+  #Stopwords
+  stop1 <- read_html("http://www.lextek.com/manuals/onix/stopwords1.html")
+  
+  stopwords <- stop1 %>% 
+    html_nodes("pre") %>%
+    html_text() 
+  stoplist <- unlist(strsplit(stopwords,"\n"))
+  stoplist <- stoplist[stoplist!="" & nchar(stoplist)>1]
+  stoplist <- stoplist[4:length(stoplist)]
+  
+
+  vals <- count(bag)
+  vals <- vals[!(vals$x %in% stoplist),]
+  vals$len <- nchar(as.character(vals$x))
+  vals <- vals[vals$len>2,]
+  vals <- vals[order(-vals$freq),]
+  datatable(vals)
+```
+
+
+All the steps required to convert unstructured information into usable data can be done with a little bit of planning, technical imagination and data manipulation. Every little detail about the data needs to be considered and meticulously converted into a usable form. From a data format perspective, upper cases are not the same as lower cases. Contractions are not the same as terms that are spelled out. Punctuation affect spacing. Carriage returns and new line markers, while not visible in reading mode, are recorded. 
+
+Let's take one line from above and dissect the changes that need to be made:
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+example <- "We can't allow financial institutions, including those that take your deposits, to take risks that threaten the whole economy."
+print(example)
+```
+
+We then turn everything into lower case so all letters of the alphabet are read the same.
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+example <- tolower(example)
+print(example)
+```
+
+Then, we get rid of punctuation by substituting values with empty quotations ('""').
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+example <- gsub("[[:punct:]]","", example)
+print(example)
+```
+
+Each space between each word can be used as a 'delimiter'. What that means is we can break apart words into values in a vector or list. 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+example <- unlist(strsplit(example, " "))
+print(example)
+```
+
+There are words in there that don't add much value as they are commonplace and filler. In text processing, these words are known as *stopwords*. They're not perfect, but in each domain, data scientists typically build a customized list. Below are the remaining words that did not match the stopword list.
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+  example <- example[!(example %in% stoplist)]
+  print(example)
+```
+
+From that data, we can aggregate the data into a form that is meaningful to answer a research question. Since the words have been standardized, the data can now be merged and compared with other polished data. 
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+  count(example)
+```
+
+In more complex analyses, a document-term matrix can be developed, which essentially a matrix of word counts for each unique word and document combination.
+
+In this section, we'll cover basics of data manipulation and cleansing. We'll start off by addressing data manipulation as a process. Then, we will learn about processing at the data element or data value level before moving onto processing steps for data frames and matrices. The lesson will then wrap up with some rudimentary processing of State of the Union speeches into easy to analyze formats.
+
+##Data manipulation as a process
+
+##Manipulating values
+What do the following three data points have in common? 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+print(c("Captain's Log, Stardate 1513.8. Star maps reveal no indication of habitable planets nearby. Origin and purpose of the cube still unknown. We've been here, held motionless, for 18 hours."," 1,20", "datafile_2010.json"))
+```
+
+Each value contains data locked in a string. 
+
+- The first value is a full sentence that can benefit from *feature extract* or creation of new variables such as the date (*stardate* = 1513.8), the type of entry (*type* = "captain's log"), habital planets status (*habital* = FALSE), or idle time (*idle_time* = 18).
+- The second value is a numerical value, but is coded as a string due to the leading white space before the "1" and the comma in place of a period.
+- The third value is a file name that contains possibly the year that the datafile contains.
+
+These scenarios are quite common. Whether a numerical value is read into a programming language as a string or values need to be extracted, more often than not, the type of value manipulation is string-based. Thus, in this section, we'll learn a few tricks using *regular expressions* or RegEx as well as rely on string operations such as `regexpr()`, `grep()` and `substr()`.
+
+###Regular Expressions
+The simplest form of string manipulation is string or pattern find and replace. In the example below, white spaces before and after each value are problematic in addition to the `$` and the `,`. 
+
+```{r}
+price_data <- c(" $1,23", " $2,5 ", "$5,21")
+print(price_data)
+
+```
+
+Enter `gsub()`, a simple way to find and replace matched strings. The syntax is as follows:
+```{r,eval=FALSE}
+gsub("[pattern-to-be-searched]","[replacement-pattern]", [data-goes-here])
+```
+
+In addition we can use a simple method to trim white spaces:
+```{r,eval=FALSE}
+trimws([data-goes-here])
+```
+
+To replace the commas and dollar signs, the following commands can be used. Notice that the period and dollar sign are preceded by two backslashes -- known as *escape values*. In R and in many programming languages, searching for characters rely on *special characters*  to conduct complex processes. As it turns out `.` is short hand for 'match any single character' whereas `$` denotes 'match the end of a string'. These are the foundations of *regular expressions*.
+```{r}
+#Replace comma with period
+  price_data <- gsub(",","\\.",price_data)
+  print(price_data)
+
+#Replace dollar sign with blank
+  price_data <- gsub("\\$","",price_data)
+  print(price_data)
+  
+#Trim white space
+  price_data <- trimws(price_data)
+  print(price_data)
+  
+#Convert into numeric
+  price_data <- as.numeric(price_data)
+  print(price_data)
+```
+
+We can think about regular expressions in terms of the R-specific functions that support string manipulation, escape sequences, position matching, and character classes.
+Regular expressions are patterns that describe a pattern in a string or part of a string (substring).
+
+###Functions
+There six metods that will make string manipulation easier. They include:
+
+- `grep()`: Returns either the index position of a matched string or the string containing the matched portion.
+- `gsub()`: Searches and replaces patterns in strings.
+- `regexpr()`: Returns the character position of a pattern in a string.
+- `strsplit()`: Splits strings into a list of values based on a delimiter
+- `substr()`: Extract substring from a string based on string positions.
+- `regmatches()`: Extract substring using information from `regexpr()`
+
+Let's apply these methods to the following:
+```{r}
+laws <- c("Dodd-Frank Act", "Glass-Steagall Act", "Hatch Act", "Sarbanes-Oxley Act")
+```
+
+Using `grep(), we'll return the index positions of laws that are named after two people, which is often denoted by `-`. 
+
+```{r}
+grep("-", laws)
+```
+
+`regexpr()` is similar to `grep()` except that it is used to find the position of a match string within each string. `grep()` returns the position within a vector or list. If we run the same search for `-`, `regexpr()` returns two sets of attributes. The first indicates the position of the first character that is matched in each string (e.g. 5 indicates that the `-` value is the fifth character is the first string) whereas the second set of attributes indicates whether there is a match. Positive values indicate matches and a value of -1 indicates no match.
+
+```{r}
+  regexpr("-", laws)
+```
+
+By default, `grep()` returns index positions, but can be changed to return matched values by adding in the argument `value = TRUE`.
+```{r}
+grep("-", laws, value = TRUE)
+```
+
+To keep only the name of the laws without the redundancy of the word "Act", we can use `gsub()`. 
+```{r}
+  laws <- gsub(" Act","", laws)
+  print(laws)
+```
+
+Using `substr()`, substrings or parts of strings can be extracted based on their position. To get the first two letters of each law, we can do the following:
+
+```{r}
+substr(laws,1,2)
+```
+
+Or if we would like to obtain the second name in each law, we could use a combination of `regexpr()` and `regmatches()`. Below, we use a more advanced expression (to be covered later in this chapter) to extract text that follows the pattern `"-\\w+"` or hyphen followed by a word.
+
+```{r}
+regmatches(laws,regexpr("-\\w+",laws))
+```
+
+Lastly, `strsplit()` can be used to create a list of all names that have been used in laws, simply by using the `-` as a separator or delimiter. 
+
+```{r}
+  strsplit(laws,"-")
+```
+
+###Syntax
+####Escaped characters
+As touched upon before, there are characters that need to be represented differently in the code in order for one to use them. A backslash makes it possible to pick up on specific characters:
+
+- `\n`: new line
+- `\r`: carriage return
+- `\'`: single quote when strings are enclosed in single quotes (`'Nay, I can\'t'`)
+- `\"`: double quote when strings are enclosed in double quotes (`"Nay, I can\"t either"`)
+
+In other cases, double backslashes should be used:
+
+- `\\.`: period. Otherwise, un-escaped periods are used for wildcard matches.
+- `\\$`: dollar sign. Otherwise, indicates to match the end of a string.
+
+####Position matching
+Regex builds in functionality to search for patterns based on position of a substring in a string, such as at the start or end of a string. There are quite a few other position matching patterns, but the following two are the workhorses.
+
+- `$`: End of string
+- `^`: Start of string
+
+To demonstrate these patterns, we'll apply `grep()` to three headlines from the BBC.
+```{r}
+  headlines <- c("May to deliver speech on Brexit", "Pound falls with May's comments", "May: Brexit plans to be laid out in new year")
+  print(headlines)
+
+#Beginning
+  grep("^May", headlines, value = TRUE)
+  
+#End
+  grep("Brexit$", headlines, value = TRUE)
+```
+
+
+####Character Classes
+Character classes are particularly helpful with matching values belonging to specific classes of characters. In R, these are heavily relied upon. Below are a few of the most used:
+
+- `[:punct:]`: Punctuation
+- `[:alpha:]`: Alphabetic characters
+- `[:digit:]`: Numerical values. Can be interchangeably used with `\d` or [0-9]
+- `[:alnum:]`: Alphanumeric characters
+- `[:space:]`: Spaces such as tabs, carriage returns, etc.
+- `[:graph:]`: Human readable characters
+- `\\w`: Word characters
+- `\\W`: Not word characters
+- `\\s`: Space
+- `\\S`: Not space
+
+Using the first paragraph from a National Bureau of Economic Research [on recessions](http://www.nber.org/cycles/dec2008.html), what if we replaced certain values based on their character class?
+```{r}
+para <- "The Business Cycle Dating Committee of the National Bureau of Economic Research met by conference call on Friday, November 28. The committee maintains a chronology of the beginning and ending dates (months and quarters) of U.S. recessions. The committee determined that a peak in economic activity occurred in the U.S. economy in December 2007. The peak marks the end of the expansion that began in November 2001 and the beginning of a recession. The expansion lasted 73 months; the previous expansion of the 1990s lasted 120 months."
+  print(para)
+
+#Remove any punctuation
+  gsub("[[:punct:]]", "",para)
+
+#Mad libs for numbers
+  gsub("[[:digit:]]", "__",para)
+  
+```
+
+
+####Quantifiers
+Sometimes, matching is done on length of patterns. The following allow for setting specific or loose parameters on pattern lengths.
+
+- `{n}`: match pattern n times
+- `{n, m}`: match pattern at least n-times, but not more than m times.
+- `{n, }`: match at least n times
+- `*`: Wildcard, or match at least 0 times
+- `+`: Match at least once
+- `?`: Match at most once
+
+
+```{r}
+dates <- c("In the year 2010", "In the year 2000", "In the year 50000", "Inauguration Day is  Jan 20, 2017")
+
+#Match 0 thrice
+  grep("0{3}", dates, value = TRUE)
+
+#Match Jan 20, 2017
+  grep("[[:alpha:]]{3}\\s+[[:digit:]]{2}\\,\\s[[:digit:]]{4}", dates, value = TRUE)
+  
+  #or
+  
+  grep("\\w+\\s+\\d+\\,\\s\\d{4}", dates, value = TRUE)
+```
+
+
+#### Exercises 2.1
+
+Personally identifiable information or PII is often a barrier to sharing information For the following financial record, anonymize records by removing age and name using `gsub()` and `regmatches()` to extract the amount of money John owes the bank.
+
+```{r}
+statement <- "John (SSN: 012-34-5678) owes $1004 to the bank located at 49-29 Pewter Street."
+```
+
+
+##Data Frame Operations
+Moving onto the more macro-scale, rows of the data table are analytical units, like countries or voters.  Columns are attributes of the units, like GDP or gender.  An example of a data table is voter composition by county, with information on population, ethnicity, and economic characteristics.  The county is the analytical unit and the metric of population is an attribute.  This example data represents a basis data set.  Analysis of the data set requires *views* onto the table -- pulling out subsets for analysis.
 
 Suppose we wanted to rank all Michigan counties by share of minority voters.  Or suppose we wanted to aggregate the counties to find the U.S. state with the highest per capita income.  These *views* on the data table require operations to pivot, merge, aggregate, and sort the raw data.  
 
@@ -75,7 +367,7 @@ X[order(X$t, X$vote), ] # order records, first by time period and then by vote
 X[order(X$t, -X$vote), ] # order records, first by time period and then dec. by vote
 ```
 
-#### Exercises 2.1
+#### Exercises 2.2
 
 1. Extract records with income greater than 120 in the second time period
 2. Extract records with vote greater than 5 and income less than 51
@@ -139,7 +431,7 @@ Consider this function to collapse the data frame by `id` to create a new data f
 aggdata[c("id", "income", "vote")]
 ```
 
-#### Exercises 2.2
+#### Exercises 2.3
 
 1. Load the [`iris`](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/iris.html) dataset using the `datasets` package.
 2. Calculate the average and maximum sepal length for each Iris species. (**Bonus**: Write the commands without error messages.) 
@@ -171,10 +463,119 @@ df <- rename(df, c("Group.1"="region", "x"="total.area"))
 df[order(df$total.area, decreasing=TRUE), ]
 ```
 
-#### Exercises 2.3
+#### Exercises 2.4
 
 1. Use the [`state`](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/state.html) datasets to identify the state divisions (e.g., New England) with the highest murder rates in 1976.
 2. What was the recorded population in 1977?
 
 
+##An Applied Example
+Political scientists and journalists often times count the number of times Congress applauds the President when delivering the State of the Union (SOTU) Address as well as analyzes the number of times words are used. While it is not a clear science, applying data manipulation techniques to create an analyzable dataset can certainly be fascinating. To illustrate a real clean up workflow with some data manipulation, we will use the SOTU transcripts from the Obama Administration. An interesting attribute of the transcripts are that they reflect the number of  applause breaks as planned for by the speechwriters and policymakers as opposed to the actual number. Using this data, we will answer the following three questions: 
 
+1. How many breaks were planned in 2010 vs 2016?
+2. What were the top 10 words used in each of those state of the unions?
+3. Which words experienced relatively greater use?
+
+The data is available [here](https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-02/data).
+
+```{r, echo=FALSE}
+ #setwd("/Users/jeff/Documents/Github/data-science/lecture-02/data")
+```
+
+Be sure to download the data and set the working directory first.
+```{r, eval=FALSE}
+setwd("[your directory here]")
+```
+
+
+####How many planned applause breaks in 2010 versus 2011?
+Looking at the data, the speechwriters included queues for applause as denoted as `(Applause.)`. An example can be seen below:
+
+```{r}
+speech <- readLines("sotu_2010.txt")
+speech <- speech[speech!=""]
+speech[12]
+```
+
+Using that piece of information, we can write a relatively short set of steps to match the *Applause* pattern. 57 breaks were planned in 2010, which is 11 more than the 46 breaks planned in 2016. While the same code was run two separate times, we will learn in a subsequent chapter how to automate repetitive tasks.
+```{r}
+
+#2010
+  #read in lines from the text
+  speech10 <- readLines("sotu_2010.txt")
+
+  #remove any blank lines
+  speech10 <- speech10[speech10!=""]
+  
+  #get string position of each Applause (returns positive values if matched)
+  ind <- regexpr("Applause", speech10)
+  sum(attr(ind,"match.length")>1)
+
+#2016
+  speech16 <- readLines("sotu_2016.txt")
+  speech16 <- speech16[speech16!=""]
+  ind <- regexpr("Applause", speech16)
+  sum(attr(ind,"match.length")>1)
+```
+
+
+####What were the top words in 2010 vs 2016
+
+```{r}
+#2010
+  #Clean up and standardize values
+  clean10 <- gsub("[[:punct:]]","",speech10)
+  clean10 <- gsub("[[:digit:]]","",clean10)
+  clean10 <- gsub("[^[:graph:]]"," ",clean10)
+  
+  #convert into bag of words
+  bag10 <- strsplit(clean10," ")
+  bag10 <- tolower(trimws(unlist(bag10)))
+  
+  #Count the number of times a word shows up
+  library(plyr)
+  counts10 <- count(bag10)
+  counts10$len <- nchar(as.character(counts10$x))
+  counts10 <- counts10[counts10$len>2,]
+  counts10 <- counts10[order(-counts10$freq),]
+  head(counts10, 10)
+  
+#2016
+  clean16 <- gsub("[[:punct:]]","",speech16)
+  clean16 <- gsub("[[:digit:]]","",clean16)
+  clean16 <- gsub("[^[:graph:]]"," ",clean16)
+  
+  bag16 <- strsplit(clean16," ")
+  bag16 <- tolower(trimws(unlist(bag16)))
+
+  counts16 <- count(bag16)
+  counts16$len <- nchar(as.character(counts16$x))
+  counts16 <- counts16[counts16$len>2,]
+  counts16 <- counts16[order(-counts16$freq),]
+  head(counts16,10)
+```
+Looking at the words above, it feels a bit unsatisfying. To rectify this, we'll scrape a list of stopwords from lextek.com. To do this, we'll use the library `rvest` to take advantage of the webpage's HTML `<pre>` tags and store the stopwords as a vector `stoplist`.
+
+```{r}
+library(rvest)
+  #Stopwords
+  stop1 <- read_html("http://www.lextek.com/manuals/onix/stopwords1.html")
+  
+  stopwords <- stop1 %>% 
+    html_nodes("pre") %>%
+    html_text() 
+  stoplist <- unlist(strsplit(stopwords,"\n"))
+  stoplist <- stoplist[stoplist!="" & nchar(stoplist)>1]
+  stoplist <- stoplist[4:length(stoplist)]
+
+```
+
+We then can remove the stopwords list to distill the list to more accurate words. 
+```{r}
+  counts10 <- counts10[!(counts10$x %in% stoplist),]
+  counts16 <- counts16[!(counts16$x %in% stoplist),]
+  
+  head(counts10,10)
+  head(counts16,10)
+```
+At this point, we've arrived at words that are more commonly presidential sounding.
