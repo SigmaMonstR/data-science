@@ -1,17 +1,20 @@
 ---
-title: "Lecture 2:  Data Manipulation"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
-author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+title: 'Lecture 2: Extract-Transform-Load'
+author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---
 
 To most, the following looks like part of a speech:
 
-*Now, one place to start is serious financial reform.  Look, I am not interested in punishing banks.  I'm interested in protecting our economy.  A strong, healthy financial market makes it possible for businesses to access credit and create new jobs. It channels the savings of families into investments that raise incomes.  But that can only happen if we guard against the same recklessness that nearly brought down our entire economy. 
-We need to make sure consumers and middle-class families have the information they need to make financial decisions.  We can't allow financial institutions, including those that take your deposits, to take risks that threaten the whole economy.*
+> Now, one place to start is serious financial reform.  Look, I am not interested in punishing banks.  I'm interested in protecting our economy.  A strong, healthy financial market makes it possible for businesses to access credit and create new jobs. It channels the savings of families into investments that raise incomes.  But that can only happen if we guard against the same recklessness that nearly brought down our entire economy. 
+We need to make sure consumers and middle-class families have the information they need to make financial decisions.  We can't allow financial institutions, including those that take your deposits, to take risks that threaten the whole economy.
 
 But to a data scientist, it looks like an opportunity to structure a dataset:
 
@@ -42,7 +45,7 @@ speech <- "Now, one place to start is serious financial reform.  Look, I am not 
   vals$len <- nchar(as.character(vals$x))
   vals <- vals[vals$len>2,]
   vals <- vals[order(-vals$freq),]
-  datatable(vals)
+  head(vals)
 ```
 
 
@@ -163,7 +166,7 @@ Let's apply these methods to the following:
 laws <- c("Dodd-Frank Act", "Glass-Steagall Act", "Hatch Act", "Sarbanes-Oxley Act")
 ```
 
-Using `grep(), we'll return the index positions of laws that are named after two people, which is often denoted by `-`. 
+Using `grep()`, we'll return the index positions of laws that are named after two people, which is often denoted by `-`. 
 
 ```{r}
 grep("-", laws)
@@ -211,7 +214,7 @@ As touched upon before, there are characters that need to be represented differe
 - `\n`: new line
 - `\r`: carriage return
 - `\'`: single quote when strings are enclosed in single quotes (`'Nay, I can\'t'`)
-- `\"`: double quote when strings are enclosed in double quotes (`"Nay, I can\"t either"`)
+- `\"`: double quote when strings are enclosed in double quotes 
 
 In other cases, double backslashes should be used:
 
@@ -520,7 +523,7 @@ Using that piece of information, we can write a relatively short set of steps to
 
 
 ####What were the top words in 2010 vs 2016
-
+To do this, we'll need to do some basic cleaning to start (e.g. remove punctuation, remove numbers, remove non-graphical characters like `\r`), parse the words into a vector of words or 'bag of words', and aggregate words into word counts.
 ```{r}
 #2010
   #Clean up and standardize values
@@ -533,9 +536,9 @@ Using that piece of information, we can write a relatively short set of steps to
   bag10 <- tolower(trimws(unlist(bag10)))
   
   #Count the number of times a word shows up
-  library(plyr)
-  counts10 <- count(bag10)
-  counts10$len <- nchar(as.character(counts10$x))
+  counts10 <- aggregate(bag10, by=list(bag10), FUN=length)
+  colnames(counts10) <- c("word","freq")
+  counts10$len <- nchar(as.character(counts10$word))
   counts10 <- counts10[counts10$len>2,]
   counts10 <- counts10[order(-counts10$freq),]
   head(counts10, 10)
@@ -548,8 +551,9 @@ Using that piece of information, we can write a relatively short set of steps to
   bag16 <- strsplit(clean16," ")
   bag16 <- tolower(trimws(unlist(bag16)))
 
-  counts16 <- count(bag16)
-  counts16$len <- nchar(as.character(counts16$x))
+  counts16 <- aggregate(bag16, by=list(bag16), FUN=length)
+  colnames(counts16) <- c("word","freq")
+  counts16$len <- nchar(as.character(counts16$word))
   counts16 <- counts16[counts16$len>2,]
   counts16 <- counts16[order(-counts16$freq),]
   head(counts16,10)
@@ -572,10 +576,11 @@ library(rvest)
 
 We then can remove the stopwords list to distill the list to more accurate words. 
 ```{r}
-  counts10 <- counts10[!(counts10$x %in% stoplist),]
-  counts16 <- counts16[!(counts16$x %in% stoplist),]
+  counts10 <- counts10[!(counts10$word %in% stoplist),]
+  counts16 <- counts16[!(counts16$word %in% stoplist),]
   
   head(counts10,10)
   head(counts16,10)
 ```
-At this point, we've arrived at words that are more commonly presidential sounding.
+
+At this point, we've arrived at words that are more presidential sounding, but can still be whittled down to the core message. But that can be left for another day.
