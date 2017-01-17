@@ -1,131 +1,219 @@
 ---
-title: "Lecture 5: Introduction to Supervised Learning"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
-author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+title: 'DRAFT - Lecture 5: Introduction to Supervised Learning'
+author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  html_document:
     theme: journal
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 
+##Approaching Supervised Learning
+Supervised learning is relied upon everyday, from the social and natural sciences to web development to field operations. Given labeled examples (also known as dependent variables or target variables), a supervised learning task involves *training* a function to mathematically weigh each *feature* in an input set (also known as independent variables or predictors) to replicate the labels (also known as dependent variable or target) for each record in the data. The label can be a continuous variable (e.g. dollar amounts, amount of geographic space, test scores, etc.) or a discrete variable (e.g. yes/no, up/down, walk/jog/run, low/medium/high). The term "supervised learning" comes from the type of task where an algorithm is calibrated based clear, labeled examples and uses objective functions to minimize error or maximize information gain. 
 
-The role of data in public policy can and should move beyond just scatter plots and trend lines. It can help uncover patterns so that decision makers can be informed in strategic decision making, be directly applied into the field, and drive change or help maintain stability. 
+A common examples include:
+
+1. __Public Health__. Classifying whether a restaurant is at [risk of violating city health regulations](https://www.drivendata.org/competitions/5/) using restaurant reviews as an input.
+2. __Labor__. Estimating the [impact of minimum wage](http://davidcard.berkeley.edu/papers/njmin-aer.pdf) on business health.
+3. __Environment__. Predicting whether a storm detection signature as identified in weather radar will result in property damage.
+4. __Housing__. Estimating the sales price of houses on the real estate market in order to estimate the impact of opening a landfill.
+5. __Health__. Estimating the proportion of one's day that is physically active using smartphone accelerometer data. 
+6. __Operations__. Forecasting call volumes at a call center to help set appropriate staffing levels to meet citizen demand.
+
+Supervised learning is much like taking a course on any academic subject. Let's take the example of a calculus class. Students are taught concepts and the application of those concepts through readings and homeworks. Each concept has a structure that is learned by examining and working through practice problems that are representative of that concept. For example, when working with derivatives, the first derivative of $f(x) = x^2$ is $f'(x) = 2x$ and its second derivative is $f''(x) = 2$. Under certain conditions, certain mathematical functions such as exponential and logarithmic functions behave differently, and the rules and patterns for handling those derivatives need to be taken into account in application. Eventually, the professor will schedule and administer a midterm or final covering all the different learned concepts. In preparation, a series of practice exams are typically provided to students as a way to test their knowledge. A practice exam is most helpful when the  material has already been well-studied and is taken only once, using examples that were answered incorrectly as an opportunity to provide insight into gaps in knowledge. Otherwise, repeatedly taking the same practice exam will provide a false sense of mastery as a student takes and re-takes and learns the answers as opposed to the eccentricities of the subject at hand. The real test is the actual exam, in theory indicating how well concepts were understood and re-applied.
+
+There are parallels between taking a class and supervised learning tasks. In a classroom setting, homeworks and practice tests are used to build applied skills to accomplish specific tasks, whereas the actual exam is used to determine precisely how robust those skills are. In supervised learning, the data is often times partitioned into two or more parts, then an algorithm is *trained* on at least one partition to learn underlying patterns, then the learned rules and weights are applied to the remaining part of the *hold out* sample to *test* the accuracy of the algorithm. 
+
+Extending this basic framework, we can break a supervised learning problem into design considerations and algorithmic considerations.
+
+1. _An intended application_. Applications are concerned with what one would like to infer or do with the data.  A well-formulated data-enable question is required, one that is framed and quantified by concrete, well-defined outcome that can be predicted based on quantitative information. For example, "Which of the lawsuits in the backlog are most likely to be lost?", "Which prospective patients will require advanced medical treatment in the next year?", "How many ambulances will need to be available to address medical incidents over the next week?". How a question is formulated is dependent on the intended use of the data, which can split into inferential and prediction tasks:  
+    - _Estimation and inference_. The former focuses on quantifying relationships in terms of coefficients or weights (e.g. a 1% increase in employment is associated with a 0.5% increase in highway traffic volume), often times relying on linear regression methods.  
+    - _Prediction_. The latter is focused on maximizing reliability and accuracy of a prediction as opposed to understanding the precise contribution of individual input features. The goal is to create a sure-fire, highly accurate function that can be relied upon to make solid decisions.  
+2. _A labeled dataset furnished with input features_. Each record should be furnished with labels of what needs to be predicted. Labels can take on any structured form such as discrete or continuous values.  
+    - _Data Pipeline_. If the data-enabled question will be repeatedly asked, it is worth examining the reliability of the *data pipeline* and whether new data will be available when the question is asked in the future. For example, more strategic problems like a 10-year population forecast may only be conducted every year requiring data once a year, whereas more operational problems like restaurant inspections may be done on a daily basis requiring new data in order to detect new patterns every day.  
+3. _A solvable algorithm or technique_. Techniques are concerned with the treatment of the type of labeled data, which has particular influence on the structure and assumptions of mathematical operations. In supervised learning, there are two broad categories of algorithms, including:  
+    - _Regression_. A number of the of the examples may depend on *regression*, which is a statistical method for estimating the relationship between a set of features or variables. Regression problems are formulated with a dependent variable that is trained or conditioned upon independent variables with the goal of estimating the expected value of given a set of variables. of calibrating *coefficients* or *weights*, which are used to not only produce a prediction of the dependent variable but infer the contribution of an independent variable if  which is a class of algorithms that estimate the expected value of a target conditioned upon  (e.g. examples #2 and #4). Common examples of regression models include Ordinary Least Squares (covered in this chapter) and Logistic Regression (covered in Chapter 8).  
+    - _Classifiers_.  The remaining are *classifiers*, or algorithms designed to predict membership to discrete categories.  
+    [hyperparameters]
+    
+In addition, algorithms typically are evaluated on [x]  
+
+4. _Cross Validation_. Supervised learning problems usually involve partitioning data to help with optimizing algorithm for accuracy and reduce the chance of *overfitting*, a condition in which an algorithm learns patterns that are noise as opposed to signal thereby leading to misleading inferences. Partitioning involves splitting the data into two or more sets where one method is "held out" from training algorithms and the other set is used for validating and tuning results. Data scientists commonly rely on two partition procedures: 
+    - _Train/Validate/Test_ assumes that the data are partitioned into three sets. The *train* set is used to initially calibrate the algorithm. The *validation* set is used to help tune hyperparameters and select features. Typically, the algorithm that is calibrated in the training stage is used to predict values in the validation set and as this set contains labels, accuracy can be assessed using appropriate measures such as RMSE or AUC. Once it is determined the algorithm is as good as it can be, the trained algorithm is then used to score a set of remaining examples in the *test* set in order to assess its generalizability. These three samples may be partitioned in the following proportions:  train = 70%, validate = 15%, and test = 15%. 70/15/15 for short. 
+    - _K-Folds Cross Validation_. A train/validate/test design can be extended for more exhaustive model tuning. K-folds cross validation involves partitioning the data into $k$ partitions. Then, combine $k - 1$ partitions to train an algorithm and predict the values for the $k^{th}$ part. Then, cycle through combinations of $k-1$ partitions until each of the $k$ holdout samples have been predicted. Upon doing so, the prediction accuracy can be calculated for each of the $k$ partitions as well as for all $k$ partitions together. Partitions that yield poorer accuracy relative to other partitions help provide a clue as to when an algorithm is insufficient or requires further tuning.  For exhaustive testing, $k = n - 1$ such that $n - 1$ models are trained such that each of the $n$ records in a data set are predicted once.
+    
+For data where no clear labels are available, we may rely on "unsupervised learning" -- a class of tasks that used to find patterns, structure, and membership using input features alone. Unsupervised learning encompasses clustering (e.g. values may naturally fall into clusters in n-dimensional space) and dimensionality reduction.  We will cover unsupervised learning in Lecture 9.
 
 
-The formulation of data science problems can take on a number of forms. 
+### 4 - Model and Evaluate
 
-- Public Safety.
-- Labor. 
-- Environment.
-
-
-##Supervised Learning
-###What is it?
-[text goes here]
-###Structure of a supervised learning project
 - Target variables
 - Input variables
 - Objective function and evaluation measures
-- model experiment design
-- Cross validation versus train/validate/test
+- AUC
+- RMSE
 
-###Regression versus classifiers
-[text goes here]
+-
 
-###Ordinary Least Squares (OLS)
-[text goes here]
+In this section, we'll start with [a simple weak]
 
-####Graphical Illustration
-[text goes here]
+## k-Nearest Neighbors (kNN)
+k-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
 
-####Formulation
-[text goes here]
+$$ \text{distance} = \sqrt{\sum(x_{ij} - x_{ij})^{2} }$$ 
 
-####Assumptions
-[text goes here]
+where $j$ is an index of features in $x$ and $i$ is an index of records (observations). For each $i$, a neighborhood of $k$ records can be determined using the ranked  ascending distance to all other records. The value of $y$ for record $i$ can be approximated by the $k$ neighbors that surround $i$. For discrete target variables, $y_i$ is determined using a procedure called *majority voting* where the most prevalent value in the neighborhood around $i$ is assigned. For continuous variables, the neighborhood mean is used to approximate $y_i$.
 
-```{r}
-#
+
+How does one implement this exactly? To show this process, pseudocode will be relied upon. It's an informal language to articulate and plan the steps of an algorithm or program, principally using words and text as opposed to formulae. There are different styles of pseudocode, but the general rules are simple: indentation is used to denote a dependency (e.g. control structures). For all techniques, we will provide pseudocode, starting with KNN:
+
+#####Pseudocode
+```
+kNN( k, set, y, x){
+  Pre-Process (optional):
+    > Transform or standardize all input features
+    
+  Loop through each `item` in `set`{
+    > Calculate vector of distances in terms of x from `item` to all other items in `set` 
+    > Rank distance in ascending order 
+    
+    if target `y` is continuous:
+      > Calculate mean of `y` for items ranked 1 through k
+    else if target is discrete:
+      > Calculate share of each discrete level for items ranked 1 through k
+      > Use majority voting to derive expected value 
+  }
+}
 ```
 
-####In Action (in R)
-- Linear models in R
-```{r}
-#
+The procedure described above yields the results for just one value of $k$. However, kNNs, like many other algorithms, are an iterative procedure, requiring tuning of *hyperparameters* -- or values that are starting and guiding assumptions of a model. In the case of kNNs, $k$ is a hyperparameter and we do not precisely know the best value of $k$. Often times, tuning of hyperparameters involve a *grid search*, which is a process that involves systematic testing of along equal intervals of the hyperparameter.
+
+Below, a grid search has been conducted for a kNN along intervals of a $log_10$ scale. The large points represent a training set and the surrounding area has been *scored* or predicted to show the shape of the region corresponding each value of $k$. 
+
+```{r, fig.height=4, echo=FALSE, warning=FALSE, message = FALSE}
+  library(ggplot2)
+  library(class)
+  set.seed(100)
+  n <- 150
+  df <- data.frame(y = c(rep(1, n/3),rep(0, n/3),rep(1, n/3)),
+                 x1 = c(rnorm(n/3, -0.7, 1), rnorm(n/3, 1, 0.7), rnorm(n/3, 0.5, 1)),
+                 x2 = c(rnorm(n/3, 0, 1.5), rnorm(n/3, 0, 1), rnorm(n/3, -3.5, 0.8)),
+                 sample = round(runif(n)))
+
+  test <- expand.grid(x1 = seq(-3, 3, 0.1), x2 = seq(-5,3, 0.05))
+  g0 <- ggplot() +
+          geom_point(aes(x = x1, y = x2, colour = factor(y)), data = df, alpha = 1, size = 3, shape = 19) +
+      xlim(-3, 3) + ylim(-5, 3)  + ggtitle("Two classes")  +theme(plot.title = element_text(size = 11))
+  
+  for(i in c(1, 10, 100)){
+    res <- knn(df[,2:3], test, df$y, k = i, prob=TRUE)
+    test$y <- as.character(res)
+    test$prob <- as.numeric(attr(res,"prob"))
+   
+    res2 <- knn(df[,2:3], df[,2:3], df$y, k = i)
+    est <- table(df$y,res2)
+    tpr <- est[2,2]/sum(df$y)
+    tnr <- est[1,1]/sum(df$y==0)
+    
+    g <- ggplot() +
+          geom_point(aes(x = x1, y = x2, colour = factor(y)), data = test, alpha = 0.15, size = 0.7, shape = 15) +
+          geom_point(aes(x = x1, y = x2, colour = factor(y)), data = df, alpha = 1, size = 2, shape = 19) +
+          xlim(-3, 3) + ylim(-5, 3) + ggtitle(paste0("k = ", i, "; TPR = ", tpr, "; TNR = ", tnr)) +theme(plot.title = element_text(size = 11))
+    assign(paste0("g",i), g)
+    test <- test[,c(-3,-4)]
+    
+  }
+  
+  library(gridExtra)
+  grid.arrange(g0, g1, g10, g100)
+    
 ```
 
-####Exporting results tables
-```{r}
-#
+#####Which K is the right K?
+The accuracy of a KNN model is principally dependent on finding the right value of $k$ directly determines what enters the calculation used to predict the target variable. Thus, to optimize for accuracy, try multiple values of $k$ and compare the resulting accuracy values. It is helpful to first see that when $k = n$, kNNs are simply the sample statistic (e.g. mean or mode) for the whole dataset. Below, the True Positive Rate (TPR, blue) and True Negative Rate (TNR, green) have been plotted for values of $k$ from 1 to $n$. The objective is to ensure that there is a balance between TPR and TNR such that predictions are accurate. Where $k > 20$, the TPR is near perfect. For values of $k < 10$, TPR and TNR are more balanced, thereby yielding more reliable and accurate results.
+
+
+```{r, fig.height=2, echo=FALSE, warning=FALSE, message = FALSE}
+  library(ggplot2)
+  library(class)
+  set.seed(100)
+
+  train <- df[df$sample==0, 1:3] 
+  test <- df[df$sample==1, 1:3] 
+ 
+  calc <- data.frame()
+  for(i in seq(1,n,1)){
+    res <- knn(train[,2:3], test[,2:3], train$y, k = i)
+    est <- table(test$y,res)
+    tpr <- est[2,2]/sum(test$y)
+    tnr <- est[1,1]/sum(test$y==0)
+    calc <- rbind(calc, data.frame(k = i, tpr = tpr, tnr = tnr))
+  }
+  ggplot() + 
+    geom_line(aes(x = k, y = tpr), data = calc, colour = "blue") + 
+    geom_line(aes(x = k, y = tnr), data = calc, colour = "green") + 
+    ylab("Rate") + xlab("K neighbors") 
+    
 ```
 
-####Limitations
-- The limits of correlation coefficients and R-squared statistics
-```{r}
-#
+There are other factors that influence the selection of $k$:
+
+- <u>Scale</u>. kNNs are strongly influenced by the scale and unit of values of $x$ as ranks are dependent on straight Euclidean distances. For example, if a dataset contained random measurements of age in years (a relatively nor) and wealth in dollars, the units will over emphasize income as the range varies from 0 to billions whereas age is on a range of 0 to 100+. To ensure equal weights, it is common to transform variables into standardized scales such as:
+    - Range scaled or $$\frac{x - \min(x)}{\max(x)-\min(x)} $$ yields scaled units between 0 and 1, where 1 is the maximum value
+    - Mean-centered or $$ \frac{x - \mu}{\sigma}$$ yield units that are in terms of standard deviations
+- <u>Symmetry</u>. It's key to remember that neighbors around each point will not likely be uniformly distributed. While KNN does not have any probabilistic assumptions, the position and distance of neighboring points may have a skewing effect. This
+
+    
+##Ordinary Least Squares (OLS) Regression
+OLS regression is the quantitative workhorse of data-driven public policy. [ ] The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. We start by defining a regression equation:
+
+$$y_i = w_0 x_{i,0} + w_{1} x_{i,1} + ... + w_{k} x_{i,k} + \epsilon_{i}$$
+
+where:
+
+- $y_i$ is the target variable or "observed response"
+- $w_{k}$ are coefficients associated with each $x_k$. Note that $w$ may be substituted with $\beta$ in some cases.
+- $x_{i,k}$ are input or independent variables 
+- subscript $i$ indicates the index of individual observations in the data set
+- $k$ is an index of position of a variable in a matrix of $x$
+- $\epsilon_{i}$ is an error term that is assumed to have a normal distribution of $\mu = 0$ and constant variance $\sigma^2$
+
+This formula can be rewritten in matrix notation as follows:
+
+$$y = w^Tx$$
+
+Given this equation, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
+or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. 
+
+####Key measures
+_R-squared_ or $R^2$ is a measure of the proportion of variance of the target variable that can be explained by a estimated regression equation. A few key bits of information are required to calculate the $R^2$, namely:
+
+- $\bar{y}$: the sample mean of $y$;
+- $\hat{y_i}$: the predicted value of $y$ for each observation $i$ as produced by the regression equation; and
+- $y_i$: the observed value of $y$ for each observation $i$.
+
+Putting these values together is fairly simple:
+
+- Total Sum of Squares or TSS is the variance of $y$: $$\text{TSS} = \sigma^2(y) = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
+
+- Sum of Squared Errors is the squared difference between each observed value of $y$ and its predicted value $\hat{y_i}$:  $$\text{SSE}  = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
+
+- Regression Sum of Squares or RSS is the difference between each predicted value $\hat{y_i}$ and the sample mean $\bar{y}$.
+
+Bringing all the values together, $$R^2 = 1 - \frac{SSE}{TSS}$$. As TSS will always be the largest value, $R^2$ will always be bound between 0 and 1 where a value of $R^2 = 0$ indicates a regression line in which $x$ does not account for variation in the target whereas $R^2 = 1$ indicates a perfect regression model where $x$ accounts for all variation in $y$. 
+
+In addition, Root Mean Square Error (RMSE) is helpful for understanding the variation of the predictions relative to $y$. RMSE is defined as $$\text{RMSE} = \sigma =  \frac{1}{n}\sqrt{\{\sum_i=1^n(\hat{y_i}-y_i)^2}$$. Note that RMSE is interpreted in terms of levels of $y$, which may not necessarily facilitate easy communication of model accuracy. In certain scenarios, particularly for time series forecasts, Mean Absolute Percentage Error (MAPE) is used to contextualize prediction accuracy relative to $y$. This measure is defined as $$\text{MAPE} = \frac{100}{n}\sum_{i=1}^n|\frac{\hat{y_i}-y_i}{y_i}|$$.
+
+####Under the hood
+```
+OLS( k, set){
+  
+  Define cost function to computer total squared error
+  
+  
+}
 ```
 
-###Experiment Design
-[Train/validate/test]
-```{r}
-#
-```
-
-##Example application
-```{r}
-#
-```
-###Exercise Data
-- Labor and wage analysis, innate ability. (David Card data set.)
-- Economic data from BEA
-
-<hr>
-##Three Cases Studies
-### (1) Predict fire risk for building safety
->New York City has about a million buildings, and each year 3,000 of them erupt in a major fire. Can officials predict which ones will go up in flames? The New York City Fire Department thinks it can use data mining to do that. Analysts at the department say that some buildings are linked to characteristics that make them more likely to have a fire than others.
-\t - [Wall Street Journal (2014)](http://blogs.wsj.com/digits/2014/01/24/how-new-yorks-fire-department-uses-data-mining/)
-
-In 2007, a skyscraper in Downtown Manhattan in New York City known as the [Deutsche Bank Building caught fire](http://cityroom.blogs.nytimes.com/2007/08/18/2-firefighters-are-dead-in-deutsche-bank-fire/?_r=0).  The New York City Fire Department ([FDNY](www.nyc.gov/fdny)) responded with hundreds of firefighters. But this was no common fire. The building was in the process of being dismantled and remediated for various hazards (e.g. asbestos) due to the damage it had sustained during the 9/11 attacks. Thus, temporary containment walls blocked modes of egress, air moved in an abnormal fashion throughout the building, and standpipes were not functional. As a result, two firefighters perished while navigating the deathly labyrinth. 
-
-A retrospective review found that city agencies failed to share pertinent information so that ground crews could safely respond. Among the recommendations of this review was the creation of a risk-based inspection system with the ability to *accurately* direct firefighters to buildings of the greatest risk of fire in order to give fire fighters the best chance to respond to fires. In response, FDNY developed the Risk-Based Inspection System (RBIS) designed to schedule fire units to conduct building inspections on a regular basis. However, scheduling just any inspection is not sufficient. With over 300,000 inspectable buildings in NYC, a risk-based system needs to prioritize buildings in a way that is reflective of fire risk. 
-
-[Image of fires in NYC goes here]
-
-#####Coordinating a data science strategy
-Both the NYC Mayor's Office and FDNY wanted to develop a fire prediction capability.The Assistant Commissioner of FDNY working with the Fire Commissioner and the Deputy Mayor for Operations established the FDNY Analytics Unit, an office with the mission of developing data science products to drive evidence-based and deployed decision making. This team was then tasked with (1) building and integrating the algorithmic engine the RBIS system using the MODA dataset, and (2) liaise with the fire ranks to ensure accurate deployment.
-
-##### Data science
-Version 1.0 of the FireCast model was built upon two years of annual-level, building-level data. Under this design, each of the 330,000 inspectable buildings as identified from the NYC Department of Buildings database were represented by two records -- one for each year in the analysis period. This master list of 660,000 records is known as the 'backbone' or 'universe' to which all data is added. Data were collected and integrated from the National Fire Incident Reporting System ([NFIRS](https://www.nfirs.fema.gov/)), the NYC Department of Buildings database, and FDNY's inspection database. NFIRS contained fire incidents, which were coded as Y = 1 for when a building experienced a fire in a given year and Y = 0 when none was experienced. It is important to note that prediction models only work if both the factual (e.g. fires) and the counterfactual (e.g. no fires) are captured  in the 'target' or 'dependent' variable; it's the only way to determine when 'co-variates' or 'independent' variables can help distinguish a building that will likely experience fires from one that will not. Building characteristics were derived from the NYC Buildings Database, such as building type (e.g. elevator building with semi-fireproof floor, one family home), building age, sub-neighborhood, owner type, among other characteristics. Most variables (both continuous and discrete) were converted into binary so that combinations of characteristics could allow for construction of an interpretable building profile. While there are many sophisticated machine learning models that could be applied, V1 of the model was developed as a logistic regression as it lends itself to narrative development and trust building. The logistic model was trained on a randomly selected 70% of the buildings, validated on 15% and tested on 15% of data. The result was a model that achieved an Area Under the Curve (AUC) or 'concordance' of over 85%. With this promising result, the model formulation was then integrated into the RBIS system by FDNY application developers. On a nightly basis, the RBIS system would run FireCast to automatically rank buildings for the highest risk of fire. Through a Oracle-based user interface, fire officers were provided the top 15 most recommended buildings for inspection in a given district in the city.
-[Firecast images goes here]
-
-#####Moving into operations
-As the model was developed, it was important to communicate the mechanics of the model to fire officers and firefighters as they ultimately need to believe the outputs of such a model. Beyond the algorithm stage, the successful adoption by a user becomes a matter of user experience and design. A highly accurate model will not be adopted if the product team does not account for user needs and interaction. In the case of the fire service, it's necessary to be able to explain why a building is risky, which is something that is not easily inferred from more sophisticated machine learning models. However, logistic regression models, while often times less powerful in prediction accuracy, allow for interpretable of factors in terms of odds ratios. For example, a multi-storied building may has a fire risk that is X-times greater than a single family home. 
-3. <u>Impact</u>: The result of these efforts was increased hit rates in fire code violations.[pre-arrival rate, inspection rates]
-
-In subsequent versions of FireCast, the model was greatly expanded as the field operations grew to understand the promise of data science. By version 2, the model was tested machine learning algorithms such as Random Forests and L1/L2 Regularization with a particular focus on feature selection on an expanded three year rolling quarter dataset with a three-year time horizon containing over 7,500 variables, including 311 phone-based complaints and building owner financial records. 
-
-####Further reading
-For more detail on the FDNY Firecast project, read this [NFPA article](http://www.nfpa.org/news-and-research/publications/nfpa-journal/2014/november-december-2014/features/in-pursuit-of-smart)
-
-### (2) Estimating impact of minimum wage on employment
->On April 1, 1992, New Jersey's minimum wage rose from $4.25 to $5.05 per hour. To evaluate the impact of the law we surveyed 410 fast-food restaurants in New Jersey and eastern Pennsylvania before and after the rise. Comparisons of employment growth at stores in New Jersey and Pennsylvania (where the minimum wage was constant) provide simple estimates of the effect of the higher minimum wage. We also compare employment changes at stores in New Jersey that were initially paying high wages (above $5) to the changes at lower-wage stores. We find no indication that the rise in the minimum wage reduced employment. - [Card and Krueger (1994)](http://davidcard.berkeley.edu/papers/njmin-aer.pdf)
-
-####How does this work?
-- <u>Behind the scenes</u>:  [How was this organized?]
-- <u>Data Science</u>:  [The technical]
-
-### (3) Monitoring Global Deforestation
->Wonderful advances in recent years in the use of satellite data and technology have empowered communities to monitor their own forests. Global Forest Watch connects the best of these systems, pulling all of this technology together on a single platform that provides access to high-quality data for the entire world. It will dramatically benefit all those working to protect our forests, and help us identify new threats to chimpanzees and prioritize our conservation efforts. -[Jane Goodall](http://www.janegoodall.at/global-forest-watch/)
-
-Every year, between 46 to 58 thousand square miles of forest are cleared -- approximately 48 soccer fields per minute[^1]. But the information used to generate these estimates often take time. Knowing where deforestation occurs sometimes requires a manual survey of locations or tedious search of satellite images. As a result, the clearing of an entire forest may only be known once its too late and options to mitigate the environmental loss are often significantly limited. 
-
-With advances in data science and technology, this information latency and filtering problem can be addressed. Originally launched in 1997 and later enhanced and augmented in 2013, Global Forest Watch (GFW) is an interactive online platform that offers data and tools to help monitor forests around the world. As the result of a partnership headed by the World Resources Institute (WRI) and partners, [description of platform]
-
-####How does this work?
-- <u>Behind the scenes</u>:  [How was this organized?]
-- <u>Data Science</u>:  [The technical]
-[code](https://github.com/wri/forma-clj/blob/master/src/clj/forma/classify/logistic.clj)
-
-###How do these examples compare?
-In all three cases, models take on the form of 
- [^1]: [WWF Site ](http://www.worldwildlife.org/threats/deforestation)] 
