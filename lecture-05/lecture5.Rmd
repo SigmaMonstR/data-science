@@ -4,10 +4,10 @@ author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Publi
   Policy
 subtitle: Intro to Data Science for Public Policy, Spring 2016
 output:
+  pdf_document:
+    toc: yes
   html_document:
     theme: journal
-    toc: yes
-  pdf_document:
     toc: yes
 ---
 
@@ -166,9 +166,63 @@ There are other factors that influence the selection of $k$:
     - Mean-centered or $$ \frac{x - \mu}{\sigma}$$ yield units that are in terms of standard deviations
 - <u>Symmetry</u>. It's key to remember that neighbors around each point will not likely be uniformly distributed. While KNN does not have any probabilistic assumptions, the position and distance of neighboring points may have a skewing effect. This
 
+####In Practice
+
+```{r}
+#KNN code example
+```
+####When to [Not] Use
+KNN is 
+- generally slow 
+- not interpretable due to non-parametric approach
+- Missing values not well handled
+
+- missingness
+- variable importance is not considered 
+
+#### Exercises 5.1
+1. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each $i$. Then, calculate the True Positive Rate, which is defined as $
+2. Modify the function to handle k = 2.
     
 ##Ordinary Least Squares (OLS) Regression
-OLS regression is the quantitative workhorse of data-driven public policy. [ ] The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. We start by defining a regression equation:
+Every year, cities and states across the United States publish measures on the performance and effectiveness of operations and policies. Performance management practitioners typically would like to know the direction and magnitude, as illustrated by a linear trend line. Is crime up? How are medical emergency response times? Are we still on budget? Which voting blocks are drifting?
+
+For example, the monthly number of toll transactions in the State of Maryland is plotted over time from 2012 to early 2016. The amount is growing with a degree of seasonality. But to concisely summarize the prevailing direction of toll transactions, we can use a trend line. That trend line is an elegant solution that shows the shape and direction of a linear relationship, taking into account all values of the vertical and horizontal axes to find a line that weaves through and divides point in a symmetric fashion.
+
+```{r, echo=FALSE, fig.height=3}
+  setwd("/Users/jeff/Documents/Github/data-science/lecture-05")
+  data <- read.csv("maryland_tolls.csv")
+  val <- aggregate(data$Total.Transactions, by=list(data$Date), FUN=sum)
+  colnames(val) <- c("Date","Transactions")
+  val$Date <- strptime(as.character(val$Date),"%m/%d/%Y %H:%M")
+  val <- val[order(val$Date),]
+  val$time <- 1:nrow(val)
+  val$Transactions <- val$Transactions / 1000000
+  
+  a <- coef(lm(Transactions ~ time, data = val))
+  ggplot() + 
+      geom_line(aes(x = time, y = Transactions),  data = val, colour = "blue") + 
+      geom_point(aes(x = time, y = Transactions),  data = val, colour = "blue") +
+      geom_abline(intercept = a[1], slope = a[2]) + 
+      ylab("Toll Transactions (millions)") + xlab("Time (months)")
+
+```
+
+This trend line can be simply described in using the following formula:
+
+$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
+
+and every point plays a role. We can infer that the trend grows at approximately 36,000 transactions per month.  Using the observed response $y$ and the independent variable $x$, calculating the intercept and slope is a fairly simple task:
+
+$$\text{slope = } \hat{\beta_1} = \frac{\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}}{\sum_{i=1}^{n}(x_i-\bar{x})^2}$$ 
+and 
+
+$$\text{intercept = } \hat{\beta_0} = \bar{y}-\hat{\beta_1}\bar{x}$$
+In a bivariate case such as this one, it's easy to see the interplay. In the slope, the covariance of $X$ and $Y$ ($\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}$) is tempered by the variance of $x$ ($\sum_{i=1}^{n}(x_i-\bar{x})^2$). If the covariance is greater than the variance, then the absolute value of the slope will be greater than one. The direction of the slope (positive or negative) is determined by the interaction between $x$ and $y$ alone. 
+
+Trend lines are one of many uses of a class of supervised learning called regression, but best known of which is Ordinary Least Squares or Least Squares Regression. In multivariate cases where many variables are used to get a handle on what factors influence $y$, the problem gets more complex. Nonetheless, OLS regression is the quantitative workhorse of data-driven public policy. The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. 
+
+To better understand arguably the most commonly used supervised learning method, we can start by defining a regression formula:
 
 $$y_i = w_0 x_{i,0} + w_{1} x_{i,1} + ... + w_{k} x_{i,k} + \epsilon_{i}$$
 
@@ -181,14 +235,20 @@ where:
 - $k$ is an index of position of a variable in a matrix of $x$
 - $\epsilon_{i}$ is an error term that is assumed to have a normal distribution of $\mu = 0$ and constant variance $\sigma^2$
 
-This formula can be rewritten in matrix notation as follows:
+Note that $x_{i,0} = 1$, thus $w_0$ is often times represented on its own. For parsimony, this formula can be rewritten in matrix notation as follows:
 
 $$y = w^Tx$$
+such that $y$ is a vector of dimensions $n \times 1$, $x$ is a matrix with dimensions $n \times k$, and $w$ is a vector of length $k$. 
 
-Given this equation, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
-or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. 
+Given this formula, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
+or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y_i})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. The SSE and MSE are measures of uncertainty relative to the observed response. Minimization of least squares can be achieved through a method known as *gradient descent*.
 
-####Key measures
+[More on gradient descent here]
+
+####Assumptions
+
+####Interpretation
+There are a number of attributes and outputs of a linear squares regression model that are examined, namely the R-squared, coefficients, and error.
 _R-squared_ or $R^2$ is a measure of the proportion of variance of the target variable that can be explained by a estimated regression equation. A few key bits of information are required to calculate the $R^2$, namely:
 
 - $\bar{y}$: the sample mean of $y$;
@@ -199,7 +259,7 @@ Putting these values together is fairly simple:
 
 - Total Sum of Squares or TSS is the variance of $y$: $$\text{TSS} = \sigma^2(y) = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
 
-- Sum of Squared Errors is the squared difference between each observed value of $y$ and its predicted value $\hat{y_i}$:  $$\text{SSE}  = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
+- Sum of Squared Errors is the squared difference between each observed value of $y$ and its predicted value $\hat{y_i}$:  $$\text{SSE}  = \sum_{i=1}^{n}(y_i - \hat{y_i})^2$$
 
 - Regression Sum of Squares or RSS is the difference between each predicted value $\hat{y_i}$ and the sample mean $\bar{y}$.
 
@@ -212,7 +272,7 @@ In addition, Root Mean Square Error (RMSE) is helpful for understanding the vari
 OLS( k, set){
   
   Define cost function to computer total squared error
-  
+  Gradient Descent
   
 }
 ```
