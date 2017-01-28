@@ -3,7 +3,6 @@
 
 setwd("/Users/jeff/Documents/Github/data-science/lecture-02/data")
 
-
 ####How many planned applause breaks in 2010 versus 2016?
 
 #2010
@@ -101,7 +100,7 @@ setwd("/Users/jeff/Documents/Github/data-science/lecture-02/data")
   
   library(wordcloud)
   set.seed(123)
-  par(mfrow=c(2,2))
+  par(mfrow=c(2,1))
   master <- master[order(-master$tfidf10),]
   wordcloud(master$word[2:100], master$tfidf10[2:100], rot.per = 0)
   
