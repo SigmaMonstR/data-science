@@ -113,7 +113,7 @@ A simple case may involve drawing a random value $x$ from a normal distribution 
 
 ```
 
-2. Fibonacci numbers are defined as $ F_n = F_{n-1} + F_{n-2}$, or numbers that are defined as the sum of the preceding two numbers. For example, given an initial sequence of ```0, 1```, the next five numbers are ```1, 2, 3, 5, 8```. Using a `while()` loop, find the Fibonacci number that precedes 1,000,000.
+2. Fibonacci numbers are defined as $F_n = F_{n-1} + F_{n-2}$, or numbers that are defined as the sum of the preceding two numbers. For example, given an initial sequence of ```0, 1```, the next five numbers are ```1, 2, 3, 5, 8```. Using a `while()` loop, find the Fibonacci number that precedes 1,000,000.
 3. Often times, data files are stored in smaller chunks to save space and enhance searchability. In some cases, data is stored in daily chunks. The National Oceanic and Atmospheric Administration (NOAA) releases data every day on environmental and atmospheric conditions, including storms. Download the data for Lecture 3, get the list of the hail signature detection files in using `list.files()`, then write a loop to record the following measures in a data frame:
 
 - month and year
