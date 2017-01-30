@@ -1,9 +1,12 @@
 ---
-title: "Lecture 4: Exploratory Data Analysis"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
-author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+title: 'Lecture 4: Exploratory Data Analysis'
+author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---
@@ -15,15 +18,12 @@ Can you visually identify distinct patterns? What makes those patterns distinct?
 
 
 ```{r, echo=F, warning=FALSE, message=FALSE}
-setwd("/Users/jeff/Documents/Github/data-science/lecture-04/example_data")
-files <- list.files()[1]
+  dir <- "/Users/jeff/Documents/Github/data-science/lecture-04/data"
+  files <- list.files("/Users/jeff/Documents/Github/data-science/lecture-04/data")[1]
 
-#install.packages("dygraphs")
-library(dygraphs)
-library(xts)
+  library(ggplot2)
 
-for(i in files){
-  temp <- read.csv(i)
+  temp <- read.csv(paste0(dir,"/",files))
   temp$accel <- sqrt(temp$user_acc_x.G.^2 + temp$user_acc_y.G.^2 + temp$user_acc_z.G.^2)
   temp <- temp[!is.na(temp$accel) & temp$accel!="",]
   #print(nrow(temp))
@@ -39,11 +39,7 @@ for(i in files){
   temp_val <- temp_val[order(temp_val$time),]
   temp_val[,1] <- as.POSIXct(as.numeric(as.character(temp_val[,1])),origin="2016-01-01")
   
-  xts_temp <- xts(temp_val[,2], order.by=temp_val[,1])
-  assign(gsub(".csv","",i),xts_temp)
-}
-
-dygraph(exercise,  group = "other", height=250) %>% dyLegend( show = "never") %>% dyAxis("y", label = "m/s^2", valueRange = c(0, 1)) 
+  ggplot(temp_val,aes(x=time, y= accel  ))  + geom_point(size=0.1) +   geom_line(colour = "navy") + ylim(0, 1) 
 
 ```
 
@@ -256,11 +252,6 @@ In addition, the *variance* of a data series contains key information about vari
 | Skewness | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | Measure of symmetry | library(e1071)<br> kurtosis()| `example`|
 | Kurosis | $$ \mu = \frac{1}{n} \sum_{i=1}^{n} x_i$$ | Measure of peakedness relative to Gaussian distribution | library(e1071)<br> skewness()| `example`|
 
-
-###Statistics of Discrete Variables
-- Cross tabulations
-- Row proportions
-- Column proportions
 
 ###Graphical Approaches
 While sample statistics help to determine expected values and overall trends of continuous variables, graphical and visual approaches help to identify unexpected values -- where are there outliers and unusual quirks of the data. In this section, we will explore univariate and bivariate graphs and their application in EDA.
