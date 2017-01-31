@@ -5,7 +5,7 @@
     setwd("/Users/jeff/Documents/Github/data-science/lecture-03/data/codealong")
   
   #transactions
-    df <- read.table("user_artists.dat",sep="\t", header = TRUE)
+    df <- read.table("user_artists.dat", sep="\t", header = TRUE)
   
   #Read in a ref table (need to use quote and fill due to spacing errors in data)
     ref <-  read.table("artists.dat",sep="\t", header = TRUE, quote = "", fill = TRUE)
@@ -46,14 +46,14 @@
       z <- sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
       return(z)
     }
-  
+  cosSim(items[,2], items[,5])
   #Set up data
     items <- as.matrix(mat[,2:ncol(mat)])
     
   #Test the function. How similar are...
   print(grep("metallica",colnames(items)))
   print(grep("red hot chili peppers",colnames(items)))
-  cosSim(items[, grep("metallica",colnames(items))], items[grep("red hot chili peppers",colnames(items))])
+  cosSim(items[, grep("metallica",colnames(items))], items[,grep("red hot chili peppers",colnames(items))])
     
 ##Populate similarity matrix
   #Set up placeholder matrix -- Note that R is faster if the matrix is preset

@@ -11,7 +11,7 @@ output:
     toc: yes
 ---
 
-Supervised learning is used everyday whether it's the social and natural sciences or web development or public policy. The term "supervised learning" comes from the nature of the empirical task, where an algorithm is *trained* to replicate labeled examples using input features and uses objective functions to minimize error or maximize information gain. Labeled examples are also known as dependent variables or target variables), and *input features*  are also known as independent variables or predictors. This assumes that some combination of features can be used to describe and predict targets. For example:
+Supervised learning is used everyday whether in the social and natural sciences or web development or public policy. The term "supervised learning" comes from the nature of the empirical task, where an algorithm is *trained* to replicate labeled examples using input features and uses objective functions to minimize error or maximize information gain. Labeled examples are also known as dependent variables or target variables), and *input features*  are also known as independent variables or predictors. This assumes that some combination of features can be used to describe and predict targets. For example:
 
 1. __Public Health__. Classifying whether a restaurant is at [risk of violating city health regulations](https://www.drivendata.org/competitions/5/) using past ratings as a target and restaurant reviews as an input.
 2. __Labor__. Estimating the [impact of minimum wage](http://davidcard.berkeley.edu/papers/njmin-aer.pdf) on business health by using employment as a target and changes in labor laws as inputs.
@@ -22,7 +22,7 @@ Supervised learning is used everyday whether it's the social and natural science
 
 
 
-###Thinking about supervised learning
+##Thinking about supervised learning
 
 The structure of a supervised learning project is much like taking a course on any academic subject. Let's take the example of a calculus class. Students are taught concepts and the application of those concepts through readings and homeworks. Each concept has a structure that is learned by examining and working through practice problems that are representative of that concept. For example, when working with derivatives, the first derivative of $f(x) = x^2$ is $f'(x) = 2x$ and its second derivative is $f''(x) = 2$. Under certain conditions, certain mathematical functions such as exponential and logarithmic functions behave differently, and the rules and patterns for handling those derivatives need to be taken into account when approaching derivative problems. Eventually, the professor will schedule and administer a midterm or final covering all the different learned concepts. In preparation, a series of practice exams are typically provided to students as a way to test their knowledge. A practice exam is most helpful when the  material has already been well-studied and is taken only once, using examples that were answered incorrectly as an opportunity to provide insight into gaps in knowledge. Otherwise, repeatedly taking the same practice exam will provide a false sense of mastery as a student takes and re-takes and learns the answers as opposed to the eccentricities of the subject at hand. The real test is the actual exam, in theory indicating how well concepts were understood and re-applied.
 
@@ -30,51 +30,61 @@ There are parallels between taking a class and supervised learning tasks. In a c
 
 In application, we can approach a supervised learning problem by how one intends to use the outputs of the algorithm and the design of the algorithmic experiment. 
 
-####Intended use
-The intended use influences the type of algorithm and it all starts with a well-formulated data-enable question that can be answered using an empirical outcome. For example:
 
-1. "Which of the lawsuits in the legal department's backlog can be won?"
-2. "Which prospective patients will require advanced medical treatment in the next year?"
-3. "What are the greatest drivers of lawsuit generation?"
+##Supervised Learning as a Process
+Algorithms are often times mentioned in technical discussions. *Artificial neural networks* and *support vector machines* are commonly found in computer vision tasks. *Linear regression* for social science, natural science and and general use. *K-Nearest Neighbors* and *K-means* clustering are common in retail and e-commerce. But ultimately, the algorithm is only one part of a whole process. Applied supervised learning is a process that is guided by a number of core considerations, including core considerations: (1) Intended use, (2) Data,  (3) Algorithm development, (4) Experiment design, (5) Deployment
+
+
+### (1) Intended use
+The intended use influences the type of algorithm. It all starts with a well-formulated data-enable question that can be answered using an empirical outcome. For example:
+
+1. "Which of the current lawsuits in the legal department's backlog can be won?"
+2. "Which prospective patients will require advanced medical treatment in the next 90 days?"
+3. "What are the greatest drivers of lawsuit generation over the last 10 years?"
 4. "Which patient characteristics are most associated with stroke?"
 
-In each of these questions, a quantitative value can be used to answer a question; however, there are nuances. The first two questions are focused on the *prediction* -- often times a *score* that represents the chances of an output. The goal is to create a sure-fire, highly accurate function that can be relied upon to make solid decisions without much manual effort. A modern example is the application of computer vision to score whether certain features are contained in images. In 2012, Google's demonstration project using artificial neural networks showed how a computer vision algorithm can detect whether a cat is present in any photograph with a high degree of accuracy; however, the underlying weights are not easily interpretted. Often times, prediction projects are deployable and are meant to be put into *production*  -- that is operating on a production server to be used in daily operations. Thus, such as project should designed with a reliable, continuous data stream in mind.
+In each of these questions, a quantitative value can be used to answer a question; however, there are nuances. The first two questions are focused on *prediction* -- often times a *score* that represents the chances of a outcome. The goal is to create a sure-fire, highly accurate function that can be relied upon to make solid decisions without much manual effort, but without a strong emphasis on interpreting underlying relationships. For example, prediction projects can be used to prioritize risky buildings for inspection, screen loan applicants for financial default, and surface search results. Typically, prediction problems are required for problems of significant scale, where it becomes cost prohibitive for humans to do a task themselves. A modern example is the application of computer vision to score whether certain features are contained in images. In 2012, a [Google demonstration project](https://www.wired.com/2012/06/google-x-neural-network/) using artificial neural networks showed how a computer vision algorithm can detect whether a cat is present in hundreds of thousands photographs with a high degree of accuracy. While the algorithm is accurate, the underlying "machinery" was not designed to be easily interpretted as prediction projects. Prediction projects are more operations or action-focused, often times designed to be put into *production*, or implemented to support everyday tasks. 
 
-The second two questions are more concerned with *estimating relationships* to understand if one or more inputs are empirically associated with a target variable. The focus is not on the numerical prediction, but the coefficients and weights in the model that quantify how much a given input influences the target. For example, a highway traffic study may find that a 1% increase in employment is associated with a 0.5% increase in highway traffic volume. July 4th weekend may increase emergency call volume by a certain percentage. Estimation often relies on linear regression methods, which are covered later in this chapter. 
+The latter two questions are more concerned with *estimating relationships* to understand if one or more inputs are empirically associated with a target variable. While the methodologies used for estimation can yield accurate predictions, the goalis to calibrate coefficients and weights in a model that shows how an input feature is associated or potentially impacts the target. For example, a highway traffic study may find that a 1% increase in employment is associated with a 0.5% increase in highway traffic volume. July 4th weekend may increase emergency call volume by a certain percentage. Estimation often relies on linear regression methods, which are covered later in this chapter. 
 
-####Design
-Once data has been 
-2. _A labeled dataset furnished with input features_. Each record should be furnished with labels of what needs to be predicted. Labels can take on any structured form such as discrete or continuous values.  
-    - _Data Pipeline_. If the data-enabled question will be repeatedly asked, it is worth examining the reliability of the *data pipeline* and whether new data will be available when the question is asked in the future. For example, more strategic problems like a 10-year population forecast may only be conducted every year requiring data once a year, whereas more operational problems like restaurant inspections may be done on a daily basis requiring new data in order to detect new patterns every day.  
-    
+In either case, it is helpful to think about supervised learning as a pointer. It is easy to flag potential cases of an observed phenomena (e.g. what, which, who, where, when), but it is hard to use supervised learning to definitively provide an answer as to "why" something happens.
 
-4. _Cross Validation_. Supervised learning problems usually involve partitioning data to help with optimizing algorithm for accuracy and reduce the chance of *overfitting*, a condition in which an algorithm learns patterns that are noise as opposed to signal thereby leading to misleading inferences. Partitioning involves splitting the data into two or more sets where one method is "held out" from training algorithms and the other set is used for validating and tuning results. Data scientists commonly rely on two partition procedures: 
-    - _Train/Validate/Test_ assumes that the data are partitioned into three sets. The *train* set is used to initially calibrate the algorithm. The *validation* set is used to help tune hyperparameters and select features. Typically, the algorithm that is calibrated in the training stage is used to predict values in the validation set and as this set contains labels, accuracy can be assessed using appropriate measures such as RMSE or AUC. Once it is determined the algorithm is as good as it can be, the trained algorithm is then used to score a set of remaining examples in the *test* set in order to assess its generalizability. These three samples may be partitioned in the following proportions:  train = 70%, validate = 15%, and test = 15%. 70/15/15 for short. 
-    - _K-Folds Cross Validation_. A train/validate/test design can be extended for more exhaustive model tuning. K-folds cross validation involves partitioning the data into $k$ partitions. Then, combine $k - 1$ partitions to train an algorithm and predict the values for the $k^{th}$ part. Then, cycle through combinations of $k-1$ partitions until each of the $k$ holdout samples have been predicted. Upon doing so, the prediction accuracy can be calculated for each of the $k$ partitions as well as for all $k$ partitions together. Partitions that yield poorer accuracy relative to other partitions help provide a clue as to when an algorithm is insufficient or requires further tuning.  For exhaustive testing, $k = n - 1$ such that $n - 1$ models are trained such that each of the $n$ records in a data set are predicted once.
-    
-For data where no clear labels are available, we may rely on "unsupervised learning" -- a class of tasks that used to find patterns, structure, and membership using input features alone. Unsupervised learning encompasses clustering (e.g. values may naturally fall into clusters in n-dimensional space) and dimensionality reduction.  We will cover unsupervised learning in Lecture 9.
+### (2) The Data
+Upon formulating research questions, the next priority is finding usable and actionable data. At a minimum, data need to contain:
 
-####Technique
-3. _A solvable algorithm or technique_. Techniques are concerned with the treatment of the type of labeled data, which has particular influence on the structure and assumptions of mathematical operations. In supervised learning, there are two broad categories of algorithms, including:  
+- _A target variable, labels, or Y_. Each record should be furnished with labels of what needs to be predicted. Labels can take on any structured form such as discrete or continuous values.   
+- _Input features or X_. A series features that be used to relate and predict the target.
+
+Each record needs to contain a target value $y$ and at least one input feature $x$. 
+
+In addition, the qualities of the data must be aligned with the task at hand:
+
+- _Unit of Analysis_. A well-formulated research question has a clear unit of analysis. The data must reflect the requirements of the question. A driverless car, for example, likely requires updated telemetry data in sub-second frequencies in order to accurately and safely maneuver. Providing telemetry data every five minutes do not likely meet the requirements. 
+- _Data Pipeline_. If the data-enabled question will be repeatedly asked, it is worth examining the reliability of the *data pipeline* and whether new data will be available when the question is asked in the future. For example, more strategic problems like a 10-year population forecast may only be conducted every year requiring data once a year, whereas more operational problems like restaurant inspections may be done on a daily basis requiring new data in order to detect new patterns every day.  
+   
+
+### (3) Algorithm
+Algorithms are a series of rules and calculations used to convert data into insight. Supervised learning algorithms are typically comprised of a learning function, a loss function, and a hyperparameters. A learning function 
+
+When putting the data together, $y$ can be expressed as a function of $x$:  $y_i = f(x_{1,i}, x_{2,i},..., x_{k,i})$. These functions .
+
+ Techniques are concerned with the treatment of the type of labeled data, which has particular influence on the structure and assumptions of mathematical operations. In supervised learning, there are two broad categories of algorithms, including:  
     - _Regression_. A number of the of the examples may depend on *regression*, which is a statistical method for estimating the relationship between a set of features or variables. Regression problems are formulated with a dependent variable that is trained or conditioned upon independent variables with the goal of estimating the expected value of given a set of variables. of calibrating *coefficients* or *weights*, which are used to not only produce a prediction of the dependent variable but infer the contribution of an independent variable if  which is a class of algorithms that estimate the expected value of a target conditioned upon  (e.g. examples #2 and #4). Common examples of regression models include Ordinary Least Squares (covered in this chapter) and Logistic Regression (covered in Chapter 8).  
     - _Classifiers_.  The remaining are *classifiers*, or algorithms designed to predict membership to discrete categories.  
     [hyperparameters]
     
 In addition, algorithms typically are evaluated on [x]  
 
+### (4) Experiment Design
+
+Supervised learning problems usually involve partitioning data to help with optimizing algorithm for accuracy and reduce the chance of *overfitting*, a condition in which an algorithm learns patterns that are noise as opposed to signal thereby leading to misleading inferences. Partitioning involves splitting the data into two or more sets where one method is "held out" from training algorithms and the other set is used for validating and tuning results. Data scientists commonly rely on two partition procedures: 
+    - _Train/Validate/Test_ assumes that the data are partitioned into three sets. The *train* set is used to initially calibrate the algorithm. The *validation* set is used to help tune hyperparameters and select features. Typically, the algorithm that is calibrated in the training stage is used to predict values in the validation set and as this set contains labels, accuracy can be assessed using appropriate measures such as RMSE or AUC. Once it is determined the algorithm is as good as it can be, the trained algorithm is then used to score a set of remaining examples in the *test* set in order to assess its generalizability. These three samples may be partitioned in the following proportions:  train = 70%, validate = 15%, and test = 15%. 70/15/15 for short. 
+    - _K-Folds Cross Validation_. A train/validate/test design can be extended for more exhaustive model tuning. K-folds cross validation involves partitioning the data into $k$ partitions. Then, combine $k - 1$ partitions to train an algorithm and predict the values for the $k^{th}$ part. Then, cycle through combinations of $k-1$ partitions until each of the $k$ holdout samples have been predicted. Upon doing so, the prediction accuracy can be calculated for each of the $k$ partitions as well as for all $k$ partitions together. Partitions that yield poorer accuracy relative to other partitions help provide a clue as to when an algorithm is insufficient or requires further tuning.  For exhaustive testing, $k = n - 1$ such that $n - 1$ models are trained such that each of the $n$ records in a data set are predicted once.
+    
+For data where no clear labels are available, we may rely on "unsupervised learning" -- a class of tasks that used to find patterns, structure, and membership using input features alone. Unsupervised learning encompasses clustering (e.g. values may naturally fall into clusters in n-dimensional space) and dimensionality reduction.  We will cover unsupervised learning in Lecture 9.
 
 
-### 4 - Model and Evaluate
 
-- Target variables
-- Input variables
-- Objective function and evaluation measures
-- AUC
-- RMSE
-
--
-
-In this section, we'll start with [a simple weak]
 
 ## k-Nearest Neighbors (kNN)
 k-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
