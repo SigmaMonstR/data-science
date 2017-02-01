@@ -32,7 +32,7 @@ In application, we can approach a supervised learning problem by how one intends
 
 
 ##Supervised Learning as a Process
-Algorithms are often times mentioned in technical discussions. *Artificial neural networks* and *support vector machines* are commonly found in computer vision tasks. *Linear regression* for social science, natural science and and general use. *K-Nearest Neighbors* and *K-means* clustering are common in retail and e-commerce. But ultimately, the algorithm is only one part of a whole process. Applied supervised learning is a process that is guided by a number of core considerations, including core considerations: (1) Intended use, (2) Data,  (3) Algorithm development, (4) Experiment design, (5) Deployment
+Algorithms are often times mentioned in technical discussions. *Artificial neural networks* and *support vector machines* are commonly found in computer vision tasks. *Linear regression* for social science, natural science and and general use. *K-Nearest Neighbors* and *K-means* clustering are common in retail and e-commerce. But ultimately, the algorithm is only one part of a whole process. Applied supervised learning is a process that is guided by a number of core considerations, including: (1) Intended use, (2) Data,  (3) Algorithm development, and (4) Experiment design.
 
 
 ### (1) Intended use
@@ -64,30 +64,35 @@ In addition, the qualities of the data must be aligned with the task at hand:
    
 
 ### (3) Algorithm
-Algorithms are a series of rules and calculations used to convert data into insight. Supervised learning algorithms are typically comprised of a learning function, a loss function, and a hyperparameters. A learning function 
+Algorithms are a series of rules and calculations used to convert data into insight. Supervised learning algorithms are typically comprised of a scoring or mapping function, learning function and a measure of risk, accuracy or error. Given a set of "training records", the values of input features $x$ can be mapped to values of the target $y$ using a function $f$, the relationship of which can be expressed generically in the following form: $y_i = f(x_{1,i}, x_{2,i},..., x_{k,i})$.  
 
-When putting the data together, $y$ can be expressed as a function of $x$:  $y_i = f(x_{1,i}, x_{2,i},..., x_{k,i})$. These functions .
+To optimally map $x$ to $y$, "weights" or "parameters" are calibrated to improve the fit or predictive accuracy of the scoring function. This "learning" process to find the optimal weights given the set of data is iterative and relies on a learning function that minimizes a measure of error or risk as well as maximizing accuracy. Optimization measures include Root Mean Squared Error (RMSE), Mean Absolute Percentage Error (MAPE), F-1 Score, Area Under the Curve (AUC), True Positive Rate (TPR), among others.
 
- Techniques are concerned with the treatment of the type of labeled data, which has particular influence on the structure and assumptions of mathematical operations. In supervised learning, there are two broad categories of algorithms, including:  
-    - _Regression_. A number of the of the examples may depend on *regression*, which is a statistical method for estimating the relationship between a set of features or variables. Regression problems are formulated with a dependent variable that is trained or conditioned upon independent variables with the goal of estimating the expected value of given a set of variables. of calibrating *coefficients* or *weights*, which are used to not only produce a prediction of the dependent variable but infer the contribution of an independent variable if  which is a class of algorithms that estimate the expected value of a target conditioned upon  (e.g. examples #2 and #4). Common examples of regression models include Ordinary Least Squares (covered in this chapter) and Logistic Regression (covered in Chapter 8).  
-    - _Classifiers_.  The remaining are *classifiers*, or algorithms designed to predict membership to discrete categories.  
-    [hyperparameters]
-    
-In addition, algorithms typically are evaluated on [x]  
+In short, the idea is that when accuracy is maximized, then the weights are optimal for mapping or predicting the relationship between $x$ and $y$.
+
+Supervised learning can be divided into _regression_ and _classification_ tasks, each of which is dependent on the type of target variable:
+
+- _Regression_ tasks focus on cases where the target $y$ is a continuous variable, such as housing price, population, solar energy produced, revenue, traffic, etc. 
+- _Classification_ tasks are focused on predicting whether a given value of $y$ belongs to two or more discrete classes or categories, such as yes/no, up/down, guilty/not guilty, fire/no fire, risky/unrisky, etc.  
+
+Over the next few sessions, we will take an in-depth look at the mechanics of a number of supervised learning algorithms and how they can be used in public policy.
 
 ### (4) Experiment Design
 
-Supervised learning problems usually involve partitioning data to help with optimizing algorithm for accuracy and reduce the chance of *overfitting*, a condition in which an algorithm learns patterns that are noise as opposed to signal thereby leading to misleading inferences. Partitioning involves splitting the data into two or more sets where one method is "held out" from training algorithms and the other set is used for validating and tuning results. Data scientists commonly rely on two partition procedures: 
-    - _Train/Validate/Test_ assumes that the data are partitioned into three sets. The *train* set is used to initially calibrate the algorithm. The *validation* set is used to help tune hyperparameters and select features. Typically, the algorithm that is calibrated in the training stage is used to predict values in the validation set and as this set contains labels, accuracy can be assessed using appropriate measures such as RMSE or AUC. Once it is determined the algorithm is as good as it can be, the trained algorithm is then used to score a set of remaining examples in the *test* set in order to assess its generalizability. These three samples may be partitioned in the following proportions:  train = 70%, validate = 15%, and test = 15%. 70/15/15 for short. 
-    - _K-Folds Cross Validation_. A train/validate/test design can be extended for more exhaustive model tuning. K-folds cross validation involves partitioning the data into $k$ partitions. Then, combine $k - 1$ partitions to train an algorithm and predict the values for the $k^{th}$ part. Then, cycle through combinations of $k-1$ partitions until each of the $k$ holdout samples have been predicted. Upon doing so, the prediction accuracy can be calculated for each of the $k$ partitions as well as for all $k$ partitions together. Partitions that yield poorer accuracy relative to other partitions help provide a clue as to when an algorithm is insufficient or requires further tuning.  For exhaustive testing, $k = n - 1$ such that $n - 1$ models are trained such that each of the $n$ records in a data set are predicted once.
-    
-For data where no clear labels are available, we may rely on "unsupervised learning" -- a class of tasks that used to find patterns, structure, and membership using input features alone. Unsupervised learning encompasses clustering (e.g. values may naturally fall into clusters in n-dimensional space) and dimensionality reduction.  We will cover unsupervised learning in Lecture 9.
+Calibrating an algorithm is not enough. Supervised learning problems usually involve partitioning data to help with ensuring accuracy of outputs and reduce the effects of *overfitting*, a condition in which an algorithm is calibrated to noise (e.g. spurious or unmeaningful patterns) as opposed to signal. An overfitted algorithm will produce unreliable and misleading results, which in turn reduces the overall utility of a model and may have negative consequences in society. For example, an employment forecast might provide qualitatively promising results, but if it is not systematically vetted for overfitting, forecasts may over or understate economic performance, thereby misinforming major decisions.
 
+To reduce the effects of overfitting, it is necessary to develop an experiment design for training algorithms, typically involving partitioning. The idea behind partitioning is to essentially create the same environment as in a math class: break the data into two or more parts, where one partition is used to *train* the data (analogue: "algorithm studies the data") and the other partition is used to *test* the data (analogue: "algorithm is given a test to see if it accurately absorbed the patterns into memory"). The former partition is referred to as the *training* set and the latter is referred to as the *test* or *hold out* set. Partitioning comes in many forms, but data scientists commonly rely on two types of partition procedures: 
 
+- _Train/Validate/Test_ assumes that the data are partitioned into three sets. The *train* set is used to initially calibrate the algorithm. The *validation* set is used to help tune algorithm weights and input select features to include in the function. Typically, the algorithm that is calibrated in the training stage is used to predict values in the validation set in order to check for accuracy and test sensitivities of different model specifications. Once it is determined the algorithm is as good as it can be, the trained algorithm is then used to score a set of remaining examples in the *test* set in order to assess its generalizability. These three samples may be partitioned in the following proportions:  train = 70%, validate = 15%, and test = 15%. 70/15/15 for short. 
+- _K-Folds Cross Validation_. A train/validate/test design can be extended for more exhaustive model tuning. K-folds cross validation involves partitioning the data into $k$ partitions. Then, combine $k - 1$ partitions to train an algorithm and predict the values for the $k^{th}$ part. Then, cycle through combinations of $k-1$ partitions until each of the $k$ holdout samples have been predicted. Upon doing so, the prediction accuracy can be calculated for each of the $k$ partitions as well as for all $k$ partitions together. Partitions that yield poorer accuracy relative to other partitions help provide a clue as to when an algorithm is insufficient or requires further tuning.  For exhaustive testing, $k = n - 1$ such that $n - 1$ models are trained such that each of the $n$ records in a data set are predicted once.
+
+For data where no clear labels are available, we may rely on "unsupervised learning" -- a class of tasks that used to find patterns, structure, and membership using input features alone. Unsupervised learning encompasses clustering (e.g. values may naturally fall into clusters in n-dimensional space) and dimensionality reduction.  We will cover unsupervised learning in Chapter 9.
+
+With this framework in place, for the remainder of this chapter, we will explore two supervised learning algorithms that handle continuous variables, but use very different formulations: k-Nearest Neighbors (KNN) and Linear Regression.
 
 
 ## k-Nearest Neighbors (kNN)
-k-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
+K-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
 
 $$ \text{distance} = \sqrt{\sum(x_{ij} - x_{ij})^{2} }$$ 
 
@@ -368,7 +373,7 @@ With this value, we can now put this finding to the test by plotting the interpo
 ```
 
 #### Exercises 5.1
-1. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each $i$. 
+1. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each record $i$. 
 2. Modify the function to handle k = 2.
     
 ##Ordinary Least Squares (OLS) Regression
