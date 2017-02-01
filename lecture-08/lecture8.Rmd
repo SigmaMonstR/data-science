@@ -44,11 +44,6 @@ Lecture objectives
 #
 ```
 
-####Decision Trees
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
-```
 
 ####Logistic Regression
 - statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
@@ -57,7 +52,14 @@ Lecture objectives
 ```
 
 
-####K-Nearest Neighbors
+####Decision Trees
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
+```{r}
+#
+```
+
+
+####Random Forests
 - statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
 ```{r}
 #
