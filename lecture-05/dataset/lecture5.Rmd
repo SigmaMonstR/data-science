@@ -1,5 +1,5 @@
 ---
-title: 'Lecture 5: Introduction to Supervised Learning'
+title: 'Lecture 6: Introduction to Supervised Learning'
 author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
   Policy
 subtitle: Intro to Data Science for Public Policy, Spring 2016
@@ -94,12 +94,18 @@ With this framework in place, for the remainder of this chapter, we will explore
 ## k-Nearest Neighbors (kNN)
 K-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
 
-$$ \text{distance} = \sqrt{\sum(x_{ij} - x_{ij})^{2} }$$ 
+$$ \text{distance} = \sqrt{\sum(x_{ij} - x_{0j})^{2} }$$ 
 
-where $j$ is an index of features in $x$ and $i$ is an index of records (observations). For each $i$, a neighborhood of $k$ records can be determined using the ranked  ascending distance to all other records. The value of $y$ for record $i$ can be approximated by the $k$ neighbors that surround $i$. For discrete target variables, $y_i$ is determined using a procedure called *majority voting* where the most prevalent value in the neighborhood around $i$ is assigned. For continuous variables, the neighborhood mean is used to approximate $y_i$.
+where $j$ is an index of features in $x$ and $i$ is an index of records (observations). For each $i$, a neighborhood of taking the $k$ records with the shortest distance to that point $i$. From that neighborhood, the value of $y$ can be approximated. Given a discrete target variables, $y_i$ is determined using a procedure called *majority voting* where the most prevalent value in the neighborhood around $i$ is assigned. For example, the ten closests points relative to a given point $i$ are provided:
 
+```{r, echo=FALSE}
+  #Vector of top 10 
+    neighbors <- c("a","a","a","c","c","d","a","c","a","e")
+```
 
-How does one implement this exactly? To show this process, pseudocode will be relied upon. It's an informal language to articulate and plan the steps of an algorithm or program, principally using words and text as opposed to formulae. There are different styles of pseudocode, but the general rules are simple: indentation is used to denote a dependency (e.g. control structures). For all techniques, we will provide pseudocode, starting with KNN:
+Choosing a value of $k = 4$ would mean that the subsample is made up of three "a"'s and one "b". As "a" makes up the majority, we can approximate $y_i$ as "a", assuming points that are closer together are more related. For continuous variables, the mean of neighboring records is used to approximate $y_i$.
+
+How does one implement this exactly? To show this process, pseudocode will be relied upon. It's an informal language to articulate and plan the steps of an algorithm or program, principally using words and text as opposed to formulae. There are different styles of pseudocode, but the general rules are simple: indentation is used to denote a dependency (e.g. control structures). For all techniques, we will provide pseudocode, starting with kNN:
 
 #####Pseudocode
 ```
@@ -120,9 +126,12 @@ kNN( k, set, y, x){
 }
 ```
 
-The procedure described above yields the results for just one value of $k$. However, kNNs, like many other algorithms, are an iterative procedure, requiring tuning of *hyperparameters* -- or values that are starting and guiding assumptions of a model. In the case of kNNs, $k$ is a hyperparameter and we do not precisely know the best value of $k$. Often times, tuning of hyperparameters involve a *grid search*, which is a process that involves systematic testing of along equal intervals of the hyperparameter.
+The procedure described above yields the results for just one value of $k$. However, kNNs, like many other algorithms, are an iterative procedure, requiring tuning of *hyperparameters* -- or values that are starting and guiding assumptions of a model. In the case of kNNs, $k$ is a hyperparameter and we do not precisely know the best value of $k$. Often times, tuning of hyperparameters involves a *grid search*, a process whereby a range of possible hyperparameters is determined and the algorithm is tested at equal intervals from the minimum to maximum of that tuning range. 
 
-Below, a grid search has been conducted for a kNN along intervals of a $log_10$ scale. The large points represent a training set and the surrounding area has been *scored* or predicted to show the shape of the region corresponding each value of $k$. 
+To illustrate this, a two-dimensional dataset with a target $y$ that takes of values $0$ and $1$ has been plotted below. Graph (1) plots the points, color-coded by their labels. Graph (2), (3), and (4) show the results of a grid search along intervals of a $log_{10}$ scale, where the background is color-coded as the predicted label for the corresponding value of $k$. In addition to $k$, two measures are provided above each graph to help contextualize predictions: the True Positive Rate or $TPR$ and the True Negative Rate or $TNR$. 
+
+The $TPR$ is defined as $TPR = \frac{\text{Number of values that were correctly predicted}}{\text{Number of actual cases values}}$. The $TNR$ is similarly defined as $TNR = \frac{\text{Number negative values that were correctly predicted}}{\text{Number of actual negative values}}$. Both are measures bound between 0 and 1, where higher values indicate a higher degree of accuracy. A high $TPR$ and low $TNR$ indicates that the algorithm is ineffective in distinguishing between positive and negative cases. The same is true with a low $TPR$ and high $TNR$. This is exactly the case in Graph (4) where all points are classified as $Y = 1$, which is empirically characterized by $TNR = 0.02$ and $TPR = 1$.
+
 
 ```{r, fig.height=4, echo=FALSE, warning=FALSE, message = FALSE}
   library(ggplot2)
@@ -137,7 +146,7 @@ Below, a grid search has been conducted for a kNN along intervals of a $log_10$ 
   test <- expand.grid(x1 = seq(-3, 3, 0.1), x2 = seq(-5,3, 0.05))
   g0 <- ggplot() +
           geom_point(aes(x = x1, y = x2, colour = factor(y)), data = df, alpha = 1, size = 3, shape = 19) +
-      xlim(-3, 3) + ylim(-5, 3)  + ggtitle("Two classes")  +theme(plot.title = element_text(size = 11))
+      xlim(-3, 3) + ylim(-5, 3)  + ggtitle("(1) Two classes")  +theme(plot.title = element_text(size = 11))
   
   for(i in c(1, 10, 100)){
     res <- knn(df[,2:3], test, df$y, k = i, prob=TRUE)
@@ -152,7 +161,7 @@ Below, a grid search has been conducted for a kNN along intervals of a $log_10$ 
     g <- ggplot() +
           geom_point(aes(x = x1, y = x2, colour = factor(y)), data = test, alpha = 0.15, size = 0.7, shape = 15) +
           geom_point(aes(x = x1, y = x2, colour = factor(y)), data = df, alpha = 1, size = 2, shape = 19) +
-          xlim(-3, 3) + ylim(-5, 3) + ggtitle(paste0("k = ", i, "; TPR = ", tpr, "; TNR = ", tnr)) +theme(plot.title = element_text(size = 11))
+          xlim(-3, 3) + ylim(-5, 3) + ggtitle(paste0("(",log10(i)+1,")","k = ", i, "; TPR = ", tpr, "; TNR = ", tnr)) +theme(plot.title = element_text(size = 11))
     assign(paste0("g",i), g)
     test <- test[,c(-3,-4)]
     
@@ -379,7 +388,7 @@ With this value, we can now put this finding to the test by plotting the interpo
 ##Ordinary Least Squares (OLS) Regression
 Every year, cities and states across the United States publish measures on the performance and effectiveness of operations and policies. Performance management practitioners typically would like to know the direction and magnitude, as illustrated by a linear trend line. Is crime up? How are medical emergency response times? Are we still on budget? Which voting blocks are drifting?
 
-For example, the monthly number of toll transactions in the State of Maryland is plotted over time from 2012 to early 2016. The amount is growing with a degree of seasonality. But to concisely summarize the prevailing direction of toll transactions, we can use a trend line. That trend line is an elegant solution that shows the shape and direction of a linear relationship, taking into account all values of the vertical and horizontal axes to find a line that weaves through and divides point in a symmetric fashion.
+For example, the monthly number of highway toll transactions in the State of Maryland is plotted over time from 2012 to early 2016. The amount is growing with a degree of seasonality. But to concisely summarize the prevailing direction of toll transactions, we can use a trend line. That trend line is an elegant solution that shows the shape and direction of a linear relationship, taking into account all values of the vertical and horizontal axes to find a line that weaves through and divides point in a symmetric fashion.
 
 ```{r, echo=FALSE, fig.height=3}
   setwd("/Users/jeff/Documents/Github/data-science/lecture-05")
@@ -410,11 +419,11 @@ $$\text{slope = } \hat{\beta_1} = \frac{\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{
 and 
 
 $$\text{intercept = } \hat{\beta_0} = \bar{y}-\hat{\beta_1}\bar{x}$$
-In a bivariate case such as this one, it's easy to see the interplay. In the slope, the covariance of $X$ and $Y$ ($\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}$) is tempered by the variance of $x$ ($\sum_{i=1}^{n}(x_i-\bar{x})^2$). If the covariance is greater than the variance, then the absolute value of the slope will be greater than one. The direction of the slope (positive or negative) is determined by the interaction between $x$ and $y$ alone. 
+In a bivariate case such as this one, it's easy to see the interplay. In the slope, the covariance of $X$ and $Y$ ($\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}$) is tempered by the variance of $x$ ($\sum_{i=1}^{n}(x_i-\bar{x})^2$). If the covariance is greater than the variance, then the absolute value of the slope will be greater than one. The direction of the slope (positive or negative) is determined by the y7 between $x$ and $y$ alone. 
 
-Trend lines are one of many uses of a class of supervised learning called regression, but best known of which is Ordinary Least Squares or Least Squares Regression. In multivariate cases where many variables are used to get a handle on what factors influence $y$, the problem gets more complex. Nonetheless, OLS regression is the quantitative workhorse of data-driven public policy. The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. 
+Trend lines are one of many uses of a class of supervised learning called regression, but best known of which is Ordinary Least Squares (also referred to as Least Squares Regression or Gaussian Generalized Linear Models). There are quite a few other types of regression, such as quantile regression, non-linear least squares, partial least squares among others. In multivariate cases where many variables are used to get a handle on what factors influence $y$, the problem gets more complex.  
 
-To better understand arguably the most commonly used supervised learning method, we can start by defining a regression formula:
+OLS regression is the quantitative workhorse of data-driven public policy. The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. To better understand arguably the most commonly used supervised learning method, we can start by defining a regression formula:
 
 $$y_i = w_0 x_{i,0} + w_{1} x_{i,1} + ... + w_{k} x_{i,k} + \epsilon_{i}$$
 
@@ -429,15 +438,12 @@ where:
 
 Note that $x_{i,0} = 1$, thus $w_0$ is often times represented on its own. For parsimony, this formula can be rewritten in matrix notation as follows:
 
-$$y = w^Tx$$
+$$Y = W^TX$$
 such that $y$ is a vector of dimensions $n \times 1$, $x$ is a matrix with dimensions $n \times k$, and $w$ is a vector of length $k$. 
 
 Given this formula, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
 or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y_i})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. The SSE and MSE are measures of uncertainty relative to the observed response. Minimization of least squares can be achieved through a method known as *gradient descent*.
 
-[More on gradient descent here]
-
-####Assumptions
 
 ####Interpretation
 There are a number of attributes and outputs of a linear squares regression model that are examined, namely the R-squared, coefficients, and error.
@@ -458,14 +464,3 @@ Putting these values together is fairly simple:
 Bringing all the values together, $$R^2 = 1 - \frac{SSE}{TSS}$$. As TSS will always be the largest value, $R^2$ will always be bound between 0 and 1 where a value of $R^2 = 0$ indicates a regression line in which $x$ does not account for variation in the target whereas $R^2 = 1$ indicates a perfect regression model where $x$ accounts for all variation in $y$. 
 
 In addition, Root Mean Square Error (RMSE) is helpful for understanding the variation of the predictions relative to $y$. RMSE is defined as $$\text{RMSE} = \sigma =  \sqrt{\frac{\sum_{i=1}^n(\hat{y_i}-y_i)^2}{n}}$$. Note that RMSE is interpreted in terms of levels of $y$, which may not necessarily facilitate easy communication of model accuracy. In certain scenarios, particularly for time series forecasts, Mean Absolute Percentage Error (MAPE) is used to contextualize prediction accuracy relative to $y$. This measure is defined as $$\text{MAPE} = \frac{100}{n}\sum_{i=1}^n|\frac{\hat{y_i}-y_i}{y_i}|$$.
-
-####Under the hood
-```
-OLS( k, set){
-  
-  Define cost function to computer total squared error
-  Gradient Descent
-  
-}
-```
-
