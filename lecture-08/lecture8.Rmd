@@ -1,48 +1,118 @@
 ---
-title: "Lecture 8: Classifiers"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
-author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+title: 'Lecture 8: Classifiers'
+author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---
 
-Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
+Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? In We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
 
 Lecture objectives
 
 ##Overview
-###Three common classification problems in public policy:
-####Example #1
-[Example goes here]
+###Three classification problems in public policy:
 
-####Example #2
-[Example goes here]
-
-####Example #3
-[Example goes here]
 
 ##Classifiers
-###What are they?
 [text goes here]
 
-###Structure of a classification problem
-- Target variables
-- Input variables
-- Objective function and evaluation measures
-- model experiment design
-- Cross validation versus train/validate/test
 
-###Framing Dataset
-[text goes here]
+###Decision Trees
+In everyday policy operations, a decision tree is a common tool used for communicating processes, whether it's how an actor moves through a complex system or how a population can be described based on a set of criteria. 
 
-###Types of classifiers
-[text goes here]
+For example, 14% of Georgians were without healthcare coverage in 2015. This is helpful to know, but ultimately, a degree of specificity would be required to use this knowledge as a tool for outreach. Using decision trees, it's possible to develop discrete profiles of the population based on observable characteristics such that discrete if-else criteria identify smaller subpopulations with similar membership. In this case, membership means health coverage. Based on this decision tree, we can infer that non-citizens under the age of 64 without a college education are 89% likely to not have coverage, and citizens between 16 and 64 who are not married have a 71% chance of not having health coverage.
 
+Whether its failure analysis of engineering mechanisms or developing customer profiles of program participation, decision trees can help characterize intricate, non-linear patterns in data.
+
+```{r, echo=F}
+# Classification Tree with rpart
+library(rpart)
+library(rpart.plot)
+
+temp <- tempfile()
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
+unz <- unzip(temp, exdir=getwd())
+df <- read.csv(unz[1])
+
+df <- df[df$AGEP>=16,]
+df$SCHL2[df$SCHL<16 ] <- "1 - Less than HS"
+df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "2 - HS"
+df$SCHL2[df$SCHL==21] <- "3 - Undergraduate Degree"
+df$SCHL2[df$SCHL>21] <- "4 - Graduate Degree"
+
+df$coverage <- NA
+df$coverage[df$HICOV == 2] <- "No Coverage"
+df$coverage[df$HICOV == 1] <- "Coverage"
+
+df$CIT2 <- NA
+df$CIT2[df$CIT != 5] <- "Citizen"
+df$CIT2[df$CIT == 5] <- "Not citizen"
+
+df$MAR2 <- NA
+df$MAR2[df$MAR == 1] <- "Married"
+df$MAR2[df$MAR == 2] <- "Widowed"
+df$MAR2[df$MAR == 3] <- "Divorced"
+df$MAR2[df$MAR == 4] <- "Separated"
+df$MAR2[df$MAR == 5] <- "Never Married"
+
+temp <- df[df$coverage=="Coverage",]
+df_sub <- rbind(df[df$coverage=="No Coverage",], temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
+# grow tree 
+set.seed(123)
+fit <- rpart(factor(coverage) ~ AGEP+ factor(CIT2) +factor(MAR2)+ factor(SCHL2) +factor(RAC1P), method="class", data=df_sub)
+
+tree.pred <- predict(fit, df_sub, type='class')
+tab <- table(tree.pred, df_sub$coverage)
+#(tab[1] + tab[4])/nrow(df_sub)
+
+# plot tree 
+rpart.plot(fit,extra=104, box.palette="GnBu",
+           branch.lty=3, shadow.col="gray", nn=TRUE)
+
+
+```
+
+
+_The Gist_. Decision trees rely on basic tenants of information theory, namely the idea of _information gain_. Given a labeled set of data that contains input features, the structure of decision trees can be likened to branches of a tree: moving from the base of the tree upwards, the tree trunk splits into two or more large branches, which then in turn split into even smaller branches, eventually reaching even small twigs with leaves. Using this physical analogy, decision trees are a representation of information, subset into smaller, more homogeneous subsamples. By recursively splitting input features into two subsamples at a time with the goal of achieving greater homogeneity of labeled examples in each subsample. This splitting process is continued on each subsample until all subsamples contain only one class or a stopping criteria is met. The point at which a feature is split is known as a decision node, the trunk of the tree from which all branches spring is known as the root node, and the termini of the tree with the most homogeneous subsamples are known as leafs. 
+
+There are a number of forms decision trees are *grown*, the most commonly implemented algorithm is the C4.5.
+
+```
+C4.5 (Examples, Target, Input Features)
+  Create root node 
+  Check levels of input features for "pure" or "nearly pure" subgroups
+  [Fill-in]
+```
+
+#### Concepts
+
+- Recursively looks for which input feature to split based on a statistical criterion
+Typically uses _entropy_, which is a core measure form information theory. $\text{Entropy} = \sum{-p_{Y=1}log_2(p_{Y=1}) + -p_{Y=1}log_2(p_{Y=1})}$
+[Information gain]
+
+- Pruning
+
+
+
+###Random Forests
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
 ```{r}
 #
 ```
+
+
+###Support Vector Machines
+- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
+```{r}
+#
+```
+
 
 
 ####Logistic Regression
@@ -52,18 +122,6 @@ Lecture objectives
 ```
 
 
-####Decision Trees
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
-```
-
-
-####Random Forests
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
-```
 
 ##Applications of classifiers
 ###Appropriate uses of classification techniques
