@@ -125,7 +125,7 @@ $(document).ready(function () {
 <div id="TOC">
 <ul>
 <li><a href="#overview">Overview</a><ul>
-<li><a href="#three-common-classification-problems-in-public-policy">Three common classification problems in public policy:</a></li>
+<li><a href="#three-classification-problems-in-public-policy">Three classification problems in public policy:</a></li>
 </ul></li>
 <li><a href="#classifiers">Classifiers</a><ul>
 <li><a href="#what-are-they">What are they?</a></li>
@@ -143,15 +143,15 @@ $(document).ready(function () {
 </ul>
 </div>
 
-<p>Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.</p>
+<p>Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? In We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.</p>
 <p>Lecture objectives</p>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<div id="three-common-classification-problems-in-public-policy" class="section level3">
-<h3>Three common classification problems in public policy:</h3>
+<div id="three-classification-problems-in-public-policy" class="section level3">
+<h3>Three classification problems in public policy:</h3>
 <div id="example-1" class="section level4">
 <h4>Example #1</h4>
-<p>[Example goes here]</p>
+<p>Risk models</p>
 </div>
 <div id="example-2" class="section level4">
 <h4>Example #2</h4>
@@ -187,13 +187,6 @@ $(document).ready(function () {
 <h3>Types of classifiers</h3>
 <p>[text goes here]</p>
 <pre class="r"><code>#</code></pre>
-<div id="decision-trees" class="section level4">
-<h4>Decision Trees</h4>
-<ul>
-<li>statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation</li>
-</ul>
-<pre class="r"><code>#</code></pre>
-</div>
 <div id="logistic-regression" class="section level4">
 <h4>Logistic Regression</h4>
 <ul>
@@ -201,8 +194,21 @@ $(document).ready(function () {
 </ul>
 <pre class="r"><code>#</code></pre>
 </div>
-<div id="k-nearest-neighbors" class="section level4">
-<h4>K-Nearest Neighbors</h4>
+<div id="decision-trees" class="section level4">
+<h4>Decision Trees</h4>
+<p>In everyday policy operations, a decision tree is a common form of communicating processes or how one moves through a complex process based on a set of criteria. Often times, the trees are built based on a logical order of events in a process. In data science, decision trees are used to identify discrete if-else criteria that can be used to segment a sample into smaller homogeneous subsamples of a given label. Unlike the decision trees of a policy office, the supervised learning approach is purely empirical, capitalizing on principles of information theory.</p>
+<p>Given a labeled set of data that contains input features, the structure of decision trees can be likened to branches of a tree: moving from the base of the tree upwards, the tree trunk splits into two or more large branches, which then in turn split into even smaller branches, eventually reaching even more small twigs with leafs. In decision tree parlance, the tree is grown by recursively splitting input features into two subsamples at a time with the goal of achieving greater homogeneity of labeled examples in each subsample. This splitting process is continued on each subsample until all subsamples contain only one class or a stopping criteria is met. The point at which a feature is split is known as a decision node, the trunk of the tree from which all branches spring is known as the root node, and the termini of the tree with the most homogeneous subsamples are known as leafs.</p>
+<p>ID3 - Recursively looks for which input feature to split based on a statistical criterion - Typically uses <em>entropy</em>, which is a core measure form information theory. <span class="math inline">\(\text{Entropy} = \sum{-p_{Y=1}log_2(p_{Y=1}) + -p_{Y=1}log_2(p_{Y=1})}\)</span></p>
+<div id="pseudocode" class="section level5">
+<h5>Pseudocode</h5>
+<pre><code>Decision Tree(set){
+  Root
+  
+}</code></pre>
+</div>
+</div>
+<div id="random-forests" class="section level4">
+<h4>Random Forests</h4>
 <ul>
 <li>statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation</li>
 </ul>
