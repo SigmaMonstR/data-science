@@ -1,5 +1,5 @@
 ---
-title: "Test Script"
+title: "Codealong -- Lecture 4"
 subtitle: "Intro to Data Science for Public Policy, Spring 2016"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
 output: 
@@ -17,7 +17,7 @@ Note: While each record is associated with a sampling weight, we will treat each
 
 ###Get data 
 ```{r, echo=FALSE}
-setwd("/Users/sigmamonstr/Github/data-science/lecture-03")
+setwd("/Users/sigmamonstr/Github/data-science/lecture-04")
 
 ```
 ```{r, warning=FALSE, message=FALSE}
@@ -34,21 +34,6 @@ colnames(acs)[1:20] #Show variable names 1 through 20
 str(acs[,1:20] )#Show variable structure names 1 through 20 
 ```
 
-While it is a good habit to learn to dig and search through the data dictionary, a simple script named 'check_dict.R' has been written to help sort through the dictionary with ease. This has been provided in the [Lecture 3 Github repository](https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-03). The script can be loaded using one of the two following commands that use the `source()` method to read in the script:
-
-```{r, message=FALSE, warning=FALSE}
-#Use if repository has been cloned onto your local drive
-  source("check_dict.R")
-
-#Use if repository has not been cloned
-  source("https://raw.githubusercontent.com/GeorgetownMcCourt/data-science/master/lecture-03/check_dict.R")
-```
-
-To use the function, simply type `check_dict([variable-name])` or `check_dict([variable-name], TRUE)` to have the results render as an HTML table. For example, what do "AGEP" and "ESR" represent? Using this function it becomes easier to check.
-```{r,  message=FALSE, warning=FALSE}
-check_dict("AGEP")
-check_dict("ESR")
-```
 
 ###Extract Variables and Clean Up
 To make the analysis a bit more manageable, 14 variables have been selected. The analysis has been limited to ages 16 and above.
@@ -72,7 +57,6 @@ AGEP, PINCP, POVPIP, WKHP should be numeric
 
 ```{r, eval=FALSE}
 #Label factors manually
-  check_dict("MAR")
   df_extract$MAR <- factor(df_extract$MAR,labels=c("Married","Widowed","Divorced","Separated", "Never married or under 15 yrs old"))
 ```
 
