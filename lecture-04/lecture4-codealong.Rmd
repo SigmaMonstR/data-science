@@ -1,0 +1,144 @@
+---
+title: "Codealong -- Lecture 4"
+subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
+---
+
+##Demo
+To put EDA into context, we will rely upon the American Community Survey ([ACS](http://www.census.gov/programs-surveys/acs/)), which is one of the most relied upon public data sources in the United States. A survey that is produced by the U.S. Census Bureau, the ACS provides a highly detailed socioeconomic snapshot of households and communities, allowing for data-driven insight to inform public policy as well as business decisions. The data dictionary containing variable definitions and descriptions can be found [here](http://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict15.txt).
+
+Note: While each record is associated with a sampling weight, meaning that one record represents more than one record. For simplicity, we will treat each record with equal weight. We will also only focus on one state in this exercise -- in this case, we have selected Iowa. The same analysis can be easily replicated for other states if not the entire United States.
+
+###Get data 
+To start, we will need to retrieve data from the Census website: "[https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip](https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip)". 
+
+First, we create a temporary file using ```tempfile()```, which will be used to hold a the zipfile. Then, we will need to use the ```download.file()``` method, specifying the ```mode = "wb"``` to ensure the file downloads the binary values -- a simple trick to get around security problems associated with "https". We download the zipfile to the ```temp``` file location. 
+```{r, warning=FALSE, message=FALSE}
+  temp <- tempfile()
+  url <- "https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip"
+  download.file(url, temp, mode="wb")
+```
+
+Now that the data has been downloaded, we will need to unzip the file using ```unzip()```, and place it in our current working drive ```getwd()```. As the dataset is a .csv, we can use the ```read.csv()``` method to import the data.
+```{r, warning=FALSE, message=FALSE}
+  unz <- unzip(temp, exdir=getwd())
+  acs <- read.csv(unz[1])
+```
+
+###Examine data structure
+Now, let's take a look at the structure of the first 20 variables using the ```str()`` method. "PUMA" and "ST" are codes for Public Use Microdata Areas and States, both of which are geographic units, yet the data represents them as integers. These variables as well as CIT (citizenship), SEX (sex) and a few others are also coded as integers although they represent factors. We will need to clean these up before using them for visual analysis.
+```{r}
+  str(acs[,1:20])
+```
+
+
+###Extract variables and clean Up
+To make the analysis a bit more manageable, we will extract 14 demographic variables, limit the analysis to ages 16 and above.
+
+```{r}
+  var_list <- c("HICOV","RAC1P","MAR","SEX","ESR","CIT","AGEP","PINCP","POVPIP","WKHP","SCHL")
+  df <- acs[acs$AGEP>=16, var_list]
+
+  #Healthcare coverage: Create one binary variable for calculations, another with characters
+  df$coverage[df$HICOV == 1] <- 1
+  df$coverage[df$HICOV == 2] <- 0
+    
+  df$hicov2[df$HICOV == 1] <- "With Healthcare"
+  df$hicov2[df$HICOV == 2] <- "Without Healthcare"
+
+  #Gender
+  df$sex2[df$SEX == 1] <- "Male"
+  df$sex2[df$SEX == 2] <- "Female"
+
+  #Race
+  df$race2[df$RAC1P == 1] <- "White alone"
+  df$race2[df$RAC1P == 2] <- "Black or African American alone"
+  df$race2[df$RAC1P == 3] <- "American Indian alone"
+  df$race2[df$RAC1P == 4] <- "Alaska Native alone"
+  df$race2[df$RAC1P == 5] <- "American Indian and Alaska Native tribes specified"
+  df$race2[df$RAC1P == 6] <- "Asian alone"
+  df$race2[df$RAC1P == 7] <- "Native Hawaiian and Other Pacific Islander alone"
+  df$race2[df$RAC1P == 8] <- "Some other race alone"
+  df$race2[df$RAC1P == 9] <- "Two or more"
+  
+  #Marital Status
+  df$mar2[df$MAR == 1] <- "Married"
+  df$mar2[df$MAR == 2] <- "Widowed"
+  df$mar2[df$MAR == 3] <- "Divorced"
+  df$mar2[df$MAR == 4] <- "Separated"
+  df$mar2[df$MAR == 5] <- "Never Married"
+  
+  #Employment Status
+  df$esr2[df$ESR %in% c(1, 2, 4, 5)] <- "Employed"
+  df$esr2[df$ESR == 3] <- "Unemployed"
+  df$esr2[df$ESR == 6] <- "Not in labor force"
+
+  #Citizenship
+  df$cit2[df$CIT %in% c(1, 2, 3, 4)] <- "Citizen"
+  df$cit2[df$CIT == 5] <- "Not citizen"
+  
+  #School
+  df$schl2[df$SCHL<16 ] <- "Less than HS"
+  df$schl2[df$SCHL>=16 & df$SCHL<21] <- "HS Degree"
+  df$schl2[df$SCHL==21] <- "Undergraduate Degree"
+  df$schl2[df$SCHL>21] <- "Graduate Degree"
+```
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+##Comparisons relative to target variable
+  prop.table(table(df$schl2, df$hicov2), 1)
+
+prop.table(table(df_extract$ESR, df_extract$coverage),1)
+
+#Marital status
+#1 .Married
+#2 .Widowed
+#3 .Divorced
+#4 .Separated
+#5 .Never married or under 15 years old
+prop.table(table(df_extract$MAR, df_extract$coverage),1)
+
+```
+
+Age and coverage
+```{r, warning=FALSE, message=FALSE}
+library(ggplot2)
+ggplot(df_extract, aes(x=AGEP, y=coverage))+
+      geom_smooth() + labs(x = "Age (years)", y = "% Without Coverage  (1.0 = 100%)")
+```
+
+Four stories in four graphs
+```{r, warning=FALSE, message=FALSE}
+library(gridExtra)
+
+p1 <- ggplot(df_extract, aes(x=AGEP, y=coverage))+ 
+      geom_smooth() + labs(x = "Age (years)", y = "% Without Coverage (1.0 = 100%)")
+
+p2 <-ggplot(df_extract, aes(x=log(PINCP), y=coverage))+
+  geom_smooth() + labs(x = "log(Personal Income)", y = "% Without Coverage (1.0 = 100%)")
+
+p3 <- ggplot(df_extract, aes(x=WKHP, y=coverage))+
+  geom_smooth() + labs(x = "Hours Worked Per Week", y = "% Without Coverage (1.0 = 100%)")
+
+p4 <-  ggplot(df_extract, aes(x=POVPIP, y=coverage))+
+  geom_smooth() + labs(x = "Poverty Level (100 = at level)", y = "% Without Coverage (1.0 = 100%)")
+
+grid.arrange(p1,p2,p3,p4, ncol=2)
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(df_extract, aes(x=AGEP, y=HICOV)) + geom_smooth() 
+ggplot(df_extract, aes(x=log(PINCP), y=HICOV)) + geom_smooth() 
+
+ggplot(df_extract, aes(log(PINCP))) + geom_density()
+ggplot(df_extract, aes(PINCP)) + geom_density() + scale_x_log10()
+```

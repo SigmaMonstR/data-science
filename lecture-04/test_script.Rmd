@@ -87,20 +87,6 @@ df_extract$coverage[df_extract$HICOV == 1] <- 0
 ##Comparisons relative to target variable
 prop.table(table(df_extract$hs, df_extract$coverage),1)
 
-# RAC1P		1	
-# Recoded detailed race code
-# 1 .White alone		
-# 2 .Black or African American alone	
-# 3 .American Indian alone		
-# 4 .Alaska Native alone		
-# 5 .American Indian and Alaska Native tribes specified; or American
-# .Indian or Alaska Native, not specified and no other races
-# 6 .Asian alone		
-# 7 .Native Hawaiian and Other Pacific Islander alone
-# 8 .Some Other Race alone		
-# 9 .Two or More Races		
-prop.table(table(df_extract$RAC1P, df_extract$coverage),1)
-
 # Employment status recode
 # b .N/A (less than 16 years old)
 # 1 .Civilian employed, at work
