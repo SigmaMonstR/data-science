@@ -83,7 +83,7 @@ The point at which a feature is split is known as a decision node, the trunk of 
   df_sub <- rbind(df[df$coverage=="No Coverage",], temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
   # grow tree 
 
-fit <- rpart(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P, method="class", data=df_sub)
+fit <- rpart(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P + WAGP, method="class", data=df_sub)
 
 #Accuracy
   tree.pred <- predict(fit, df_sub, type='class')
