@@ -101,8 +101,8 @@ Date,Facility,Total Transactions,Transponder Transactions,Percentage of Transpon
 7/31/13 0:00,HMB,433063,395320,91%,,"6000 Pulaski HighwayPerryville, MD 21903(39.567807, -76.073059)"
 7/31/13 0:00,ICC,1542795,,,Transponder data not available,"16902 Crabbs Branch WayRockville, MD 20855(39.122199, -77.188097)"
 7/31/13 0:00,WPL,1308652,795346,60.70%,,"850 Revell HighwayAnnapolis, MD 21409(39.01338, -76.406716)"
-7/31/13 0:00,HWN,323430,158572,49%,,"965 Orland Park RoadNewburg, MD 20664(38.364741, 76.9761)"
-7/31/13 0:00,JFK,1419630,892288,62.85%,,"1TurnpikePerryville, MD 21903(39.589249, -76.072845)"
+7/31/13 0:00,HWN,323430,158572,49%,,"9665 Orland Park RoadNewburg, MD 20664(38.364741, 76.9761)"
+7/31/13 0:00,JFK,1419630,892288,62.85%,,"1 TurnpikePerryville, MD 21903(39.589249, -76.072845)"
 8/31/13 0:00,FMT,4011477,2818171,70%,,"3990 Leland AveBaltimore, MD 21224(39.2661, -76.561575)"
 8/31/13 0:00,FSK,946354,721840,76.30%,,"303 Authority DriveBaltimore, MD 21222(39.230495, -76.510661)"
 8/31/13 0:00,JFK,1481470,951480,64.20%,,"1 TurnpikePerryville, MD 21903(39.589249, -76.072845)"
@@ -199,7 +199,7 @@ Date,Facility,Total Transactions,Transponder Transactions,Percentage of Transpon
 7/31/14 0:00,WPL,1332621,828136,62%,,"850 Revell HwyAnnapolis, MD 21409(39.01338, -76.406716)"
 7/31/14 0:00,HWN,342125,173540,51%,,"9665 Orland Park RdNewburg, MD 20664(38.364741, -76.9761)"
 7/31/14 0:00,ICC,1684163,,,Transponder data not yet available,"16902 Crabbs Branch WayRockville, MD 20855(39.122199, -77.188097)"
-8/31/14 0:00,HWN,353604,178492,50%,,"9665 Orland ParkNewburg, MD 20 664(38.364741, -76.98761)"
+8/31/14 0:00,HWN,353604,178492,50%,,"9665 Orland ParkNewburg, MD 20664(38.364741, -76.98761)"
 8/31/14 0:00,ICC,1533189,,,Transponder data not year available,"16902 Crabbs Branch WayRockville, MD 20855(39.122199, -77.188097)"
 8/31/14 0:00,BHT,2403144,1648447,69%,,"1200 Frankfurst AveBaltimore, MD 21226(39.240612, -76.587157)"
 8/31/14 0:00,FMT,3797896,2645308,70%,,"3990 Leland AveBaltimore, MD 21224(39.2661, -76.561575)"
@@ -268,7 +268,7 @@ Date,Facility,Total Transactions,Transponder Transactions,Percentage of Transpon
 4/30/15 0:00,JFK,1342485,924227,69%,,"1 TurnpikePerryville, MD 21903(39.567807, -76.073059)"
 4/30/15 0:00,HMB,444098,411672,93%,,"6000 Pulaski HwyAnnapolis, MD 21409(39.01338, -76.406716)"
 4/30/15 0:00,WPL,1065880,733576,69%,,"850 Revell HwyAnnapolis, MD 21409(39.01338, -76.406716)"
-4/30/15 0:00,ICC,2284564,,,transponder data not yet available,"19602 Crabbs Branch WayRockville, MD 20855(39.122199, -77.188097)"
+4/30/15 0:00,ICC,2284564,,,transponder data not yet available,"16902 Crabbs Branch WayRockville, MD 20855(39.122199, -77.188097)"
 5/31/15 0:00,BHT,2508649,1735894,69%,,"1200 Frankfurst AveBaltimore, MD 21226(39.240612, -76.587157)"
 4/30/15 0:00,BHT,2439148,1732407,71%,,"1200 FrankfurstBaltimore, MD 21226(39.240612, -76.587157)"
 5/31/15 0:00,FMT,3698772,2612391,71%,,"3990 Leland AveBaltimore, MD 21224(39.2661, -76.561575)"
