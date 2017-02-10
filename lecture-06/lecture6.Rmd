@@ -20,10 +20,6 @@ Supervised learning is used everyday whether in the social and natural sciences 
 5. __Health__. Estimating one's level of physically activity using smartphone accelerometer data as inputs and user-tagged labels as targets. 
 6. __Operations__. Forecasting call volumes at a call center to help set appropriate staffing levels to meet citizen demand.
 
-
-
-##Thinking about supervised learning
-
 The structure of a supervised learning project is much like taking a course on any academic subject. Let's take the example of a calculus class. Students are taught concepts and the application of those concepts through readings and homeworks. Each concept has a structure that is learned by examining and working through practice problems that are representative of that concept. For example, when working with derivatives, the first derivative of $f(x) = x^2$ is $f'(x) = 2x$ and its second derivative is $f''(x) = 2$. Under certain conditions, certain mathematical functions such as exponential and logarithmic functions behave differently, and the rules and patterns for handling those derivatives need to be taken into account when approaching derivative problems. Eventually, the professor will schedule and administer a midterm or final covering all the different learned concepts. In preparation, a series of practice exams are typically provided to students as a way to test their knowledge. A practice exam is most helpful when the  material has already been well-studied and is taken only once, using examples that were answered incorrectly as an opportunity to provide insight into gaps in knowledge. Otherwise, repeatedly taking the same practice exam will provide a false sense of mastery as a student takes and re-takes and learns the answers as opposed to the eccentricities of the subject at hand. The real test is the actual exam, in theory indicating how well concepts were understood and re-applied.
 
 There are parallels between taking a class and supervised learning tasks. In a classroom setting, homeworks and practice tests are used to build applied skills to accomplish specific tasks, whereas the actual exam is used to determine precisely how robust those skills are. In supervised learning, the data is often times partitioned into two or more parts, then an algorithm is *trained* on at least one partition to learn underlying patterns, then the learned rules and weights are applied to the remaining part of the *hold out* sample to *test* the accuracy of the algorithm. 
@@ -91,6 +87,229 @@ For data where no clear labels are available, we may rely on "unsupervised learn
 With this framework in place, for the remainder of this chapter, we will explore two supervised learning algorithms that handle continuous variables, but use very different formulations: k-Nearest Neighbors (KNN) and Linear Regression.
 
 
+##Ordinary Least Squares (OLS) Regression
+Every year, cities and states across the United States publish measures on the performance and effectiveness of operations and policies. Performance management practitioners typically would like to know the direction and magnitude, as illustrated by a linear trend line. Is crime up? How are medical emergency response times? Are we still on budget? Which voting blocks are drifting?
+
+For example, the monthly number of highway toll transactions in the State of Maryland is plotted over time from 2012 to early 2016. The amount is growing with a degree of seasonality. But to concisely summarize the prevailing direction of toll transactions, we can use a trend line. That trend line is an elegant solution that shows the shape and direction of a linear relationship, taking into account all values of the vertical and horizontal axes to find a line that weaves through and divides point in a symmetric fashion.
+
+```{r, echo=FALSE, fig.height=3}
+  setwd("/Users/jeff/Documents/Github/data-science/lecture-06")
+  library(ggplot2)
+  data <- read.csv("maryland_tolls.csv")
+  val <- aggregate(data$Total.Transactions, by=list(data$Date), FUN=sum)
+  colnames(val) <- c("Date","Transactions")
+  val$Date <- strptime(as.character(val$Date),"%m/%d/%Y %H:%M")
+  val <- val[order(val$Date),]
+  val$time <- 1:nrow(val)
+  val$Transactions <- val$Transactions / 1000000
+  
+  a <- coef(lm(Transactions ~ time, data = val))
+  ggplot() + 
+      geom_line(aes(x = time, y = Transactions),  data = val, colour = "blue") + 
+      geom_point(aes(x = time, y = Transactions),  data = val, colour = "blue") +
+      geom_abline(intercept = a[1], slope = a[2]) + 
+      ylab("Toll Transactions (millions)") + xlab("Time (months)")
+
+```
+
+This trend line can be simply described in using the following formula:
+
+$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
+
+and every point plays a role. We can infer that the trend grows at approximately 36,000 transactions per month.  Using the observed response $y$ and the independent variable $x$, calculating the intercept and slope is a fairly simple task:
+
+$$\text{slope = } \hat{\beta_1} = \frac{\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}}{\sum_{i=1}^{n}(x_i-\bar{x})^2}$$ 
+and 
+
+$$\text{intercept = } \hat{\beta_0} = \bar{y}-\hat{\beta_1}\bar{x}$$
+In a bivariate case such as this one, it's easy to see the interplay. In the slope, the covariance of $X$ and $Y$ ($\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}$) is tempered by the variance of $x$ ($\sum_{i=1}^{n}(x_i-\bar{x})^2$). If the covariance is greater than the variance, then the absolute value of the slope will be greater than one. The direction of the slope (positive or negative) is determined by the y7 between $x$ and $y$ alone. 
+
+Trend lines are one of many uses of a class of supervised learning called regression, but best known of which is Ordinary Least Squares (also referred to as Least Squares Regression or Gaussian Generalized Linear Models). There are quite a few other types of regression, such as quantile regression, non-linear least squares, partial least squares among others. In multivariate cases where many variables are used to get a handle on what factors influence $y$, the problem gets more complex.  
+
+OLS regression is the quantitative workhorse of data-driven public policy. The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. To better understand arguably the most commonly used supervised learning method, we can start by defining a regression formula:
+
+$$y_i = w_0 x_{i,0} + w_{1} x_{i,1} + ... + w_{k} x_{i,k} + \epsilon_{i}$$
+
+where:
+
+- $y_i$ is the target variable or "observed response"
+- $w_{k}$ are coefficients associated with each $x_k$. Note that $w$ may be substituted with $\beta$ in some cases.
+- $x_{i,k}$ are input or independent variables 
+- subscript $i$ indicates the index of individual observations in the data set
+- $k$ is an index of position of a variable in a matrix of $x$
+- $\epsilon_{i}$ is an error term that is assumed to have a normal distribution of $\mu = 0$ and constant variance $\sigma^2$
+
+Note that $x_{i,0} = 1$, thus $w_0$ is often times represented on its own. For parsimony, this formula can be rewritten in matrix notation as follows:
+
+$$Y = W^TX$$
+such that $y$ is a vector of dimensions $n \times 1$, $x$ is a matrix with dimensions $n \times k$, and $w$ is a vector of length $k$. 
+
+Given this formula, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
+or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y_i})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. The SSE and MSE are measures of uncertainty relative to the observed response. Minimization of least squares can be achieved through a method known as *gradient descent*.
+
+
+####Interpretation
+There are a number of attributes and outputs of a linear squares regression model that are examined, namely the R-squared, error, and coefficients.
+
+#####R-squared
+_R-squared_ or $R^2$ is a measure of the proportion of variance of the target variable that can be explained by a estimated regression equation. A few key bits of information are required to calculate the $R^2$, namely:
+
+- $\bar{y}$: the sample mean of $y$;
+- $\hat{y_i}$: the predicted value of $y$ for each observation $i$ as produced by the regression equation; and
+- $y_i$: the observed value of $y$ for each observation $i$.
+
+Putting these values together is fairly simple:
+
+- Total Sum of Squares or TSS is the variance of $y$: $$\text{TSS} = \sigma^2(y) = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
+
+- Sum of Squared Errors is the squared difference between each observed value of $y$ and its predicted value $\hat{y_i}$:  $$\text{SSE}  = \sum_{i=1}^{n}(y_i - \hat{y_i})^2$$
+
+- Regression Sum of Squares or RSS is the difference between each predicted value $\hat{y_i}$ and the sample mean $\bar{y}$.
+
+Together, $R^2 = 1 - \frac{SSE}{TSS}$. As TSS will always be the largest value, $R^2$ will always be bound between 0 and 1 where a value of $R^2 = 0$ indicates a regression line in which $x$ does not account for variation in the target whereas $R^2 = 1$ indicates a perfect regression model where $x$ accounts for all variation in $y$. 
+
+#####Error
+Error can be measured in a number of ways in the OLS context. The most common is the Root Mean Square Error (RMSE), which is essentially the standard error between predictions $\hat{y_i}$ and $y_i$. RMSE is defined as $\text{RMSE} = \sigma =  \sqrt{\frac{\sum_{i=1}^n(\hat{y_i}-y_i)^2}{n}}$. Note that RMSE is interpreted in terms of levels of $y$, which may not necessarily facilitate easy communication of model accuracy. For example, a $\text{RMSE = 0.05}$ in one model might appear to be small relative to a $RMSE = 164$. However, when contextualized, the former may be a larger proportion of its respective sample mean than the latter's, indicating a less accurate fit.
+
+There are other methods of representing error. In time series forecasts, Mean Absolute Percentage Error (MAPE) is used to contextualize prediction accuracy as a percentage of $y$. This measure is defined as $\text{MAPE} = \frac{100}{n}\sum_{i=1}^n|\frac{\hat{y_i}-y_i}{y_i}|$ and can be easily interpretted and communicated. For example, MAPE = 1.1% from one model can be compared against the MAPE = 13.5% of another model. 
+
+
+#####Coefficients
+Regression models have the capability of describing the marginal point relationship between each $x$ and the target $y$. Recall the toll road example. 
+
+
+$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
+
+###In Practice
+
+```{r, echo=FALSE}
+  df <- read.csv("/Users/jeff/Documents/Github/data-science/lecture-06/dataset/tollroad_ols.csv")
+```
+```{r, eval=FALSE}
+  setwd("<set-working-directory>")
+  df <- read.csv("tollroad_ols.csv")
+```
+
+#####Explore data
+
+Eight fields:
+
+- `date` 
+- `year`
+- `fips`
+- `transactions`
+- `transponders`
+- `emp`
+- `bldgs`
+- `wti_eia`
+
+```{r}
+  str(df)
+```
+
+```{r}
+  cor(df[,c(4:8)], use = "complete")
+```
+
+Clean up data
+```{r}
+  df$date <- as.Date(df$date, "%Y-%m-%d")
+  df$fips <- factor(df$fips)
+```
+
+Graph the toll transactions
+```{r, fig.height=2}
+  ggplot(data = df, 
+         aes(x = date, y = transactions, group = fips, colour = fips)) +
+    geom_line() +  geom_point()
+```
+
+
+#####Set train/test
+```{r}
+  df$flag <- 0
+  df$flag[df$year >= 2015] <- 1
+```
+
+#####Regression
+Using linear regression `lm()`
+
+Produces an object that contains all the outputs of a regression model
+
+```{r, eval=F}
+  lm(<yvar> ~ <xvars>, data = <data>)
+```
+
+
+Fit the model, save to object `fit`
+Run `summary()` to see high level results
+```{r, message=FALSE, warning=FALSE}
+  fit <- lm(transactions ~ emp, data = df[df$flag == 0,])
+  summary(fit)
+```
+
+The `fit` object contains rich information about all dimensions and attributes of a regression model, such as the coefficients, residuals, among other features -- all of which can be accessed using the `str()` method.
+
+
+```{r, message=FALSE, warning=FALSE}
+    fit <- lm(log(transactions) ~ log(emp), data = df[df$flag == 0,])
+    summary(fit)
+```
+
+```{r, message=FALSE, warning=FALSE}
+    fit <- lm(log(transactions) ~ log(emp) + log(bldgs) + log(wti_eia) + fips, 
+              data = df[df$flag == 0,])
+    summary(fit)
+```
+
+Prediction
+```{r, message=FALSE, warning=FALSE}
+  df$yhat <- predict(fit, newdata = df) 
+
+```
+
+Mean Absolute Percentage Error (MAPE)
+```{r}
+  mape <- function(y_hat, y){
+    return(mean(abs(y_hat/y-1), na.rm=T))
+  }
+```
+
+
+```{r}
+  #train error
+    train_error <- mape(df[df$flag == 0, "yhat"], log(df[df$flag == 0, "transactions"]))
+
+  #test error
+    test_error <- mape(df[df$flag == 1, "yhat"], log(df[df$flag == 1, "transactions"]))
+```
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2}
+  library(gridExtra) 
+    
+  g1 <-  ggplot(data = df[df$flag == 0, ], 
+                aes(x = log(transactions), y = log(transactions))) +
+          geom_line() +  geom_point()  +  
+          ggtitle(paste0("Train set (MAPE = ",round(100*train_error,2),"%)")) +
+          geom_point(aes(x = log(transactions), y = yhat, colour = fips)) +
+          theme(plot.title = element_text(size = 10))
+  
+  g2 <-  ggplot(data = df[df$flag == 1, ], 
+                aes(x = log(transactions), y = log(transactions))) +
+          geom_line() +  geom_point()  +  
+          ggtitle(paste0("Test set (MAPE = ",round(100*test_error,2),"%)")) +
+          geom_point(aes(x = log(transactions), y = yhat, colour = fips)) +
+          theme(plot.title = element_text(size = 10))
+    
+  grid.arrange(g1, g2, ncol=2)
+      
+```
+
+
+#### Exercises 6.1
+
+1. 
+
 ## k-Nearest Neighbors (kNN)
 K-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
 
@@ -134,7 +353,7 @@ The $TPR$ is defined as $TPR = \frac{\text{Number of values that were correctly 
 
 
 ```{r, fig.height=4, echo=FALSE, warning=FALSE, message = FALSE}
-  library(ggplot2)
+
   library(class)
   set.seed(100)
   n <- 150
@@ -146,7 +365,7 @@ The $TPR$ is defined as $TPR = \frac{\text{Number of values that were correctly 
   test <- expand.grid(x1 = seq(-3, 3, 0.1), x2 = seq(-5,3, 0.05))
   g0 <- ggplot() +
           geom_point(aes(x = x1, y = x2, colour = factor(y)), data = df, alpha = 1, size = 3, shape = 19) +
-      xlim(-3, 3) + ylim(-5, 3)  + ggtitle("(1) Two classes")  +theme(plot.title = element_text(size = 11))
+      xlim(-3, 3) + ylim(-5, 3)  + ggtitle("(1) Two classes")  + theme(plot.title = element_text(size = 11))
   
   for(i in c(1, 10, 100)){
     res <- knn(df[,2:3], test, df$y, k = i, prob=TRUE)
@@ -207,10 +426,10 @@ There are other factors that influence the selection of $k$:
 - <u>Symmetry</u>. It's key to remember that neighbors around each point will not likely be uniformly distributed. While kNN does not have any probabilistic assumptions, the position and distance of neighboring points may have a skewing effect. 
 
 ####Usage
-KNNs are efficient and effective under certain conditions. First, kNNs can handle target values that are either discrete or continuous, making the approach relatively flexible. They are best used when there are relatively few features as distances to neighbors need to be calculated for each and every record and need to be optimized by searching for the value of ``k`` that optimizes for accuracy. In cases where data is randomly or uniformly distributed in fewer dimensions, a trained KNN is an effective solution to filling gaps in data, especially in spatial data. However, kNNs are not interpretable as it is a nonparametric approach -- it does not produce results that have a causal relationship or illustrate. Furthermore, kNNs are not well-equipped to handle missing values.
+KNNs are efficient and effective under certain conditions. First, kNNs can handle target values that are either discrete or continuous, making the approach relatively flexible. They are best used when there are relatively few features as distances to neighbors need to be calculated for each and every record and need to be optimized by searching for the value of $k$ that optimizes for accuracy. In cases where data is randomly or uniformly distributed in fewer dimensions, a trained KNN is an effective solution to filling gaps in data, especially in spatial data. However, kNNs are not interpretable as it is a nonparametric approach -- it does not produce results that have a causal relationship or illustrate. Furthermore, kNNs are not well-equipped to handle missing values.
 
 ####An Example
-In practice in ``R``, KNNs can be trained using the ``knn()`` function in the ``class`` library. However, this function is best suited for discrete target variables. To illustrate KNN regressions, we will write a function from scratch and illustrate using remote sensed data. Remote sensing is data obtained through scanning the Earth from aircrafts or satellites. Remote sensed earth observations yield information about weather, oceans, atmospheric composition, human development among other things -- all are fundamental for understanding the environment. As of Jan 2017, the National Aeronautics and Atmospheric Administration (NASA) maintains two low-earth orbiting (LEO) satellites named Terra and Aqua, each of which takes images of the Earth using the Moderate Resolution Imaging Spectroradiometer (MODIS) instrument. Among the many practical scientific applications of MODIS imagery is the ability to sense vegetation growth patterns using the Normalized Difference Vegetation Index (NDVI) -- a measure ranging from -1 to +1 that indicates that amount of live green on the Earth's surface. Imagery data is a $n \times m$ gridded matrix where each cell represents the NDVI value for a given latitude-longitude pair.
+In practice in `R`, KNNs can be trained using the `knn()` function in the `class` library. However, this function is best suited for discrete target variables. To illustrate KNN regressions, we will write a function from scratch and illustrate using remote sensed data. Remote sensing is data obtained through scanning the Earth from aircrafts or satellites. Remote sensed earth observations yield information about weather, oceans, atmospheric composition, human development among other things -- all are fundamental for understanding the environment. As of Jan 2017, the National Aeronautics and Atmospheric Administration (NASA) maintains two low-earth orbiting (LEO) satellites named Terra and Aqua, each of which takes images of the Earth using the Moderate Resolution Imaging Spectroradiometer (MODIS) instrument. Among the many practical scientific applications of MODIS imagery is the ability to sense vegetation growth patterns using the Normalized Difference Vegetation Index (NDVI) -- a measure ranging from -1 to +1 that indicates that amount of live green on the Earth's surface. Imagery data is a $n \times m$ gridded matrix where each cell represents the NDVI value for a given latitude-longitude pair.
 
 NASA's Goddard Space Flight Center (GSFC) publishes monthly [MODIS NDVI composites](https://neo.sci.gsfc.nasa.gov/view.php?datasetId=MOD13A2_M_NDVI). For ease of use, the data has been reprocessed such that data are represented as three columns:  latitude, longitude, and NDVI. In this example, we randomly select a proportion of the data (~30%), then use KNNs to interpolate the remaining 70% to see how close we can get to replicating the original dataset. In application, scientific data that is collected _in situ_ on the Earth's surface may take on a similar format -- represembling randomly selected points that can be used to generalize the measures on a grid, even where measures were not taken. This process of interpolation and gridding of point data is the basis for inferring natural and manmind phenomena beyond where data was sampled, whether relating to the atmosphee, environment, infrastructure, among other domains.
 
@@ -220,7 +439,7 @@ To start, we'll set a working directory.
   setwd("[your-dir]")
 ```
 ```{r, echo=FALSE}
-  setwd("/Users/jeff/Documents/Github/data-science/lecture-05/dataset")
+  setwd("/Users/jeff/Documents/Github/data-science/lecture-06/dataset")
 ```
 
 Then read in the data, which is available in CSV form on the course [repo](https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-05/dataset).
@@ -229,7 +448,7 @@ Then read in the data, which is available in CSV form on the course [repo](https
   df <- read.csv("ndvi_sample_201606.csv")
 ```
 
-To view the data, we can use the ``geom_raster()`` option in the ``ggplot2`` library. Notice the color gradations between arrid and lush areas of vegetation.
+To view the data, we can use the `geom_raster()` option in the `ggplot2` library. Notice the color gradations between arrid and lush areas of vegetation.
 ```{r, fig.height = 3}
   library(ggplot2)
   ggplot(df, aes(x=lon, y=lat)) +
@@ -255,7 +474,7 @@ For this example, we will focus on an area in the Western US and extract only a 
     sampled <- us_west[runif(nrow(us_west)) < 0.3 & us_west$ndvi != 99999,]
 ```
 
-A KNN algorithm is fairly simple to build when the scoring or voting function is a simple mean. All that is required is to write a series of a loops to calculate the nearest neighbors for any value of ``k``. The ``knn.mean`` function should take a training set (input features - ``x_train`` and target - ``y_train``), and a test set (input features - ``x_test``).
+A KNN algorithm is fairly simple to build when the scoring or voting function is a simple mean. All that is required is to write a series of a loops to calculate the nearest neighbors for any value of $k$. The ``knn.mean`` function should take a training set (input features - ``x_train`` and target - ``y_train``), and a test set (input features - ``x_test``).
 
 
 ```{r}
@@ -291,7 +510,7 @@ A KNN algorithm is fairly simple to build when the scoring or voting function is
 
 ```
 
-The hyperparameter ``k`` needs to be tuned. We thus also should write a function to find the optimal value of ``k`` that minimizes the loss function, which is the Root Mean Squared Error ($\text{RMSE} = \sigma =  \sqrt{\frac{\sum_{i=1}^n(\hat{y_i}-y_i)^2}{n}}$.).
+The hyperparameter $k$ needs to be tuned. We thus also should write a function to find the optimal value of $k$ that minimizes the loss function, which is the Root Mean Squared Error ($\text{RMSE} = \sigma =  \sqrt{\frac{\sum_{i=1}^n(\hat{y_i}-y_i)^2}{n}}$.).
 
 ```{r}
   knn.opt <- function(x_train, y_train, x_test, y_test, max, step){
@@ -335,7 +554,7 @@ Normally, the input features (e.g. latitude and longitude) should be normalized,
 
 ```
 
-The algorithm can now be placed into testing, searching for the optimal value of ``k`` along at increments of ``1`` from $k = 1$ to $ k = \text{n}$. Based on the grid search, the optimal value is $k = 4$.
+The algorithm can now be placed into testing, searching for the optimal value of $k$ along at increments of $1$ from $k = 1$ to $ k = \text{n}$. Based on the grid search, the optimal value is $k = 4$.
 ```{r, fig.height = 3}
   #opt
     logs <- knn.opt(xtrain, ytrain, xtest, ytest, nrow(xtest), 1)
@@ -345,7 +564,7 @@ The algorithm can now be placed into testing, searching for the optimal value of
             geom_line() + geom_point() + ggtitle("RMSE vs. K-Nearest Neighbors")
 ```
 
-With this value, we can now put this finding to the test by plotting the interpolated data as a raster. Using the ``ggplot`` library, we will produce six graphs to illustrate the tolerances of the methods: the original and sampled images as well as a sampling of rasters for various values of $k$.
+With this value, we can now put this finding to the test by plotting the interpolated data as a raster. Using the `ggplot` library, we will produce six graphs to illustrate the tolerances of the methods: the original and sampled images as well as a sampling of rasters for various values of $k$.
 ```{r, fig.height=6}
 #Original
   full <- ggplot(us_west, aes(x=lon, y=lat)) +
@@ -381,86 +600,53 @@ With this value, we can now put this finding to the test by plotting the interpo
     grid.arrange(full, sampled, k1, k4, k10, k100, ncol=2)
 ```
 
-#### Exercises 5.1
-1. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each record $i$. 
-2. Modify the function to handle k = 2.
+#### Exercises 6.2
+
+1. Write a function `dist()` that calculates the distance between all records of a two variable data frame `df` and a given reference coordinate. The reference coordinate will be an index $i$ of a row in the data frame (e.g. calculate the distance between row $i$ and all other points).
+2. Expand that distance function to accept one or more variables. Use the example data to test your function.
+```{r}
+  data <- data.frame(x1 = rnorm(1000, 10, 5), x2 = rnorm(1000, 20, 35), x3 = rnorm(1000, 14, 1), x1 = rnorm(1000, 100, 200))
+```
+3. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each record $i$. 
+4. Modify the function to handle $k = 2$.
     
-##Ordinary Least Squares (OLS) Regression
-Every year, cities and states across the United States publish measures on the performance and effectiveness of operations and policies. Performance management practitioners typically would like to know the direction and magnitude, as illustrated by a linear trend line. Is crime up? How are medical emergency response times? Are we still on budget? Which voting blocks are drifting?
 
-For example, the monthly number of highway toll transactions in the State of Maryland is plotted over time from 2012 to early 2016. The amount is growing with a degree of seasonality. But to concisely summarize the prevailing direction of toll transactions, we can use a trend line. That trend line is an elegant solution that shows the shape and direction of a linear relationship, taking into account all values of the vertical and horizontal axes to find a line that weaves through and divides point in a symmetric fashion.
 
-```{r, echo=FALSE, fig.height=3}
-  setwd("/Users/jeff/Documents/Github/data-science/lecture-05")
-  data <- read.csv("maryland_tolls.csv")
-  val <- aggregate(data$Total.Transactions, by=list(data$Date), FUN=sum)
-  colnames(val) <- c("Date","Transactions")
-  val$Date <- strptime(as.character(val$Date),"%m/%d/%Y %H:%M")
-  val <- val[order(val$Date),]
-  val$time <- 1:nrow(val)
-  val$Transactions <- val$Transactions / 1000000
-  
-  a <- coef(lm(Transactions ~ time, data = val))
-  ggplot() + 
-      geom_line(aes(x = time, y = Transactions),  data = val, colour = "blue") + 
-      geom_point(aes(x = time, y = Transactions),  data = val, colour = "blue") +
-      geom_abline(intercept = a[1], slope = a[2]) + 
-      ylab("Toll Transactions (millions)") + xlab("Time (months)")
+## Answers
+#### Exercises 6.1 - OLS
 
+1.
+
+
+#### Exercises 6.2 - KNN
+
+1. Write a function `dist()` that calculates the distance between all records of a two variable data frame `df` and a given reference coordinate. The reference coordinate will be an index `i` of a row in the data frame (e.g. calculate the distance between row `i` and all other points).
+```{r}
+  dist <- function(df, i){
+    temp <- df[i,]
+    dist <- sqrt(df[,1]^2 + df[,1]^2)
+    return(dist)
+  }
 ```
 
-This trend line can be simply described in using the following formula:
+2. Expand that distance function to accept one or more variables. 
+```{r}
+#Modify the function
+  dist <- function(df, i){
+    temp <- df[i,]
+    col <- ncol(df)
+    dist <- 0
+    for(k in 1:col){
+      dist <- dist + df[,k]^2
+    }
+    return(sqrt(dist))
+  }
 
-$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
+#Test it
+  data <- data.frame(x1 = rnorm(1000, 10, 5), x2 = rnorm(1000, 20, 35), x3 = rnorm(1000, 14, 1), x1 = rnorm(1000, 100, 200))
+  out <- dist(data, 1)
+  head(out)
+```
 
-and every point plays a role. We can infer that the trend grows at approximately 36,000 transactions per month.  Using the observed response $y$ and the independent variable $x$, calculating the intercept and slope is a fairly simple task:
-
-$$\text{slope = } \hat{\beta_1} = \frac{\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}}{\sum_{i=1}^{n}(x_i-\bar{x})^2}$$ 
-and 
-
-$$\text{intercept = } \hat{\beta_0} = \bar{y}-\hat{\beta_1}\bar{x}$$
-In a bivariate case such as this one, it's easy to see the interplay. In the slope, the covariance of $X$ and $Y$ ($\sum_{i=1}^{n}{(x_i - \bar{x})(y_i-\bar{y})}$) is tempered by the variance of $x$ ($\sum_{i=1}^{n}(x_i-\bar{x})^2$). If the covariance is greater than the variance, then the absolute value of the slope will be greater than one. The direction of the slope (positive or negative) is determined by the y7 between $x$ and $y$ alone. 
-
-Trend lines are one of many uses of a class of supervised learning called regression, but best known of which is Ordinary Least Squares (also referred to as Least Squares Regression or Gaussian Generalized Linear Models). There are quite a few other types of regression, such as quantile regression, non-linear least squares, partial least squares among others. In multivariate cases where many variables are used to get a handle on what factors influence $y$, the problem gets more complex.  
-
-OLS regression is the quantitative workhorse of data-driven public policy. The technique is a statistical method that estimates unknown parameters by minimizing the sum of squared differences between the observed values and predicted values of the target variable. To better understand arguably the most commonly used supervised learning method, we can start by defining a regression formula:
-
-$$y_i = w_0 x_{i,0} + w_{1} x_{i,1} + ... + w_{k} x_{i,k} + \epsilon_{i}$$
-
-where:
-
-- $y_i$ is the target variable or "observed response"
-- $w_{k}$ are coefficients associated with each $x_k$. Note that $w$ may be substituted with $\beta$ in some cases.
-- $x_{i,k}$ are input or independent variables 
-- subscript $i$ indicates the index of individual observations in the data set
-- $k$ is an index of position of a variable in a matrix of $x$
-- $\epsilon_{i}$ is an error term that is assumed to have a normal distribution of $\mu = 0$ and constant variance $\sigma^2$
-
-Note that $x_{i,0} = 1$, thus $w_0$ is often times represented on its own. For parsimony, this formula can be rewritten in matrix notation as follows:
-
-$$Y = W^TX$$
-such that $y$ is a vector of dimensions $n \times 1$, $x$ is a matrix with dimensions $n \times k$, and $w$ is a vector of length $k$. 
-
-Given this formula, the objective is to minimize the Sum of Squared Errors as defined as $$SSE = \sum_{i=0}^{n}{(y_i - \hat{y})^2}$$
-or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \hat{y_i})^2}$$. Both measures require the *predicted value* of $y$ as calculated as $$\hat{y_i} = w_0 + w_{1} x_{i,1} + ... + w_{k} x_{i,k}$$. The SSE and MSE are measures of uncertainty relative to the observed response. Minimization of least squares can be achieved through a method known as *gradient descent*.
-
-
-####Interpretation
-There are a number of attributes and outputs of a linear squares regression model that are examined, namely the R-squared, coefficients, and error.
-_R-squared_ or $R^2$ is a measure of the proportion of variance of the target variable that can be explained by a estimated regression equation. A few key bits of information are required to calculate the $R^2$, namely:
-
-- $\bar{y}$: the sample mean of $y$;
-- $\hat{y_i}$: the predicted value of $y$ for each observation $i$ as produced by the regression equation; and
-- $y_i$: the observed value of $y$ for each observation $i$.
-
-Putting these values together is fairly simple:
-
-- Total Sum of Squares or TSS is the variance of $y$: $$\text{TSS} = \sigma^2(y) = \sum_{i=1}^{n}(y_i - \hat{y})^2$$
-
-- Sum of Squared Errors is the squared difference between each observed value of $y$ and its predicted value $\hat{y_i}$:  $$\text{SSE}  = \sum_{i=1}^{n}(y_i - \hat{y_i})^2$$
-
-- Regression Sum of Squares or RSS is the difference between each predicted value $\hat{y_i}$ and the sample mean $\bar{y}$.
-
-Bringing all the values together, $$R^2 = 1 - \frac{SSE}{TSS}$$. As TSS will always be the largest value, $R^2$ will always be bound between 0 and 1 where a value of $R^2 = 0$ indicates a regression line in which $x$ does not account for variation in the target whereas $R^2 = 1$ indicates a perfect regression model where $x$ accounts for all variation in $y$. 
-
-In addition, Root Mean Square Error (RMSE) is helpful for understanding the variation of the predictions relative to $y$. RMSE is defined as $$\text{RMSE} = \sigma =  \sqrt{\frac{\sum_{i=1}^n(\hat{y_i}-y_i)^2}{n}}$$. Note that RMSE is interpreted in terms of levels of $y$, which may not necessarily facilitate easy communication of model accuracy. In certain scenarios, particularly for time series forecasts, Mean Absolute Percentage Error (MAPE) is used to contextualize prediction accuracy relative to $y$. This measure is defined as $$\text{MAPE} = \frac{100}{n}\sum_{i=1}^n|\frac{\hat{y_i}-y_i}{y_i}|$$.
+3. Write a function to retrieve the value of $y$ where $k = 1$ for each record $i$. 
+4. Modify the function to handle $k = 2$.
