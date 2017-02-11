@@ -149,7 +149,19 @@ or the Mean Squared Error as defined as $$MSE = \frac{1}{n}\sum_{i}^{n}{(y_i - \
 
 
 ####Interpretation
-There are a number of attributes and outputs of a linear squares regression model that are examined, namely the R-squared, error, and coefficients.
+There are a number of attributes of a linear squares regression model that are examined, namely the specification, coefficients, R-squared, and error.
+
+#####Specification and coefficients
+The specification is the formulation of a model, comprised of the target feature and the input features. It is often times represented loosely as:
+
+$Y = f(x_1, x_2,...,x_n)$
+
+
+Each of the $\beta$ values is a coefficient that describes the marginal relationship between each $x$ and the target $y$. Recall the toll road example. 
+
+$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
+ 
+The $\beta_0$ (or y-intercept) is equal to 10.501, meaning when months = 0, the expected traffic was 10.5 million (without accounting for seasonality). The $\beta_1$ or coefficient for month is 36,000, meaning that for each additional month forward, we would expect an average 36,000 traffic increase. As we will see in the the following elaborated example, these coefficients will offer robust insights into the inner quantitative workings of the modeled relationship. As we will see in the practical example at the end of this section, there are countless ways of representing relationships.
 
 #####R-squared
 _R-squared_ or $R^2$ is a measure of the proportion of variance of the target variable that can be explained by a estimated regression equation. A few key bits of information are required to calculate the $R^2$, namely:
@@ -174,13 +186,12 @@ Error can be measured in a number of ways in the OLS context. The most common is
 There are other methods of representing error. In time series forecasts, Mean Absolute Percentage Error (MAPE) is used to contextualize prediction accuracy as a percentage of $y$. This measure is defined as $\text{MAPE} = \frac{100}{n}\sum_{i=1}^n|\frac{\hat{y_i}-y_i}{y_i}|$ and can be easily interpretted and communicated. For example, MAPE = 1.1% from one model can be compared against the MAPE = 13.5% of another model. 
 
 
-#####Coefficients
-Regression models have the capability of describing the marginal point relationship between each $x$ and the target $y$. Recall the toll road example. 
-
-
-$$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
 
 ###In Practice
+
+To put regression into perspective, we will predict [Maryland tollroad transactions](https://data.maryland.gov/Transportation/Toll-Transactions/hrir-ejvj) using an assortment of US county-level data. The dataset is comprised of monthly totals of tollroad transactions by county, joined with US Bureau of Labor Statistics' [monthly employment estimates](https://www.bls.gov/cew/datatoc.htm), US Census Bureau [building permit estimates](https://www.census.gov/construction/bps/), and the Energy Information Agency's [West Texas Crude Fuel Prices](http://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm). 
+
+To get started, first we need to import the `tollroad_ols.csv` data file from the Lecture 6 `dataset` folder.
 
 ```{r, echo=FALSE}
   df <- read.csv("/Users/jeff/Documents/Github/data-science/lecture-06/dataset/tollroad_ols.csv")
@@ -192,98 +203,217 @@ $$\text{transactions} = 10.501 + 0.036 \times \text{months}$$
 
 #####Explore data
 
-Eight fields:
+The dataset is provided in long form, where data from multiple geographic areas are stacked. The dataset contains eight fields: 
 
-- `date` 
-- `year`
-- `fips`
-- `transactions`
-- `transponders`
-- `emp`
-- `bldgs`
-- `wti_eia`
+- `date` in `YYYY-MM-DD` format.
+- `year` of record.
+- `fips` is the Federal Information Processing System (FIPS) code for a given county.
+- `transactions` is total monthly toll transactions in a county.
+- `transponders` is the total monthly toll transactions conducted using a radio frequency transponder.
+- `emp` is the employment in a given month in given county.
+- `bldgs` is the number of new building permits issued in a given county.
+- `wti_eia` is the West Texas Intermediate spot crude price. This is the only measure that will have the same value across all geographies in a given time period.
 
+To get a feel for the data, we use the `str()` method. All fields should be in numerical or integer form except for `date` and `fips`. 
 ```{r}
-  str(df)
+  str(df[1:3,])
 ```
 
-```{r}
-  cor(df[,c(4:8)], use = "complete")
-```
-
-Clean up data
+Reformatting is simple. `date` can be converted into a date object using `as.Date()` and `fips` can be converted into a factor.
 ```{r}
   df$date <- as.Date(df$date, "%Y-%m-%d")
   df$fips <- factor(df$fips)
 ```
 
-Graph the toll transactions
+Upon doing so, we can run some cursory exploratory checks ahead of formulating any models. First is to produce correlation matrix. We will beautify the text outputs using a library called `sjPlot` that formats quantitative outputs in  an easier to read fashion. 
+
+The correlation matrix on the pooled data indicates finds that employment is positively associated with both transactions and transponder transactions. 
+
+```{r, fig.height=2, warning=FALSE, message = FALSE}
+  library(sjPlot)
+  tab <- cor(df[,c(4:8)], use = "complete")
+  sjp.corr(tab)
+```
+
+For ease of interpretation, we will use a `log-log` specification, meaning that  continuous variables that enter the regression specification are transformed using a natural log. This changes the interpretation of coefficients and in may improve model fit in certain situations.
+
+```{r, fig.height=2, warning=FALSE, message = FALSE}
+  tab <- cor(log(df[,c(4:8)]), use = "complete")
+  sjp.corr(tab)
+```
+
+In addition, we can run an ANOVA (Analysis Of Variance) to understand if using FIPS county codes help explain the variation in transactions by looking at if the mean of transactions for each county are the same. The null hypothesis that county means are equivalent is rejected as the p-value of the F-test below is asymptotically small (< 0.01).
+```{r}
+  fit <- aov(transactions ~ fips, data = df)
+  summary(fit) 
+```
+
+The same test using $log(transactions)$ yields a better fit when comparing, indicating that we may want to consider to use log-transformed target feature.
+```{r}
+  fit <- aov(log(transactions) ~ fips, data = df)
+  summary(fit) 
+```
+
+Graphically, it is also important to develop a visual understand of how the data are distributed. Using `ggplot2`, we plot the toll transactions over time, finding a degree of seasonality and clear differences in the levels at which traffic flows through each county.
 ```{r, fig.height=2}
+  library(ggplot2)
   ggplot(data = df, 
          aes(x = date, y = transactions, group = fips, colour = fips)) +
     geom_line() +  geom_point()
 ```
 
+Recognizing that each county experiences different levels of traffic and economic activity, it is prudent to break apart the data into histograms for each county to expose skewedness and determine if the fundamental Gaussian assumptions of OLS are met. The histograms below indicate that there most measures can be characterized by a central tendency, but there are some measures in some counties that are significantly right skewed.
+```{r, fig.height=2, warning=FALSE, message=FALSE}
+  
+  fips <- unique(df$fips)
+  for(k in 1:length(fips)){
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(transactions)) + 
+            geom_density(fill = "orange") + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("trans",k), temp)
+    
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(emp)) + 
+            geom_density(fill = "red") + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("emp",k), temp)
+        
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(bldgs)) + 
+            geom_density(fill = "navy") + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("bldgs",k), temp) 
 
-#####Set train/test
+  }
+
+  library(gridExtra)
+  grid.arrange(trans1, trans2, trans3, trans4, trans5, trans6,
+               emp1, emp2, emp3, emp4, emp5, emp6,
+               bldgs1, bldgs2, bldgs3, bldgs4, bldgs5, bldgs6, ncol = 6)
+  
+```
+
+This skewness can be improved by applying mathematical transformations such as $log_{10}$ or natural logarithm. 
+
+```{r, echo=FALSE, fig.height=2, warning=FALSE, message=FALSE}
+  
+  fips <- unique(df$fips)
+  for(k in 1:length(fips)){
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(transactions)) + 
+            geom_density(fill = "orange") + scale_x_log10() + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("trans",k), temp)
+    
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(emp)) + 
+            geom_density(fill = "red") + scale_x_log10() + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("emp",k), temp)
+        
+    temp <- ggplot(data = df[df$fips==fips[k],], aes(bldgs)) + 
+            geom_density(fill = "navy") + scale_x_log10() + 
+            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
+            axis.text.y=element_blank())
+    assign(paste0("bldgs",k), temp) 
+
+  }
+
+  grid.arrange(trans1, trans2, trans3, trans4, trans5, trans6,
+               emp1, emp2, emp3, emp4, emp5, emp6,
+               bldgs1, bldgs2, bldgs3, bldgs4, bldgs5, bldgs6, ncol = 6)
+  
+```
+
+
+#####Set train/test samples
+With a basic understanding of the patterns in the underlying data, we can partition the data for training and testing. Given the small sample of points, we will partition the data into a 60-30 split, which is approximately 2012 through 2014 and 2015 through 2016, respectively. This partition is captured in a new variable `flag`. 
+
 ```{r}
   df$flag <- 0
   df$flag[df$year >= 2015] <- 1
 ```
 
 #####Regression
-Using linear regression `lm()`
-
-Produces an object that contains all the outputs of a regression model
+Running a linear regression is a fairly simple task when using the `lm()` method. The basic syntax involves specifying the $y$, $x$ and the dataframe or matrix.
 
 ```{r, eval=F}
-  lm(<yvar> ~ <xvars>, data = <data>)
+  lm(<yvar> ~ <xvars> , data = <data>)
 ```
 
+When evoked, the `lm()` method produces an class object that contains all the outputs of a regression model, including coefficients, fitness tests, residuals, predictions among other things.As a simple example, we will fit the specification: $\log\text{(transactions)} = \beta_0 + \beta_1 \text{log(employment)} + \epsilon$ using only the training set (`flag == 0`). We can assign the output to `fit`. To see all attributes of the `fit` object, use the `str()` method. For a high-level summary, use the `summary()` method. 
 
-Fit the model, save to object `fit`
-Run `summary()` to see high level results
+The bivariate regression yielded statistically significant results for employment, indicating that a 100% increase in employment is associated with a 43% increase in highway toll transactions. The amount of variance explained is modest with an $R^2 = 0.321$ with a relatively large $RMSE = 0.6904$. 
+
 ```{r, message=FALSE, warning=FALSE}
-  fit <- lm(transactions ~ emp, data = df[df$flag == 0,])
+  fit <- lm(log(transactions) ~ log(emp), data = df[df$flag == 0,])
   summary(fit)
 ```
 
-The `fit` object contains rich information about all dimensions and attributes of a regression model, such as the coefficients, residuals, among other features -- all of which can be accessed using the `str()` method.
 
-
+The `fit` object contains other rich information about attributes of a regression model, such as the coefficients, residuals, among other features. The full detail coefficients, for instance, can be easily viewed by using the following command: 
 ```{r, message=FALSE, warning=FALSE}
-    fit <- lm(log(transactions) ~ log(emp), data = df[df$flag == 0,])
-    summary(fit)
+  summary(fit)$coef
 ```
 
+To view the full list of attributes contained in the regression object, use the structure method `str()`.
+
+A common step in assessing model fitness regressions is to check if the normality assumptions are met as this will influence reliability and accuracy of the model. The residuals, for example, should be normally distributed; however, the kernel density graph below shows that the residuals (in blue) are bimodally distributed, which is not normally distributed as compared with the simulated normal distribution (yellow). This indicates provides an indication that the regression needs to be refined in order to account for other parameters.
+
+
+```{r, message=FALSE, warning=FALSE, fig.height=2}
+  x <- data.frame(resid = fit$residuals)
+  set.seed(50)
+  x$norm <- rnorm(nrow(x), mean(x$resid), sd(x$resid))
+  ggplot(x, aes(resid)) + 
+    geom_density(aes(norm), alpha = 0.4, fill = "yellow") + 
+    geom_density(fill = "navy", alpha = 0.6) 
+```
+
+Thinking back to the earlier results of the ANOVA test, it makes sense to incorporate the `fips` feature and try a few other features. The results are far more promising, with an R-squared above 0.9 and a RMSE that is roughly one-third the size. The employment feature is statistically significant with a p-value under 0.05 with a coefficient that indicates that essentially every one-person (or 100%) increase in employment is associated with a two fold increase in trips -- this makes sense as people may be commuting for work. Additional building permits (`log(bldgs)`) appear to have a modest effect as may be expected as their effect is likely lagged. The `FIPS` counties, while not fully significant, seem to help explain much of the variability. 
+
 ```{r, message=FALSE, warning=FALSE}
-    fit <- lm(log(transactions) ~ log(emp) + log(bldgs) + log(wti_eia) + fips, 
+  fit <- lm(log(transactions) ~ log(emp) + log(bldgs) + log(wti_eia) + fips, 
               data = df[df$flag == 0,])
-    summary(fit)
+  summary(fit)
 ```
 
-Prediction
+A cursory look at the residuals finds a much more normally distributed set of residuals, indicating that incorporating the `FIPS` codes enables better a more proper model.
+```{r, message=FALSE, warning=FALSE, fig.height=2}
+  x <- data.frame(resid = fit$residuals)
+  set.seed(50)
+  x$norm <- rnorm(nrow(x), mean(x$resid), sd(x$resid))
+  ggplot(x, aes(resid)) + 
+    geom_density(aes(norm), alpha = 0.4, fill = "yellow") + 
+    geom_density(fill = "navy", alpha = 0.6) 
+```
+
+#####Prediction
+The critical step is the prediction step, using the trained regression model to score the test set. In this example, both train and test sets are contained in data frame `df`. Generating predicted values $\hat{y}$ using the input features is a simple task that relies on the `predict()` method. The method accepts the regression object and a new dataset. In our example, we input use `fit` and `df`. The output is a vector of predictions for each line of `df`. We assign this vector as a new column as `df`.
+
 ```{r, message=FALSE, warning=FALSE}
   df$yhat <- predict(fit, newdata = df) 
-
 ```
 
-Mean Absolute Percentage Error (MAPE)
+With the prediction available, a Mean Absolute Percentage Error (MAPE) can be used to quantify the model fit in terms that are interpretable. To do so, we first need to write a MAPE function.
 ```{r}
   mape <- function(y_hat, y){
     return(mean(abs(y_hat/y-1), na.rm=T))
   }
 ```
 
-
+Upon doing so, we can compare the performance of the model in the training phase and the test phase. The error rate of the training set was 0.8% and grows to 1.4% in the test set, indicating some degree of overfitting. However, in absolute terms, the errors are relatively small.
 ```{r}
   #train error
     train_error <- mape(df[df$flag == 0, "yhat"], log(df[df$flag == 0, "transactions"]))
-
+    print(paste0("MAPE-train = ", train_error))
   #test error
     test_error <- mape(df[df$flag == 1, "yhat"], log(df[df$flag == 1, "transactions"]))
+    print(paste0("MAPE-test = ", test_error))
 ```
 
+The predictions can be compared against the actual transactional volumes using an ordinary scatter plot. To contextualize the predictions, we also add a 45-degree line that indicates how accurate predictions are relative to actual. Deviations below the line suggest that predictions are underestimation and above the line indicates overestimation. The effects of overfitting are clear in the models when comparing training results to test results. The training sample (left graph) predictions are spot on with predictions landing on the diagonal, whereas some of the test sample (right graph) stray below the line. 
 ```{r, message=FALSE, warning=FALSE, fig.height = 2}
   library(gridExtra) 
     
@@ -292,7 +422,7 @@ Mean Absolute Percentage Error (MAPE)
           geom_line() +  geom_point()  +  
           ggtitle(paste0("Train set (MAPE = ",round(100*train_error,2),"%)")) +
           geom_point(aes(x = log(transactions), y = yhat, colour = fips)) +
-          theme(plot.title = element_text(size = 10))
+          theme(plot.title = element_text(size = 10), )
   
   g2 <-  ggplot(data = df[df$flag == 1, ], 
                 aes(x = log(transactions), y = log(transactions))) +
@@ -307,8 +437,8 @@ Mean Absolute Percentage Error (MAPE)
 
 
 #### Exercises 6.1
-
-1. 
+1. Run a regression for `FIPS = 24015` where $Y$ is $log(transactions)$ and $X$ are log(emp), log(bldgs), and  log(wti_eia).
+2. Obtain the training and testing MAPEs for `FIPS = 24015`. How does this compare to the MAPE for `FIPS = 24015` from the example pooled model?
 
 ## k-Nearest Neighbors (kNN)
 K-nearest neighbors (KNN) is a non-parametric pattern recognition algorithm that is based on a simple idea: observations that are more similar will likely also be located in the same neighborhood. Given a class label $y$ associated with input features $x$, a given record $i$ in a dataset can be related to all other records using Euclidean distances in terms of $x$: 
@@ -605,18 +735,74 @@ With this value, we can now put this finding to the test by plotting the interpo
 1. Write a function `dist()` that calculates the distance between all records of a two variable data frame `df` and a given reference coordinate. The reference coordinate will be an index $i$ of a row in the data frame (e.g. calculate the distance between row $i$ and all other points).
 2. Expand that distance function to accept one or more variables. Use the example data to test your function.
 ```{r}
-  data <- data.frame(x1 = rnorm(1000, 10, 5), x2 = rnorm(1000, 20, 35), x3 = rnorm(1000, 14, 1), x1 = rnorm(1000, 100, 200))
+  set.seed(150)
+  data <- data.frame(x1 = rnorm(1000, 10, 5), 
+                     x2 = rnorm(1000, 20, 35), 
+                     x3 = rnorm(1000, 14, 1), 
+                     x4 = rnorm(1000, 100, 200))
 ```
 3. For the following values, write a function to retrieve the value of $y$ where $k = 1$ for each record $i$. 
 4. Modify the function to handle $k = 2$.
     
 
-
 ## Answers
 #### Exercises 6.1 - OLS
+The goal of this exercise is to illustrate that some times, training models on discrete units of analysis may yield better results than on a global basis. A global model is one where all data is pooled together, assuming similar relationships. A local model partitions the data into smaller cells to hone in on the unique signal in those cells.
 
-1.
+Using the `tollroad_ols.csv` dataset, we can compare MAPE values to see the performance of a global versus local model. The practical application of this is to understand that running a regression on each `FIPS` code may yield better predictive results.
+```{r, echo=FALSE}
+df <- read.csv("/Users/jeff/Documents/Github/data-science/lecture-06/dataset/tollroad_ols.csv")
+```
+```{r, eval=FALSE}
+setwd("<set-working-directory>")
+df <- read.csv("tollroad_ols.csv")
+```
+```{r}
+df$date <- as.Date(df$date, "%Y-%m-%d")
+df$fips <- factor(df$fips)
+df$flag <- 0
+df$flag[df$year >= 2015] <- 1
+```
 
+
+```{r, message=FALSE, warning=FALSE}
+
+#Global model (df is all the data)
+  fit <- lm(log(transactions) ~ log(emp) + log(bldgs) + log(wti_eia) + fips, data = df[df$flag==0,])
+  df$yhat <- predict(fit, newdata = df) 
+
+#error in global
+  train_g <- mape(df[df$flag == 0 & df$fips==24015, "yhat"], log(df[df$flag == 0 & df$fips==24015, "transactions"]))
+  test_g <- mape(df[df$flag == 1 & df$fips==24015, "yhat"], log(df[df$flag == 1 & df$fips==24015, "transactions"]))
+  
+#Local model
+  test <- df[df$fips==24015, ]
+  fit24015 <- lm(log(transactions) ~ log(emp) + log(bldgs) + log(wti_eia), data = test[test$flag==0,])
+  summary(fit24015)
+  test$yhat <- predict(fit24015, newdata = test) 
+  
+#error for local
+  train_l <- mape(test[test$flag == 0, "yhat"], log(test[test$flag == 0, "transactions"]))
+  test_l <- mape(test[test$flag == 1, "yhat"], log(test[test$flag == 1, "transactions"]))
+  
+  #Plot graphs (black line = actual)
+  a <- ggplot(data = test, 
+         aes(x = date, y = log(transactions))) +
+    geom_line(colour= "navy") +  geom_point()  +  
+    ggtitle(paste0("Individual: Train = ", round(100*train_l,2), "%, Test = ", round(100*test_l,2),"%")) +
+    geom_line(aes(x = date, y = yhat, colour = fips)) +
+    theme(plot.title = element_text(size = 10)) + 
+    ylim(c(13,15))
+  
+  b<-ggplot(data = df[df$fips == 24015,], 
+         aes(x = date, y = log(transactions))) +
+    geom_line() +  geom_point()  +  
+    ggtitle(paste0("Pooled: Train = ", round(100*train_g,2), "%, Test = ", round(100*test_g,2),"%")) +
+    geom_line(aes(x = date, y = yhat, colour = fips)) +
+    theme(plot.title = element_text(size = 10))  + ylim(c(13,15))
+  
+  grid.arrange(a,b,ncol=1)
+```
 
 #### Exercises 6.2 - KNN
 
@@ -643,7 +829,11 @@ With this value, we can now put this finding to the test by plotting the interpo
   }
 
 #Test it
-  data <- data.frame(x1 = rnorm(1000, 10, 5), x2 = rnorm(1000, 20, 35), x3 = rnorm(1000, 14, 1), x1 = rnorm(1000, 100, 200))
+  set.seed(150)
+  data <- data.frame(x1 = rnorm(1000, 10, 5), 
+                     x2 = rnorm(1000, 20, 35), 
+                     x3 = rnorm(1000, 14, 1), 
+                     x4 = rnorm(1000, 100, 200))
   out <- dist(data, 1)
   head(out)
 ```

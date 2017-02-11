@@ -98,6 +98,7 @@
     eia$Date <- as.Date(as.character(eia$Date), "%b %d, %Y")
     eia$date <- paste0(format(eia$Date,"%Y"),format(eia$Date, "%m"))
     eia <- eia[,c(5,2)]
+    eia <- eia[!is.na(eia[,2]) & !is.na(eia[,1]),]
     eia <- aggregate(eia[,2], by = list(date = eia$date), FUN = mean)
     colnames(eia) <- c("date","wti_eia")
 
