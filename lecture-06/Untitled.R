@@ -1,50 +1,42 @@
-df<- read.csv("~/Downloads/Seattle_Real_Time_Fire_911_Calls.csv")
-
-library(plyr)
-df$Type <- as.character(df$Type)
-df$Datetime <- as.character(df$Datetime)
-df <- df[2:nrow(df),]
-
-
-
-df$Datetime <- gsub("[ ][+]0{4}","", df$Datetime)
-df$Datetime <-  as.POSIXct(df$Datetime,format = "%m/%d/%Y %I:%M:%S %p")
-df$Date <- as.Date(format(df$Datetime, "%m/%d/%Y" ),"%m/%d/%Y")
-df <- df[df$Type=="Aid Response",]
-
-events <- count(df,c('Type'))
-
-df_count <- count(df,c('Date'))
-df_count <- df_count[order(df_count$Date),]
-df_count$month <- format(df_count$Date, "%m")
-df_count$weekday <- weekdays(df_count$Date)
-df_count$id <- 1:nrow(df_count)
-
-
-train <- df_count[ df_count$id<2000 & df_count$freq<500,]
-test  <- df_count[df_count$freq <500 & df_count$freq > 0  & df_count$id>2000 ,] 
-
-fit <- lm(log(freq) ~ id + factor(month) factor(weekday), data=train)
-summary(fit)
-y_hat <- predict.lm(fit,test)
-
-plot(train$id,log(train$freq), col="grey")
-lines(train$id,log(train$freq), col="black")
-lines(test$id, y_hat, col="red")
-
-plot(test$id,log(test$freq), col="grey")
-lines(test$id,test$freq, col="black")
-lines(test$id, y_hat, col="red")
-
-
-test$smoothed <- NA
-for(k in 1:2:nrow(df_count)){
+census_geocoder <- function(address,type,secondary,state){
   
+  library(RCurl)
+  library(jsonlite)
+  
+  addy <- paste("street=",gsub(" ","+",address),sep="")
+  if(type=="z"){
+    wild <- paste("zip=",gsub(" ","+",secondary),sep="")
+  }else{
+    wild <- paste("city=",gsub(" ","+",secondary),sep="")
+  }
+  
+  state <- paste("state=",gsub(" ","+",state),sep="") 
+  string <-  paste("https://geocoding.geo.census.gov/geocoder/geographies/address?",addy,"&",wild,"&",state,"&benchmark=4&vintage=4&format=json",sep="")
+  json_file <- fromJSON(string)
+  
+  #Check if there are results
+  if(nrow(json_file$result$addressMatches$coordinates)>0){
+    
+    #If not, kick back an empty dataframe
+    if(is.null(json_file$result$addressMatches$coordinates$x[1])==TRUE){
+      print("no result")
+      return(data.frame(
+        address="",
+        lat = "",
+        lon= "",
+        tract = "",
+        block = ""))
+      
+    } else{
+      
+      #Address,lat,lon,tract, block
+      return(data.frame(
+        address=as.character(data.frame(json_file$result$addressMatches)[1,1]),
+        lat = as.character(json_file$result$addressMatches$coordinates$y[1]),
+        lon= as.character(json_file$result$addressMatches$coordinates$x[1]),
+        tract = data.frame(json_file$result$addressMatches$geographies$`Census Tracts`)$GEOID[1],
+        block = data.frame(json_file$result$addressMatches$geographies$`2010 Census Blocks`)[1,c("GEOID")]))
+      
+    }
+  }
 }
-library(ggplot2)
-ggplot(df_count, aes(x=Date, y=freq)) + 
-  geom_line(alpha = 0.6, colour="navy",size = 0.2) + 
-  xlab("Time") + ylab("incidents") + geom_smooth()+
-  coord_cartesian(ylim = c(0, 500)) 
-
-

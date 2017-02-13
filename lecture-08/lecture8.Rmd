@@ -24,52 +24,71 @@ Lecture objectives
 
 
 ###Decision Trees
-In everyday policy operations, a decision tree is a common tool used for communicating processes, whether it's how an actor moves through a complex system or how a population can be described based on a set of criteria. 
+In everyday policy setting and operations, decision trees are a common tool used for communicating complex processes, whether for how an actor moves through intricate and convoluted bureaucracy or how a subpopulation can be described based on a set of criteria. While the garden variety decision tree can be laid out qualitatively, supervised learning allows decision trees to be create in an empirical fashion that not only have the power to aesthetically communicate patterns, but also predict how a non-linear system behaves.
 
-For example, 14% of Georgians were without healthcare coverage in 2015. This is helpful to know, but ultimately, a degree of specificity would be required to use this knowledge as a tool for outreach. Using decision trees, it's possible to develop discrete profiles of the population based on observable characteristics such that discrete if-else criteria identify smaller subpopulations with similar membership. In this case, membership means health coverage. Based on this decision tree, we can infer that non-citizens under the age of 64 without a college education are 89% likely to not have coverage, and citizens between 16 and 64 who are not married have a 71% chance of not having health coverage.
+According to the US Census Bureau's American Community Survey, approximately 16.5% of Georgians were without healthcare coverage in 2015. To some degree, this is surprising, but it is important to know to support public policy and outreach. This statistic on its own, however, is not useful; it needs to be contextualized and segmented so that government can conduct outreach to ensure that all citizens have access to a modern fundamental service. Using decision trees, it's possible to develop discrete profiles of the population based on observable characteristics such that discrete if-else criteria identify smaller subpopulations with similar membership. Below, a decision tree has been estimated following the specification: $Pr(Coverage) = f(\text{Sex, Age, Education, Marital Status, Race, Citizenship})$.  Based on this decision tree, we can identify well-defined cells of Georgians who have and do not have healthcare coverage. For example, non-citizens under the age of 64 without a college education are 90% likely to not have coverage, and citizens between 16 and 64 who are not married have a 71% chance of not having health coverage. 
 
-Whether its failure analysis of engineering mechanisms or developing customer profiles of program participation, decision trees can help characterize intricate, non-linear patterns in data.
+It is important to note that these cells are not arbitrarily defined nor does a black box guide their creation. The tree was grown using fundamental principles of a discipline known as _information theory_ that helps to identify when an empirical variable contains information. Whether its failure analysis of engineering mechanisms or developing customer profiles of program participation, decision trees can help characterize intricate, non-linear patterns in data.
+
+The point at which a feature is split is known as a decision node, the trunk of the tree from which all branches spring is known as the root node, and the termini of the tree with the most homogeneous subsamples are known as leafs. 
 
 ```{r, echo=F}
 # Classification Tree with rpart
-library(rpart)
-library(rpart.plot)
+  library(rpart)
+  library(rpart.plot)
 
-temp <- tempfile()
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
-unz <- unzip(temp, exdir=getwd())
-df <- read.csv(unz[1])
+#Download
+  temp <- tempfile()
+  #download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
+  #unz <- unzip(temp, exdir=getwd())
+  df <- read.csv("ss15pga.csv")
 
-df <- df[df$AGEP>=16,]
-df$SCHL2[df$SCHL<16 ] <- "1 - Less than HS"
-df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "2 - HS"
-df$SCHL2[df$SCHL==21] <- "3 - Undergraduate Degree"
-df$SCHL2[df$SCHL>21] <- "4 - Graduate Degree"
+#Recode
+  df <- df[df$AGEP>=16,]
+  df$SCHL2[df$SCHL<16 ] <- "Less than HS"
+  df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "HS Degree"
+  df$SCHL2[df$SCHL==21] <- "Undergraduate Degree"
+  df$SCHL2[df$SCHL>21] <- "Graduate Degree"
+  df$SCHL2 <- as.factor(df$SCHL2)
+  
+  df$coverage <- NA
+  df$coverage[df$HICOV == 2] <- "No Coverage"
+  df$coverage[df$HICOV == 1] <- "Coverage"
+  df$coverage <- as.factor(df$coverage)
+  
+  df$CIT2 <- NA
+  df$CIT2[df$CIT != 5] <- "Citizen"
+  df$CIT2[df$CIT == 5] <- "Non-citizen"
+  df$CIT2 <- as.factor(df$CIT2)
+  
+  df$MAR2 <- NA
+  df$MAR2[df$MAR == 1] <- "Married"
+  df$MAR2[df$MAR == 2] <- "Widowed"
+  df$MAR2[df$MAR == 3] <- "Divorced"
+  df$MAR2[df$MAR == 4] <- "Separated"
+  df$MAR2[df$MAR == 5] <- "Never Married"
+  df$MAR2 <- as.factor(df$MAR2)
 
-df$coverage <- NA
-df$coverage[df$HICOV == 2] <- "No Coverage"
-df$coverage[df$HICOV == 1] <- "Coverage"
+#Coverage
+  wght <- grep("pwgtp",colnames(df))
+  est <- c()
+  for(k in wght){
+    est <- c(est, sum(df[df$coverage=="No Coverage",k])/sum(df[[k]]))
+  }
 
-df$CIT2 <- NA
-df$CIT2[df$CIT != 5] <- "Citizen"
-df$CIT2[df$CIT == 5] <- "Not citizen"
+  
+#Resampling
+  temp <- df[df$coverage=="Coverage",]
+  set.seed(123)
+  df_sub <- rbind(df[df$coverage=="No Coverage",], temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
+  # grow tree 
 
-df$MAR2 <- NA
-df$MAR2[df$MAR == 1] <- "Married"
-df$MAR2[df$MAR == 2] <- "Widowed"
-df$MAR2[df$MAR == 3] <- "Divorced"
-df$MAR2[df$MAR == 4] <- "Separated"
-df$MAR2[df$MAR == 5] <- "Never Married"
+fit <- rpart(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P + WAGP, method="class", data=df_sub)
 
-temp <- df[df$coverage=="Coverage",]
-df_sub <- rbind(df[df$coverage=="No Coverage",], temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
-# grow tree 
-set.seed(123)
-fit <- rpart(factor(coverage) ~ AGEP+ factor(CIT2) +factor(MAR2)+ factor(SCHL2) +factor(RAC1P), method="class", data=df_sub)
-
-tree.pred <- predict(fit, df_sub, type='class')
-tab <- table(tree.pred, df_sub$coverage)
-#(tab[1] + tab[4])/nrow(df_sub)
+#Accuracy
+  tree.pred <- predict(fit, df_sub, type='class')
+  tab <- table(tree.pred, df_sub$coverage)
+  #(tab[1] + tab[4])/nrow(df_sub)
 
 # plot tree 
 rpart.plot(fit,extra=104, box.palette="GnBu",
@@ -79,25 +98,27 @@ rpart.plot(fit,extra=104, box.palette="GnBu",
 ```
 
 
-_The Gist_. Decision trees rely on basic tenants of information theory, namely the idea of _information gain_. Given a labeled set of data that contains input features, the structure of decision trees can be likened to branches of a tree: moving from the base of the tree upwards, the tree trunk splits into two or more large branches, which then in turn split into even smaller branches, eventually reaching even small twigs with leaves. Using this physical analogy, decision trees are a representation of information, subset into smaller, more homogeneous subsamples. By recursively splitting input features into two subsamples at a time with the goal of achieving greater homogeneity of labeled examples in each subsample. This splitting process is continued on each subsample until all subsamples contain only one class or a stopping criteria is met. The point at which a feature is split is known as a decision node, the trunk of the tree from which all branches spring is known as the root node, and the termini of the tree with the most homogeneous subsamples are known as leafs. 
+_The Gist_. The structure of a decision tree can be likened to branches of a tree: moving from the base of the tree upwards, the tree trunk splits into two or more large branches, which then in turn split into even smaller branches, eventually reaching even small twigs with leaves. Given a labeled set of data that contains input features, the branches of a decision tree is grown by subsetting a population into smaller, more homogeneous units. In other words, moving from the root of the tree to the terminating branches, each subsequent set of branches should contain records that are more similar, more homogeneous or purer. 
 
-There are a number of forms decision trees are *grown*, the most commonly implemented algorithm is the C4.5.
+How is a decision tree empirically grown? For this, we can rely on pseudocode to lay out the process for the C4.5 algorithm, which is perhaps the most commonly implemented decision tree algorithm described in [Quinlan (1993)]():
 
 ```
-C4.5 (Examples, Target, Input Features)
-  Create root node 
-  Check levels of input features for "pure" or "nearly pure" subgroups
-  [Fill-in]
+C4.5 (Sample = S, Target = Y, Input Features = X)
+  Screen records for cases that meet termination criteria.
+      If each base case that is met, partition sample to isolate homogeneous cases.
+  For each input feature X, calculate the normalized information gain IG from splitting X into two subsamples.
+  Partition S into two partitions using feature X that corresponds to the highest IG.
+  Repeat process for each sub-partition until termination criteria is met.
 ```
 
-#### Concepts
+There are a number key concepts that guide the decision tree algorithm, including (1) termination criteria and (2) normalized information gain. 
 
-- Recursively looks for which input feature to split based on a statistical criterion
-Typically uses _entropy_, which is a core measure form information theory. $\text{Entropy} = \sum{-p_{Y=1}log_2(p_{Y=1}) + -p_{Y=1}log_2(p_{Y=1})}$
-[Information gain]
+[Termination criteria]
 
-- Pruning
+[Information gain] To understand information gain means to understand the concept of _entropy_, which is a measure of purity or certainty of information. Given discrete classes or "states", entropy is defined as:
 
+$$\text{Entropy} = \sum{-p_{i} log_2(p_{i})}$$
+where $i$ is an index of states, $p$ is the proportion of observations that are in state $i$, and $log_2(p_i)$ is the Base 2 logarithm of the proportion for state $i$. 
 
 
 ###Random Forests
