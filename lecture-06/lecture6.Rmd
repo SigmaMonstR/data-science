@@ -823,7 +823,7 @@ df$flag[df$year >= 2015] <- 1
     col <- ncol(df)
     dist <- 0
     for(k in 1:col){
-      dist <- dist + df[,k]^2
+      dist <- dist + (df[,k] - temp[,k])^2
     }
     return(sqrt(dist))
   }
