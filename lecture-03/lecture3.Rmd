@@ -215,7 +215,7 @@ What if we had a time series dataset with a fair amount of random variability an
 
 #Call library to open XLS
   library(gdata)
-  df <- read.xls("data/PET_PRI_SPT_S1_D.xls", sheet = 3, skip=2)
+  df <- read.xls("data/PET_PRI_SPT_S1_D.xls", sheet = 2, skip=2)
 
 #Inspect and clean up date
   head(df,3)
