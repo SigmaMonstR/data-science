@@ -39,9 +39,6 @@ Below is a visualization of the results, which are interpretable as well as defi
   library(rpart.plot)
 
 #Download
-  temp <- tempfile()
-  #download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
-  #unz <- unzip(temp, exdir=getwd())
   df <- read.csv("ss15pga.csv")
 
 #Recode
@@ -207,91 +204,17 @@ As we move through this chapter, the bias-variance tradeoff is a critical consid
 
 #Section 2 - Methods
 
+In the context of healthcare coverage, we will review an application of KNNs, then explore two types of tree-based learning, then wrap up with logistic regression. We will need to import pre-cleaned healthcare coverage data from the American Community Survey (ACS), which is available from [US Census Bureau website](https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip). 
 
-In the context of healthcare coverage, we will review an application of KNNs, then explore two types of tree-based learning, then wrap up with logistic regression. Before diving in, let's pre-prep the healthcare coverage data from the American Community Survey (ACS), which is available from [US Census Bureau website](https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip).
-```{r}
-#Download
-  #temp <- tempfile()
-  #download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
-  #unz <- unzip(temp, exdir=getwd())
-  #df <- read.csv("unz")
-
-  df <- read.csv("ss15pga.csv")
-```
-
-Upon downloading the data, we'll need to recode a few demographic varaibles. Healthcare coverage is the labeled variable (target). 
 
 ```{r}
-#Keep people who are 16 or older
-  df <- df[df$AGEP>=16,]
-
-#Health coverage
-  df$coverage <- NA
-  df$coverage[df$HICOV == 2] <- "No Coverage"
-  df$coverage[df$HICOV == 1] <- "Coverage"
-  df$coverage <- as.factor(df$coverage)
-```
-
-Using the [data dictionary](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict15.pdf),  we'll restructure and label the education, citizenship, marriage, and race.
-```{r}
-#Education
-  df$educ[df$SCHL<16 ] <- "Less than HS"
-  df$educ[df$SCHL>=16 & df$SCHL<21] <- "HS Degree"
-  df$educ[df$SCHL==21] <- "Undergraduate Degree"
-  df$educ[df$SCHL>21] <- "Graduate Degree"
-  df$educ <- as.factor(df$educ)
+  health <- read.csv("data/lecture7.csv")
+  str(health)
   
-#Citizenship
-  df$cit[df$CIT != 5] <- "Citizen"
-  df$cit[df$CIT == 5] <- "Non-citizen"
-  df$cit <- as.factor(df$cit)
-
-#Marriage
-  df$mar[df$MAR == 1] <- "Married"
-  df$mar[df$MAR == 2] <- "Widowed"
-  df$mar[df$MAR == 3] <- "Divorced"
-  df$mar[df$MAR == 4] <- "Separated"
-  df$mar[df$MAR == 5] <- "Never Married"
-  df$mar <- as.factor(df$mar)
-
-#Race
-  df$race[df$RAC1P == 1] <- "White"
-  df$race[df$RAC1P == 2] <- "Black"
-  df$race[df$RAC1P == 3] <- "Amer. Ind."
-  df$race[df$RAC1P == 4] <- "Alaska Native"
-  df$race[df$RAC1P == 5] <- "Tribes Spec."
-  df$race[df$RAC1P == 6] <- "Asian"
-  df$race[df$RAC1P == 7] <- "Nat. Hawaiian/Pac. Isl."
-  df$race[df$RAC1P == 8] <- "Other"
-  df$race[df$RAC1P == 9] <- "Two or More"
-  df$race <- factor(df$race)
-```
-
-For consistency, we'll rename the `AGEP` and `WAGE` variables.
-```{r}
-  colnames(df)[c(8,70)] <- c("age", "wage")
-```
-
-As only a fraction of respondents to the survey did not have healthcare coverage, we will need to "boost" the signal of this subpopulation in order to better emphasize differences. This usually is done by either (1) resampling the smaller subpopulation until there is a 1:1 ratio of the two subpopulations, or (2) undersampling the larger population. In this case, we will undersampled the people with coverage.
-
-```{r}
-#Prep for undersampling 'covered'
-  temp <- df[df$coverage=="Coverage",]
-
-#Set seed to so that the random draw is replicable
-  set.seed(123)
-  health <- rbind( df[df$coverage=="No Coverage",], 
-                   temp[sample(row.names(temp), sum(df$coverage == "No Coverage")),])
-
-```
-
-Lastly, we only need to keep the following variables.
-```{r}
-  vars <- c("coverage", "age", "wage", "cit", "mar", "educ", "race")
-  health <- health[, vars]
 ```
 
 ### KNNs in applications
+
 
 #### Review of KNNs
 Review
@@ -301,9 +224,6 @@ Review
 
 Recall that in the case of KNNs, all variables should be in the same scale such that each input feature has equal weight. A review of the data indicates that the health data is not in the appropriate form to be used. 
 
-```{r}
-  str(health)
-```
 
 #### Data preparation: Mixed variable formats
 The continuous variable can be discretized by first binning records at equal intervals. For simplicity, we'll bin the age and wage varaibles in the following manner:
@@ -440,24 +360,23 @@ Upon installing and loading the `ROCR` library, the library requires a minimum o
 The `performance()` method is used to extract accuracy statistics from `pred.obj`. The AUC, for example, can be extracted using the command below and the AUC statistic is captured under `pred.obj@y.values`. Note that the AUC is less than 0.5, indicating that this is an egregiously poor performing model.
 ```{r}
 #Calculate AUC
-  auc <- performance(pred.obj, "auc")
-  str(auc)
+  auc.knn <- performance(pred.obj, "auc")
+  str(auc.knn)
 ```
 
 Nonetheless, it is worth seeing the shape of the curve. To plot the ROC, we need to extract the FPR and TPR accuracies from `pred.obj`. The resulting object can be plotted. Typically, a remotely well-performing model will curve above the diagonal line with an $AUC > 0.5$. Closer the line is to reaching TPR = 1 for all values of FPR, the more robust the model. While we can optimize for different values of $k$, KNNs are not well-suited for this task.
 
 ```{r}
+  
 #Calculate ROC
   pred.knn <- performance(pred.obj, "tpr", "fpr")
 
 #Plot
   plot(pred.knn, colorize = TRUE,
-       main = paste0("k = 10; AUC = ",round(unlist(auc@y.values), 2)))
+       main = paste0("k = 10; AUC = ",round(unlist(auc.knn@y.values), 2)))
   abline(a = 0, b = 1)
 ```
 
-###Decision Trees
-In everyday policy setting and operations, decision trees are a common tool used for communicating complex processes, wh
 
 ###Decision Trees
 In everyday policy setting and operations, decision trees are a common tool used for communicating complex processes, whether for how an actor moves through intricate and convoluted bureaucracy or how a sub-population can be described based on a set of criteria. While the garden variety decision tree can be laid out qualitatively, supervised learning allows decision trees to be create in an empirical fashion that not only have the power to aesthetically communicate patterns, but also predict how a non-linear system behaves.
@@ -553,70 +472,32 @@ _Issues_. While decision trees are can be interpreta and discrete method for cla
 
 
 ####Decision Trees in Practice
+
+```{r}
+#Train-Test 
+  rand <- runif(nrow(health)) 
+  rand <- rand > 0.5
+  
+#Create x-matrix. Use "-1" in the column argument to keep everything except column 1
+  train <- health[rand == T, ]
+  test <- health[rand == F, ]
+  
+```
+
+
 ```{r, message = FALSE, eval=F}
-# Classification Tree with rpart
-  library(rpart)
-  library(rpart.plot)
-
-#Download
-  temp <- tempfile()
-  #download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
-  #unz <- unzip(temp, exdir=getwd())
-  df <- read.csv(unz)
-
-#Recode
-  df <- df[df$AGEP>=16,]
-  df$SCHL2[df$SCHL<16 ] <- "Less than HS"
-  df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "HS Degree"
-  df$SCHL2[df$SCHL==21] <- "Undergraduate Degree"
-  df$SCHL2[df$SCHL>21] <- "Graduate Degree"
-  df$SCHL2 <- as.factor(df$SCHL2)
-  
-  df$coverage <- NA
-  df$coverage[df$HICOV == 2] <- "No Coverage"
-  df$coverage[df$HICOV == 1] <- "Coverage"
-  df$coverage <- as.factor(df$coverage)
-  
-  df$CIT2 <- NA
-  df$CIT2[df$CIT != 5] <- "Citizen"
-  df$CIT2[df$CIT == 5] <- "Non-citizen"
-  df$CIT2 <- as.factor(df$CIT2)
-  
-  df$MAR2 <- NA
-  df$MAR2[df$MAR == 1] <- "Married"
-  df$MAR2[df$MAR == 2] <- "Widowed"
-  df$MAR2[df$MAR == 3] <- "Divorced"
-  df$MAR2[df$MAR == 4] <- "Separated"
-  df$MAR2[df$MAR == 5] <- "Never Married"
-  df$MAR2 <- as.factor(df$MAR2)
-
-#Coverage
-  wght <- grep("pwgtp",colnames(df))
-  est <- c()
-  for(k in wght){
-    est <- c(est, sum(df[df$coverage=="No Coverage",k])/sum(df[[k]]))
-  }
-
-  
-#Resampling
-  temp <- df[df$coverage=="Coverage",]
-  set.seed(123)
-  df_sub <- rbind(df[df$coverage=="No Coverage",], 
-                  temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
-  # grow tree 
-
-fit <- rpart(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P + WAGP, method="class", data=df_sub)
+library(rpart)
+fit <- rpart(coverage ~ age + wage + cit + mar + educ + race, method = "class", data = train)
 
 #Accuracy
-  tree.pred <- predict(fit, df_sub, type='class')
-  tab <- table(tree.pred, df_sub$coverage)
-  (tab[1] + tab[4])/nrow(df_sub)
-
-# plot tree 
-rpart.plot(fit,extra=104, box.palette="GnBu",
-           branch.lty=3, shadow.col="gray", nn=TRUE)
-
-
+  tree.pred <- predict(fit, test, type='prob')
+  pred.obj <- prediction(tree.pred[,2], test[,1])
+  pred.rpart <- performance(pred.obj, "tpr", "fpr")
+  auc.rpart <- performance(pred.obj, "auc")
+  
+#Plot AUC
+  plot(pred.knn, colorize=T, lwd=2, main = paste0("AUC = ",round(unlist(auc.rpart@y.values),2)))
+  abline(a = 0, b = 1)
 ```
 
 ###Random Forests
@@ -630,16 +511,38 @@ rpart.plot(fit,extra=104, box.palette="GnBu",
 ```
 
 Using the 
-```{r, eval=F}
-library(randomForest)
 
+```{r, warning=FALSE, fig.height=2}
+  library(randomForest)
 
-fit2 <- randomForest(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P + WAGP,
-             data=df_sub)
+#Run Random Forest
+  fit <- randomForest(coverage ~ age + wage + cit + mar + educ + race, method = "class", data = train)
 
-summary(fit2)
-print(importance(fit2,type = 2)) 
+#Check output
+  summary(fit)
+  print(importance(fit, type = 2)) 
 
+#Search for most optimal number of input features
+  fit.tune <- tuneRF(train[,-1], train$coverage, ntreeTry = 300, stepFactor = 1.5, 
+                improve = 0.01, trace = TRUE, plot = TRUE)
+  
+  tune.param <- fit.tune[fit.tune[, 2] == min(fit.tune[, 2]), 1]
+
+#Re-run with tuned parameters
+  set.seed(123)
+  fit <-randomForest(coverage ~ ., data = train, mtry = tune.param, 
+                     importance = TRUE, ntree = 200)
+  print(fit)
+
+#Accuracy
+  tree.pred <- predict(fit, test, type='prob')
+  pred.obj <- prediction(tree.pred[,2], test[,1])
+  pred.rf <- performance(pred.obj, "tpr", "fpr")
+  auc.rf <- performance(pred.obj, "auc")
+  
+#Plot AUC
+  plot(pred.knn, colorize=T, lwd=2, main = paste0("AUC = ",round(unlist(auc.rf@y.values),2)))
+  abline(a = 0, b = 1)
 ```
 
 ###Logistic Regression
