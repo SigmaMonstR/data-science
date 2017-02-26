@@ -1,0 +1,13 @@
+user,area,income,employ
+No,East,> $20k,Yes
+No,East,> $20k,No
+No,East,> $20k,Yes
+No,West,> $20k,Yes
+No,West,> $20k,Yes
+No,East,> $20k,No
+Yes,East,> $20k,Yes
+Yes,East,< $20k,No
+Yes,West,< $20k,Yes
+Yes,East,< $20k,No
+Yes,East,< $20k,Yes
+Yes,East,< $20k,Yes

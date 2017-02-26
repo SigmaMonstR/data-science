@@ -376,23 +376,24 @@ Using the extracted probabilities, we now can calculate the accuracy using the T
 
 To more robustly test the model, we will rely on the Receiving-Operating Characteristic (ROC) Curve and the Area Under the Curve (AUC). The ROC calculates the TPR and FPR at many thresholds, that produces a curve that indicates the general robustness of a model. The AUC is literally the area under that curve, which is a measure between 0.5 and 1 where the former indicates no predictive power and 1.0 indicates a perfect model. 
 
-To assess accuracy, we will install and load the `devtools` and `plotROC` libraries. The former allows for loading libraries available via Github and the latter is an extension of `ggplot2` that calculates accuracy and graphs ROC plots. In order to calculate the ROC, we will create a new data frame `input` that is comprised of the labels for the test set `ytest` and the predicted probabilities `test.prob`. 
+To assess accuracy, we will install and load the `plotROC` library, which calculates accuracy and uses `ggplot2` to graph the ROC. In order to calculate the ROC, we will create a new data frame `input` that is comprised of the labels for the test set `ytest` and the predicted probabilities `test.prob`. 
 ```{r}
 #Load libraries
-  #install.packages("devtools")
-  #devtools::install_github("sachsmc/plotROC")
   library(ggplot2)
   library(plotROC)
 
 #Set up test data frame
-  input <- data.frame(ytest = ytest, prob = test.prob)
+  input <- data.frame(ytest = ytest, test.prob)
 ```
 
 We then will first create a ggplot object named `base` that will contain the labels (`d = `) and probabilities (`m = `), then create the ROC plot using  `geom_roc()` and `style_roc()`. A ROC curve for a well-performing model should sit well-above the the 45 degree diagonal line, which is the reference for an AUC of 0.5 (the minimum expected for a positive predictor). However, as the curve is below the 45 degree line, we may have a seriously deficient model. 
 
 ```{r, message = FALSE, warning=FALSE, fig.height = 2}
 #Base object
-  roc <- ggplot(input, aes(d = ytest, m = prob)) + geom_roc() + style_roc()
+  base <- ggplot(input, aes(d = ytest, m = test.prob))
+
+#ROC
+  roc <- base + geom_roc() + style_roc()
   
 #Show result
   roc
@@ -742,10 +743,9 @@ Where *Variable Importance* for variable $k$ is the sum of *Goodness of Fit* (e.
 
 Using the `plotROC` package once again, we calculate the AUC score for each model to assess predictive performance on both the training and test set. One particularly striking difference is the switch in position of the $optimal$ and $cp = 0$ curves: $cp = 0$ is higher in the training set, but are at the approximate safe height in test. This indicates that $cp = 0$ notably overfits, likely to the extra low bias of unpruned leafs.
 
-```{r, fig.height = 3, message = FALSE, warning = FALSE}
+```{r, fig.height = 2, message = FALSE, warning = FALSE}
 #plotROC
   library(plotROC)
-  library(gridExtra)
 
 #Predict values for train set
   pred.opt.train <- predict(fit.opt, train, type='prob')[,2]
@@ -794,9 +794,7 @@ As the result of tuning towards an optimal model, we can see that the decision t
 
 #Assemble a well-formatted table
   library(xtable)
-  tab <- data.frame(model = unique(input.test$model), 
-                    train = calc_auc(roc.train)$AUC, 
-                    test = calc_auc(roc.test)$AUC)
+  tab <- data.frame(model = unique(input$model), train = calc_auc(roc.train)$AUC, test = calc_auc(roc.test)$AUC)
   print(xtable(tab, digits = 5), comment=FALSE) 
 ```
 
@@ -962,7 +960,7 @@ Using the `importance()` method, we can see the Mean Decrease Gini, which calcul
 
 By default, the `randomForests` library sets the number of trees to equal 500. By plotting the fit object, we can see how OOB error and the confidence interval converges asymptotically as more trees are added to the ensemble. Otherwise stated, more trees will help up to a certain point and the default is likely more than enough. 
 
-```{r, warning=FALSE, message = FALSE, fig.height = 4}
+```{r, warning=FALSE, message = FALSE, fig.height = 2}
   plot(fit.rf)
 ```
 
@@ -981,7 +979,7 @@ As we know that $n = 500$ trees is more than enough, we will now need to tune th
 ```
 
 Below, we conduct a search from `mtryStart = 1` with a `stepFactor = 2`. The search result indicates that *2* variables per split are optimal.
-```{r, warning=FALSE, fig.height=4}
+```{r, warning=FALSE, fig.height=2}
 #Search for most optimal number of input features
   fit.tune <- tuneRF(train[,-1], train$coverage, ntreeTry = 500, 
                      mtryStart = 1, stepFactor = 2, 
@@ -1015,6 +1013,4 @@ Using the optimal result, we can plug back into the `randomForest()` method and 
   calc_auc(roc.rf)
 ```
 
-
-
-###To be continued for Lecture 8
+<To be continued for Lecture 8>
