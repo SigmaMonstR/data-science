@@ -213,15 +213,28 @@ To illustrate this tradeoff, the three graphs below exemplify the two extremes a
   df$ypoly <- predict(lm(y ~ x + x2 + x3, data= df), newdata = df)
   
   proper <- ggplot(df) + geom_point(aes(x = x, y = y), size = 0.1) + geom_smooth(aes(x = x, y = ypoly), se = FALSE, span = 0.3) + ggtitle("Balanced") + 
-            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
-            axis.text.y=element_blank(), axis.title.y=element_blank(), axis.title.x=element_blank())
+  theme(plot.title = element_text(size = 10), axis.line=element_blank(),axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank())
+  
   simple <- ggplot(df) + geom_point(aes(x = x, y = y), size = 0.1) + geom_smooth(aes(x = x, y = y), method = "lm", se = FALSE) + ggtitle("Underfit (High Bias, Low Variance)") + 
-            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
-            axis.text.y=element_blank(), axis.title.y=element_blank(), axis.title.x=element_blank())
+  theme(plot.title = element_text(size = 10), axis.line=element_blank(),axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank())
  
   complex <- ggplot(df) + geom_point(aes(x = x, y = y), size = 0.1) + geom_smooth(aes(x = x, y = y), span = 0.005, se = FALSE) + ggtitle("Overfit (Low Bias, High Variance)") + 
-            theme(plot.title = element_text(size = 9), axis.text.x=element_blank(),
-            axis.text.y=element_blank(), axis.title.y=element_blank(), axis.title.x=element_blank())
+  theme(plot.title = element_text(size = 10), axis.line=element_blank(),axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank())
    grid.arrange(simple, complex, proper, ncol = 3) 
 ```
 
@@ -390,7 +403,7 @@ To assess accuracy, we will install and load the `devtools` and `plotROC` librar
 
 We then will first create a ggplot object named `base` that will contain the labels (`d = `) and probabilities (`m = `), then create the ROC plot using  `geom_roc()` and `style_roc()`. A ROC curve for a well-performing model should sit well-above the the 45 degree diagonal line, which is the reference for an AUC of 0.5 (the minimum expected for a positive predictor). However, as the curve is below the 45 degree line, we may have a seriously deficient model. 
 
-```{r, message = FALSE, warning=FALSE, fig.height = 2}
+```{r, message = FALSE, warning=FALSE, fig.height = 3}
 #Base object
   roc <- ggplot(input, aes(d = ytest, m = prob)) + geom_roc() + style_roc()
   
@@ -493,7 +506,7 @@ To understand attribute tests means to have a thorough understanding of separabi
 
 To answer that question, we can rely on a visual cross-tabulation where the size of the circles is scaled proportional to the number of records. The objective is to identify the matrix where the circles are the largest along any diagonal -- this would indicate that given usership, a feature is able to serve as a criterion that separates users from non-users. Of the three graphs below, graph #2 is able to separate a relatively large proportion of users from non-users. For a relatively low-dimensional dataset (fewer attributes), a visual analysis is accomplishable. However, on scale, undertaking this process manually may be onerous and prone to error.
 
-```{r, echo = F, message = FALSE, }
+```{r, echo = F, message = FALSE }
   
   #employ
   tab <- as.data.frame(table(customers$user, customers$employ))
@@ -503,7 +516,10 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy") + 
               theme_bw() + xlab("Customer?") + ylab("Employed?") +  ggtitle("(1)") + 
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1)
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
+              theme( plot.title = element_text(size = 9), 
+                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
+                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
   
   
   #Income
@@ -514,8 +530,10 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy")  +  ggtitle("(2)") +  
               theme_bw() + xlab("Customer?") + ylab("Income") +   
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1)
-  
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
+              theme( plot.title = element_text(size = 9), 
+                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
+                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
   
   #Revenue
   tab <- as.data.frame(table(customers$user, customers$area))
@@ -525,7 +543,10 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy")  +  ggtitle("(3)") +  
               theme_bw() + xlab("Customer?") + ylab("Side of town?") +   
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1)
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
+              theme( plot.title = element_text(size = 9), 
+                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
+                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
   
   grid.arrange(pie_1, pie_2, pie_3,  ncol = 3)
 ```
@@ -632,8 +653,13 @@ tree.error <- data.frame( trees = 1:n,
                           v5 = 50*(1+cos((1:n)/3)) + runif(n)*10)
 
 ggplot(tree.error) + geom_line(aes(x = trees, y = v1), colour = "orange") + geom_line(aes(x = trees, y = v2), colour = "navy") +
-  xlab("Number of trees") + ylab("Error") + geom_vline(xintercept = 10, colour = "red") + geom_line(aes(x = trees, y = v3), colour = "green") + geom_line(aes(x = trees, y = v4), colour = "purple") + geom_line(aes(x = trees, y = v5), colour = "lightblue") + 
-              theme(plot.title = element_text(size = 10))
+  xlab("Number of nodes") + ylab("Error") + geom_vline(xintercept = 10, colour = "red") + geom_line(aes(x = trees, y = v3), colour = "green") + geom_line(aes(x = trees, y = v4), colour = "purple") + geom_line(aes(x = trees, y = v5), colour = "lightblue")  + 
+  theme(plot.title = element_text(size = 10), axis.line=element_blank(),axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank())
  
 ```
 
@@ -667,7 +693,8 @@ To put decision trees into practice, we will use a simple train/test design to p
 
 With the data ready, we can call the `rpart` library, which is the most popular classification trees library. 
 ```{r, message = FALSE}
-library(rpart)
+#Load rpart library
+  library(rpart)
 ```
 
 The main method we're concerned with is the `rpart()` method, which requires a few arguments:
@@ -944,6 +971,7 @@ Like decision trees, much of Random Forests rely on easy to use methods made ava
 Using the same formula as the `rpart()` function, we can train a naive Random Forest and check the OOB error. Approximately 80% and 77% of people without and with coverage, respectively, can be accurately classified. The algorithm also tried 2 variables per bagging iteration to start.
 
 ```{r, warning=FALSE, message = FALSE}
+#Load randomForest library
   library(randomForest)
 
 #Run Random Forest
@@ -1017,4 +1045,4 @@ Using the optimal result, we can plug back into the `randomForest()` method and 
 
 
 
-###To be continued for Lecture 8
+###To be continued in Lecture 8
