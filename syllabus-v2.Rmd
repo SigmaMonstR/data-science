@@ -158,7 +158,7 @@ Supervised learning is the most relied upon class of techniques that enable caus
 
 *Homework Assignment*
 
-- TBA
+- Lec 6: Satellite imagery for predicting employment
 
 
 ##### Lecture 7 + 8: Classification techniques 
@@ -173,14 +173,15 @@ Classification models are one of the workhorses of data science. Classifiers ena
 4.	Models: statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation, Decision trees, Logistic Regression, K-Nearest Neighbors
 5.	Appropriate uses of classification techniques, Scoring, prediction and prioritization, Propensity score matching
 
-
 *Example application*
 
-- Classifying physical activity using a smart phone accelerometer
+- Healthcare insurance coverage data
 
-*Homework Assignment*
+*Homework Assignments*
 
-- TBA
+- Lec 7: Predict activity using smartphone accelerometer data (due Lec 8).
+- Lec 8: Hand out class project instructions, one page proposal of what you'll do due by Lec 9.
+
 
 ##### Lecture 9: Unsupervised learning 
 
@@ -199,6 +200,8 @@ No, this is not an independent study session. Unsupervised learning techniques s
 - Univariate clustering application: k-means
 - Multivariate clustering application: Customer segmentation using Census American Community Survey
 
+*Homework Assignment*
+- Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
 
 #### Section 3: Data enhancement and visualization
 

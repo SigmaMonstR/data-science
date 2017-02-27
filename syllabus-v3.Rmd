@@ -1,6 +1,14 @@
+---
+title: "PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017"
+subtitle: Jeff Chen ([jc2817@georgetown.edu](mailto:jc2817@georgetown.edu)) and Dan
+  Hammer ([dan.hammer@georgetown.edu](mailto:dan.hammer@georgetown.edu))
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
 
-# PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017 
-
+Updated: February 27, 2017
 
 #### Course Description
 
@@ -34,12 +42,12 @@ Students are expected to sign up for a Github account (https://github.com). Read
 #### Workload and assignments
 
 Students will be evaluated on the basis of five problem sets (60%) and one final project (40%). Late
-problem sets will be penalized by 10% per day late. All problem sets will be submitted electronically. The final project will be due on Monday May 8th. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
+problem sets will be penalized by 10% per day late. All problem sets will be submitted electronically. The final project assignment details will be made available in late March and the final product will be due on Monday May 8th. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
 
 
 ### Course Outline
 
-Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.
+Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.  The section outlines are subject to change up to one week before the lecture.  Please continue to review the syllabus throughout the course.
 
 #### Section 1: Fundamentals
 Data science is about designing and building data products that derive insight. This first section will focus on developing fundamental skills required to build effective products.
@@ -64,6 +72,7 @@ The objective of the first lecture is to overcome the coefficient of static fric
 
 - Graphing photovoltaic energy data from the National Institute of Standard and Technology's Net Zero Energy Residential Test Facility
 
+
 ##### Lecture 2: Data manipulation
 
 The objective of this lecture is to present the most important and fundamental elements of data manipulation.  These core operations include sort, merge, reshape, and collapse.  We will also present loops through multiple rows or columns, and other alternatives to operate on partitions of data frames.
@@ -79,8 +88,27 @@ The objective of this lecture is to present the most important and fundamental e
 7. Text processing: capitalization, substring, regex
 8. Looping through basic operations (bonus: same idea without loops)
 
+*Example application*
+- Parsing and conducting basic text analysis using State of the Union Speeches (2009 to 2016)
 
-##### Lecture 3: Exploratory Data Analysis (EDA)
+##### Lecture 3: Functions and Control Structures 
+Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
+
+*Lecture objectives*
+
+1. Custom functions for consistency and efficiency
+2. Control structures: Loops, if statements
+3. Suitable practices
+
+*Example application*
+
+- Collaborative filtering with Last.FM music listening data
+
+*Homework Assignment*
+
+- Batch Extraction of Census Housing Permits data
+
+##### Lecture 4: Exploratory Data Analysis (EDA)
 The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
 
 *Lecture objectives*
@@ -95,27 +123,7 @@ The objective of this lecture is to handle missing values appropriately and scri
 - Conducting analysis of missing values analysis  of weather anomalies from 1880 to Present using the National Oceanographic and Atmospheric Administration's GHCN-M
 
 
-##### Lecture 4: Functions and Control Structures 
-Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
-
-*Lecture objectives*
-
-1. Custom functions for consistency and efficiency
-2. Control structures: Loops, if statements
-3. Suitable practices
-
-*Example applications*
-
-- Smoothing conventional gasoline time series data from the Energy Information Administration (EIA)
-
-*Homework Assignment*
-
-- TBA
-
-
 ##### Section 2: Data Analysis + Modeling
-
-The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
 
 The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
 
@@ -131,7 +139,7 @@ Formal statistics offers methods to calculate closed-form, analytical answers to
 
 *Example application*	
 
-- Schooling outcomes data
+- Schooling outcomes
 
 
 ##### Lecture 6: Introduction to Supervised Learning 
@@ -197,7 +205,6 @@ No, this is not an independent study session. Unsupervised learning techniques s
 *Homework Assignment*
 - Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
 
-
 #### Section 3: Data enhancement and visualization
 
 Beyond the data preparation and modeling, the ‘presentation layer’ is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
@@ -235,7 +242,6 @@ There are many cases where you will rely on data or services that aren’t store
 
 - Extracting elevation data from the Google Elevation API
 - Identifying the characteristics of farmers’ markets in the Southwest United States.
-
 
 ##### Lecture 12:  Spatial Data and Maps
 
