@@ -17,7 +17,7 @@ $$Y(\text{employment}_i) = f(\text{light distribution}_i)$$
 
 You have been provided with 48 months of summary statistics of nighttime satellite imagery for each of 182 metropolitan areas in the file "homework2_data.Rda" (link to data in homework template); However, you are provided only 42 months of employment data. The employment data has been indexed relative to each metro area. The dataset contains 9 features:
 
-- `GEOID`: Five character string. ID for each of the 819 metropolitan areas.
+- `GEOID`: Five character string. ID for each of the 182 metropolitan areas.
 - `date`: Date in `YYYY-MM-DD` format.
 - `emp`: Numeric. Mean-indexed employment estimate metro area (1.0 = mean)
 - `year`: Integer. Year in `YYYY` format.
@@ -46,8 +46,8 @@ __Tips__.
 __Submission__. 
 
 - You will be given a `.R` script template and your submission will be a functioning R script. This script will be run by class instructors and the output of which will be graded automatically using a grading script. Save this `.R` file following this naming convention "firstname-lastname-hmwk2.R". For example: a file for Bill Clinton would be "bill-clinton-hmwk2.R". 
-- Your code should generate a data frame of predictions labeled `myPredictions`, which should contain the following fields labeled in this manner: `GEOID`, `date`, and `yhat` (your prediction). Choose your 10 best cities for grading and be sure that your `predictions` dataframe only contains those 10 cities (there should be about $n = 480$, of which $n=60$ are records without the employment values to be used for scoring and $n = 420$ are your training set). A point will be deducted if your data frame and variables are not labeled exactly as stated above.
--  Your grade will be based on the out-of-sample accuracy of your 10 cities as provided in the `predictions` dataframe that you will produce. As we have been provided `emp` values for 42 of 48 months in the sample but satellite data for all 48 months, you will be able to 'predict' or 'score' the 6 months of missing `emp` data.  Again, you should label your the field with your predictions as `yhat` in the `myPredictions` dataframe.
+- Your code should generate a data frame of predictions labeled `myPredictions`, which should contain the following fields labeled in this manner: `GEOID`, `date`, and `yhat` (your prediction). Choose your 10 best cities for grading and be sure that your `myPredictions` dataframe only contains those 10 cities (there should be about $n = 480$, of which $n=60$ are records without the employment values to be used for scoring and $n = 420$ are your training set). A point will be deducted if your data frame and variables are not labeled exactly as stated above.
+-  Your grade will be based on the out-of-sample accuracy of your 10 cities as provided in the `myPredictions` dataframe that you will produce. As we have been provided `emp` values for 42 of 48 months in the sample but satellite data for all 48 months, you will be able to 'predict' or 'score' the 6 months of missing `emp` data.  Again, you should label your the field with your predictions as `yhat` in the `myPredictions` dataframe.
 - Scoring. 8 points for accuracy (see below). 2 points if your code runs without error. 
 - Accuracy metric. Your accuracy score will be based on the Mean Absolute Percentage Error (MAPE) of your out-of-sample predictions:
 $$\text{MAPE} = 100 \times \frac{\sum{|(\hat{y_i}/y_i)-1|}}{n}$$

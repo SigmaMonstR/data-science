@@ -5,7 +5,7 @@
 
 #Use this script to get the data
   temp <- tempfile()
-  download.file("https://github.com/SigmaMonstR/rudy.js/raw/master/temp.Rda", temp, mode="wb")
+  download.file("https://github.com/GeorgetownMcCourt/data-science/raw/master/homeworks/homework2/toStudents/homework2_data.Rda", temp, mode="wb")
   load(temp)
 
 #Utilities to help you
