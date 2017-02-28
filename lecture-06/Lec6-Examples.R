@@ -19,17 +19,20 @@
   df$flag[df$year >= 2015] <- 1
   
 #Run LM, v1
-  fit <- lm(log(transactions) ~ log(emp), data = df[df$flag == 0,])
+  fit <- lm( log(transactions) ~ log(emp), data = df[df$flag == 0,])
   summary(fit)
   
 #Check coefficient
   summary(fit)$coef
+  summary(fit)$r.squared
+  str(summary(fit))
   
 #Check errors
   library(ggplot2)
   x <- data.frame(resid = fit$residuals)
   set.seed(50)
   x$norm <- rnorm(nrow(x), mean(x$resid), sd(x$resid))
+  
   ggplot(x, aes(resid)) + 
     geom_density(aes(norm), alpha = 0.4, fill = "yellow") + 
     geom_density(fill = "navy", alpha = 0.6) 
@@ -193,3 +196,4 @@
   #Graphs plotted
   library(gridExtra) 
   grid.arrange(full, sampled, k1, k4, k10, k100, ncol=2)
+  
