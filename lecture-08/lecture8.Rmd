@@ -10,29 +10,163 @@ output:
     theme: journal
     toc: yes
 ---
----
-title: 'Lecture 7: Classifiers I'
-author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
-  Policy
-subtitle: Intro to Data Science for Public Policy, Spring 2016
-output:
-  pdf_document:
-    toc: yes
-  html_document:
-    theme: journal
-    toc: yes
----
 
-The above diagram was produced using a decision tree algorithm, which is one of many forms of supervised learning known as _classifiers_ or _classification algorithms_. Classifiers take on many forms. Some use recursive partitioning to break a population into many, more homogeneous subpopulations. Others estimate a series of equations to fit a line or plane between two or more classes. Others will average the results of an ensemble of models to predict membership. Each class of model is defined with mathematical scenarios in mind. This chapter is organized into three sections. Section 1 describes common considerations in classification models. Section 2 provides an overview of a number of classifiers, including kNN, logistic regression, decision trees, as well as random forests, support vector machines, and ensemble methods. Section 3 describes the types of applications of these methods.
+Building on Lecture 7, this section lightly introduces three more classification algorithms: Generalized Linear Models, Support Vector Machines, and Artificial Neural Networks.
+
+##
 
 
-| Measure | Description | Interpretation |
-|----------------+-------------------------------+----------------------------|
-|Receiving Operating Characteristic (ROC) Curve| ROC curves plotpairs of TPRs and FPRs that correspond to varied discriminant thresholds between 0 and 1. By systematically testing thresholds. For example, TPRs and FPRs are calculated and plotted given probability thresholds $p = 0.2$, $p = 0.5$, and $p=0.8$.  | Once plotting the curve with TPR as Y and FPR as X, the area under the curve (AUC) represents robustness of the model, ranging from 0.5 (model is as good as a coin toss) to 1.0 (perfectly robust model). The AUC statistic is sometimes referred to as the "concordance". |
-|<br> $F_1$ Score| <br> The score is formulated as $F_1 = 2 \times \frac{precision \times recall}{precision + recall}= 2 \times \frac{PPV \times TPR}{PPV + TPR}$ where $\text{precision or PPV} = \frac{TP}{TP + FP}$ and $\text{recall or TPR} = \frac{TP}{TP + FN}$|<br>  The measure is bound between 0 and 1, where 1 is the top score indicating a better model. |
+##Support vector machines
+You’re given a three feature data set. Two features are continuous inputs and the third is a target containing labels of two groups. Upon plotting the points in two dimensional space and color coding for the target, you notice that there is a clear line of separation: A straight line can partition one group from the other (Figure 1). You think and realize that multiple lines could do the job: there are almost infinite lines (Figure 2) that could serve as the boundary between the groups. But which is the best? There should in theory be one line that optimally describes the separation between the groups. 
+
+```{r, echo = FALSE, message = FALSE, warning= FALSE}
+#Margin Example
+margin_size <- 0.3
+set.seed(123)
+df <- data.frame(x = runif(200),
+                 y = runif(200),
+                 supports = NA)
+
+#Set up margin supports
+  supports <- data.frame( x = c(0.6, 0.7, 0.7), y = NA, supports = NA)
+  supports$supports[1:2] <- -1.08 + 2*supports$x[1:2]
+  supports$supports[3] <- -.52 + 2*supports$x[3]
+  
+df <- rbind(df,
+            supports)
+  
+  
+#Best boundary
+  df$z <- -0.8 + df$x*2 
+  df$perp <- 0.6578033 + df$x*-0.5
+  df$perp[df$x >= 0.6951213] <- NA
+  df$perp[df$x <= 0.4711213] <- NA
+  
+#Cut out
+  df <- df[which((df$y > df$z + margin_size | df$y < df$z - margin_size | !is.na(df$supports))), ]
+  df$group <- "Side A"
+  df$group[df$y < df$z - margin_size] <- "Side B"
+  df$cols <- "blue"
+  df$cols[df$group == "Side B"] <- "green"
+  
+  
+#Alternative boundaries
+  df$z1 <- -1.1 + df$x*2.1
+  df$z2 <- -0.5 + df$x*1.9
+  df$z3 <- -0.95 + df$x*2  
+  df$z4 <- -0.65 + df$x*2  
+  df$z5 <- -0.95 + df$x*2.3
+  df$z6 <- -0.65 + df$x*1.7
+  
+  df$margin2 <- -1.08 + df$x*2
+  df$margin1 <- -.52 + df$x*2
+  
+  df <- df[order(df$perp),]
+  
+#Plot
+library(ggplot2)
+
+base <- ggplot(df, aes(group=factor(group))) + 
+    geom_point(aes(x = x, y = y,  colour = factor(group)))  +
+    ylim(0,1) + xlim(0,1) + 
+    ylab("x1") + xlab("x2") +
+    ggtitle("(1)") + scale_colour_manual(values=c("lightblue", "lightgrey")) +
+  coord_fixed(ratio = 1) +
+    theme(plot.title = element_text(size = 10), 
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm"))
+  
+options1 <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z1), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z2), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z3), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z4), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z5), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z6), alpha = 0.5, colour = "grey") + 
+  ylim(0,1) + xlim(0,1) +
+  ggtitle("(2)") +  scale_colour_manual(values=c("lightblue", "lightgrey")) +
+  coord_fixed(ratio = 1) + 
+  ylab("x1") + xlab("x2") +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm"))
 
 
+optimal <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), size = 2, colour = "purple") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = perp), size = 1, colour = "blue") + 
+  ylim(0,1) + xlim(0,1) + 
+  ylab("x1") + xlab("x2") +
+  ggtitle("(3)") +  scale_colour_manual(values=c("lightblue", "lightgrey")) +
+  coord_fixed(ratio = 1) +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) + 
+  annotate("text", x = .3, y = .4, label = "Margin", colour = "blue") + 
+  annotate("text", x = .8, y = .2, label = "Hyperplane", colour = "purple") 
 
+  
+supports <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), size = 2, colour = "purple") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "grey") +
+  geom_point(aes(x = x, y = supports, colour = "red", size=0.7)) +
+  ylim(0,1) + xlim(0,1) + 
+  ylab("x1") + xlab("x2") +
+  ggtitle("(4)") +  scale_colour_manual(values=c("lightblue", "lightgrey", "red")) +
+  coord_fixed(ratio = 1) +theme_bw() +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) 
+
+library(gridExtra)
+grid.arrange(base, options1, ncol = 2)
+```
+
+If we are to assume a straight line is appropriate, we can find a line that maximizes the distance between the groups. As seen in Figure 3, the line is known as the hyperplane or decision boundary (in purple) and the distance is known as the margin (in blue). This is the fundamental goal of Support Vector Machines (SVM): to maximize the margin around a hyperplane. By maximizing the margin around the hyperplane, we also improve the ability for the model to tolerate mistakes that cross into the margin.
+
+The algorithm looks for points that lie on the edges of the margin to act as “support vectors” of the hyperplane. Otherwise stated, these are control points or reference points that serve as markers that indicate the edges of the margin.
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+grid.arrange(optimal, supports, ncol = 2)
+```
+
+[Soft margin versus hard margin]
+
+[Higher dimensions]
+
+##Artificial Neural Networks
+[]
 
 ##Applications of classifiers
 ###Appropriate uses of classification techniques
