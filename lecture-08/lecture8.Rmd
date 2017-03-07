@@ -17,6 +17,7 @@ Building on Lecture 7, this section lightly introduces three more classification
 
 
 ##Support vector machines
+SVMs cannot be interpretted. They are    
 You’re given a three feature data set. Two features are continuous inputs and the third is a target containing labels of two groups. Upon plotting the points in two dimensional space and color coding for the target, you notice that there is a clear line of separation: A straight line can partition one group from the other (Figure 1). You think and realize that multiple lines could do the job: there are almost infinite lines (Figure 2) that could serve as the boundary between the groups. But which is the best? There should in theory be one line that optimally describes the separation between the groups. 
 
 ```{r, echo = FALSE, message = FALSE, warning= FALSE}
@@ -164,6 +165,74 @@ grid.arrange(optimal, supports, ncol = 2)
 [Soft margin versus hard margin]
 
 [Higher dimensions]
+
+[Pseudo code]
+
+[Math]
+
+[Cost and Gamma]
+
+####Applying SVMs
+```{r}
+library(e1071)
+health <- read.csv("data/lecture8.csv")
+
+#Create index of randomized booleans of the same length as the health data set
+  set.seed(100)
+  rand <- runif(nrow(health)) 
+  rand <- rand > 0.5
+  
+#Create train test sets
+  train <- health[rand == T, ]
+  test <- health[rand == F, ]
+  
+#Check SVM
+  svm.fit <- svm(coverage ~ ., data=train)
+  summary(svm.fit)
+  
+#Tune SVM
+  tune <- tune.svm(coverage ~. ,
+                    data = train,
+                    kernel="radial", 
+                    cost=10^(-1:2), gamma=c(.5,1,2))
+
+  print(tune)
+  
+#Re-train
+  svm.fit2 <- svm(coverage ~ ., data=train, kernel="polynomial", cost=1, gamma=1)
+  summary(svm.fit2)
+  
+#Prediction
+  svm.pred <- predict(svm.fit2, test)
+```
+
+Estimate the AUC
+```{r, message = FALSE, warning = FALSE}
+#plotROC
+  library(plotROC)
+  library(ggplot2)
+
+#Predict values for train set
+  pred.svm.train <- predict(svm.fit2, train, type='prob')
+
+#Predict values for test set
+  pred.svm.test <- predict(svm.fit2, test, type='prob')
+
+  
+#Set up ROC inputs
+  input.svm <- rbind(data.frame(model = "train", d = train$coverage, m = pred.svm.train), 
+                  data.frame(model = "test", d = test$coverage,  m = pred.svm.test))
+  
+#Graph all three ROCs
+  roc.svm <- ggplot(input.svm, aes(d = d, model = model, m = m, colour = model)) + 
+             geom_roc(show.legend = TRUE) + style_roc()  + ggtitle("ROC: SVM")
+
+#AUC
+  calc_auc(roc.svm)
+```
+
+
+
 
 ##Artificial Neural Networks
 []
