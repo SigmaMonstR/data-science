@@ -109,9 +109,9 @@ options1 <- ggplot(df) +
 
 optimal <- ggplot(df) + 
   geom_point(aes(x = x, y = y, colour = df$cols)) +
-  geom_line(aes(x = x, y = z), size = 2, colour = "purple") + 
-  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "grey") + 
-  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = z), size = 2, colour = "red") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "blue") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "blue") + 
   geom_line(aes(x = x, y = perp), size = 1, colour = "blue") + 
   ylim(0,1) + xlim(0,1) + 
   ylab("x1") + xlab("x2") +
@@ -126,19 +126,24 @@ optimal <- ggplot(df) +
         panel.grid.major=element_blank(),
         panel.grid.minor=element_blank(),plot.background=element_blank(),
         plot.margin=unit(c(-0.5,1,1,1), "cm")) + 
-  annotate("text", x = .3, y = .4, label = "Margin", colour = "blue") + 
-  annotate("text", x = .8, y = .2, label = "Hyperplane", colour = "purple") 
+  annotate("text", x = .75, y = .9, label = "H1", colour = "blue") + 
+  annotate("text", x = .93, y = .85, label = "H2", colour = "blue") + 
+  annotate("text", x = .52, y = .45, label = "d+", colour = "blue") + 
+  annotate("text", x = .68, y = .37, label = "d-", colour = "blue") + 
+  annotate("text", x = .2, y = .1, label = 'atop(bold("wx-b = +1"))', colour = "blue", parse = T)  + 
+  annotate("text", x = .39, y = .2, label = 'atop(bold("wx-b = 0"))', colour = "red", parse = T) + 
+  annotate("text", x = .75, y = .1, label = 'atop(bold("wx-b = -1"))', colour = "blue", parse = T) 
 
   
 supports <- ggplot(df) + 
   geom_point(aes(x = x, y = y, colour = df$cols)) +
-  geom_line(aes(x = x, y = z), size = 2, colour = "purple") + 
-  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "grey") + 
-  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "grey") +
+  geom_line(aes(x = x, y = z), size = 2, colour = "red") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "blue") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "blue") +
   geom_point(aes(x = x, y = supports, colour = "red", size=0.7)) +
   ylim(0,1) + xlim(0,1) + 
   ylab("x1") + xlab("x2") +
-  ggtitle("(4)") +  scale_colour_manual(values=c("lightblue", "lightgrey", "red")) +
+  ggtitle("(4)") +  scale_colour_manual(values=c("lightblue", "lightgrey", "green")) +
   coord_fixed(ratio = 1) +theme_bw() +
   theme(plot.title = element_text(size = 10), 
         axis.line=element_blank(),
@@ -154,13 +159,14 @@ library(gridExtra)
 grid.arrange(base, options1, ncol = 2)
 ```
 
-If we are to assume a straight line is appropriate, we can find a line that maximizes the distance between the groups. As seen in Figure 3, the line is known as the hyperplane or decision boundary (in purple) and the distance is known as the margin (in blue). This is the fundamental goal of Support Vector Machines (SVM): to maximize the margin around a hyperplane. By maximizing the margin around the hyperplane, we also improve the ability for the model to tolerate mistakes that cross into the margin.
+If we are to assume a straight line is appropriate, we can find a line that maximizes the distance between the groups. As seen in Figure 3, the dashed grey lines and the solid purple lines are known as hyperplanes, but are simply lines in two dimensional space. H1 and H2 are hyperplanes that are defined by a set of "support vectors" -- points that serve as control  or reference points for the location of the hyperplane (see Figure 4).  The elegance of this method is that not all points in a dataset are used to define H1 and H2: only select points on or near the hyperplanes are required to define the plane. These planes are defined using simple linear equations shown in dot-product form:  $$w^T x - b = +1$$  and $$w^T x - b = -1$$ for H2, where $w$ is a weight that needs to be calibrated.  H1 and H2 primarily serve as the boundaries of what is known as the *margin*, or the space that maximally separates the two classes that are linearly separable The optimal hyperplane or *decision boundary* is defined as $$w^T x - b = 0$$ and sits at a distance of $d+$ from H1 and $d-$ from H2.
 
-The algorithm looks for points that lie on the edges of the margin to act as “support vectors” of the hyperplane. Otherwise stated, these are control points or reference points that serve as markers that indicate the edges of the margin.
 
 ```{r, echo=F, warning=FALSE, message=FALSE}
 grid.arrange(optimal, supports, ncol = 2)
 ```
+
+
 
 [Soft margin versus hard margin]
 
@@ -172,8 +178,50 @@ grid.arrange(optimal, supports, ncol = 2)
 
 [Cost and Gamma]
 
+Start with line
+$mx + b = y$
+
+Generalized case for plane
+$wt + b = y$
+
+Classification for two classes
+$w^T + b > y$
+$w^T + b < y$
+$w^T + b$ are parameters of plane
+
+Where $y = 0$, that’s when we have no idea if point is positive or neg
+labels are $y \in {-1, +1}$
+
+boundaries are thus -1 and 1. Above the absolutes are scored as 1 and everything in between is iffy
+$w^T + b = +1$
+$w^T + b = 0$
+$w^T + b = -1$
+Lines are parallel to one another
+
+To optimize: we want to find the maximum distance between H1 and H2. This can be done by finding the distance of the line that is perpendicular to H1 and H2 since they are parallel.  The following equations are the points at which the perpendicular line intersects at two points
+$w^T_1 + b =1$
+$w^T_2 + b =-1$
+
+Subtract the two equations: 
+$w^T(x_1 - x_2) = 2$
+Using a vector calculus trick, we can $x_1 - x_2 = \frac{2}{||w||}$ where $||w||$ is the normalized w vector (length of w)
+This is the definition of the margin = $\frac{2}{||w||}$
+
+Optimization
+- maximize = $\frac{2}{||w||}$
+- easier to minimize $\frac{1}{2}||w||^2$ — this is known as a quadratic programming problem
+Or maximize another equation: sum of all points i, minus product alphas, labels, values
+$w(\alpha) = \sum_i{\alpha_i} - \frac{1}{2}\sum_i{\alpha_1\alpha_0 y_1 y_0 x_1^Tx_0}$
+subject to $\alpha_i \geq 0$ (non-negatives), $\sum_i{\alpha_i y_i} = 0$ (sum of alpha and y are equal to zero)
+
+Once the equation is maximized, $w = \sum_i{\alpha_i y_i x_i}$ can be extracted
+Many $\alpha_i$ are zero, non-zeros are the support vectors or basically data points 
+Only a few X's matter
+
+$x_i^Tx_j$ is the dot product that indicates relationship and only cases that move together are used
+
 ####Applying SVMs
-```{r}
+```{r, message = FALSE, warning = FALSE, eval = F}
 library(e1071)
 health <- read.csv("data/lecture8.csv")
 
@@ -207,7 +255,7 @@ health <- read.csv("data/lecture8.csv")
 ```
 
 Estimate the AUC
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, eval = F}
 #plotROC
   library(plotROC)
   library(ggplot2)
