@@ -599,7 +599,7 @@ $\qquad \text{Entropy}_\text{income < 20k } = (-p_{user} log_2(p_{\text{user}}))
 $\qquad \qquad \qquad \qquad \qquad  = -\frac{5}{5} log_2(\frac{5}{5}) = 0$
 
 
-$\qquad \text{Entropy}_\text{income < 20k } = (-p_{user} log_2(p_{\text{user}})) - (-p_{\text{non-user}} log_2(p_{\text{non-user}}))$
+$\qquad \text{Entropy}_\text{income > 20k } = (-p_{user} log_2(p_{\text{user}})) - (-p_{\text{non-user}} log_2(p_{\text{non-user}}))$
 
 $\qquad \qquad \qquad \qquad \qquad = -\frac{6}{7} log_2(\frac{6}{7}) + -\frac{1}{7} log_2(\frac{1}{7}) = 0.5916728$
 

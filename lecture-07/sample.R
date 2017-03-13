@@ -4,7 +4,7 @@ library(rattle)
 library(rpart.plot)
 
 temp <- tempfile()
-download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pia.zip",temp, mode="wb")
+download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
 unz <- unzip(temp, exdir=getwd())
 df <- read.csv(unz[1])
 
