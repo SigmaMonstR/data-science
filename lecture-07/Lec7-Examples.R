@@ -6,8 +6,8 @@
   setwd("/Users/jeff/Documents/Github/data-science/lecture-07")
 
 #Libraries required
-  #install.packages(c("rpart","rpart.plot", "devtools", "gridExtra", "randomForest" ))
-  #devtools::install_github("sachsmc/plotROC")
+  install.packages(c("rpart","rpart.plot", "devtools", "gridExtra", "randomForest" ))
+  devtools::install_github("sachsmc/plotROC")
 
 #Load data 
   health <- read.csv("data/lecture7.csv")
@@ -33,7 +33,7 @@
     library(plotROC)
   
   #TRAIN MODEL
-  #Fit decision tree under default assumptions -- cp = 0
+  #Fit decision tree under default assumptions -- cp = 0.01
     fit <- rpart(coverage ~ age + wage + cit + mar + educ + race, 
                  method = "class", data = train)
   
@@ -52,7 +52,7 @@
   
   #Refit with optimal
     fit.opt <- rpart(coverage ~ age + wage + cit + mar + educ + race, 
-                     method = "class", data = train, cp = 0.0010281)
+                     method = "class", data = train, cp = 1.0885e-03)
     
     rpart.plot(fit.opt, shadow.col="gray", nn=TRUE)
   
@@ -88,6 +88,7 @@
   
   #Plot
     grid.arrange(roc.train, roc.test, ncol = 2)
+    calc_auc(roc.test)
     
 ##################
 ##RANDOM FORESTS##

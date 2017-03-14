@@ -516,10 +516,7 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy") + 
               theme_bw() + xlab("Customer?") + ylab("Employed?") +  ggtitle("(1)") + 
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
-              theme( plot.title = element_text(size = 9), 
-                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
-                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1)
   
   
   #Income
@@ -530,10 +527,7 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy")  +  ggtitle("(2)") +  
               theme_bw() + xlab("Customer?") + ylab("Income") +   
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
-              theme( plot.title = element_text(size = 9), 
-                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
-                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) 
   
   #Revenue
   tab <- as.data.frame(table(customers$user, customers$area))
@@ -543,10 +537,7 @@ To answer that question, we can rely on a visual cross-tabulation where the size
               geom_point(aes(size = count), colour = "navy")  +  ggtitle("(3)") +  
               theme_bw() + xlab("Customer?") + ylab("Side of town?") +   
               scale_size_continuous(range=c(3,15)) + 
-              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1) +
-              theme( plot.title = element_text(size = 9), 
-                    axis.text.x=element_blank(), axis.text.y=element_blank(), 
-                    axis.title.x=element_blank(), axis.title.y=element_blank()) 
+              theme(plot.title = element_text(size = 10), legend.position="none")  + coord_fixed(ratio = 1)
   
   grid.arrange(pie_1, pie_2, pie_3,  ncol = 3)
 ```
