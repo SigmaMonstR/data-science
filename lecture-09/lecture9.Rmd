@@ -1,9 +1,11 @@
 ---
-title: "Lecture 8: Unsupervised Learning"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+title: "Lecture 9: Unsupervised Learning"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---

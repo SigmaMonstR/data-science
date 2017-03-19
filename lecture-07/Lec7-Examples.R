@@ -48,6 +48,7 @@
                    method = "class", data = train, cp = 0)
     
   #Examine printcp to find optimal cp value
+  #Find lowest xerror
     printcp(fit.0)
   
   #Refit with optimal
