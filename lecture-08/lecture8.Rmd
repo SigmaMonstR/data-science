@@ -96,17 +96,22 @@ ggplot(l) +
 
 By substituting the linear model output $z$ into the logistic function, we bound the output between 0 and 1 and interpret the result as a conditional probability:
 
-$$Pr(Y=1|X) = F(z) = \frac{1}{1+ e^{-(w_0 + w_1 x_1 + w_2 x_2 )}}  $$
-The inverse of the logistic function is the *log odds ratio* or *logit link*, which is written as:
+$$p = Pr(Y=1|X) = F(z) = \frac{1}{1+ e^{-(w_0 + w_1 x_1 + w_2 x_2 )}}  $$
+To interpret the coefficients, we need to start by defining what *odds* are:
 
-$$logit(F(z)) = log(\frac{F(z)}{1-F(z)}) = w_0 + w_1 x_1 + w_2 x_2   $$
-where *log* is a natural logarithm transformation. This relationship is particularly important as it allows for conversion of probabilities into odds and vice versa. Furthermore, the underlying weights of the logistic regression can be interpretted using *Odds Ratios* or *OR*. 
+$$odds = \frac{p}{1-p}= \frac{F(z)}{1-F(z)}=e^z$$
+where $F(z)$ is a probability of some event $z = 1$and $1-F(z)$ is the probability of $z = 0$. The odds can be re-formulated as:
 
-To start, we define *odds* as the exponentiated $F(x)$:
+$$pr(success) = \frac{e^{(w_0 + w_1 x_1 + w_2 x_2 )}}{1+e^{(w_0 + w_1 x_1 + w_2 x_2 )}}$$
+$$pr(failure) = \frac{1}{1+e^{(w_0 + w_1 x_1 + w_2 x_2 )}}$$
 
-$$odds = e^{F(x)} = e^{w_0 + w_1 x_1 + w_2 x_2}$$
+Typically, we deal with *odds* in terms of *log odds* as the exponentiation may be challenging to work with:
 
-For a marginal 1 unit increase in $x_1$, the OR is expressed as the $odds(x+1)$ over $odd(x+0)$:
+$$log(odds)=log(\frac{p}{1-p})= w_0 + w_1 x_1 + w_2 x_2 $$
+
+where *log* is a natural logarithm transformation. This relationship is particularly important as it allows for conversion of probabilities into odds and vice versa. 
+
+The underlying weights of the logistic regression can be interpretted using *Odds Ratios* or *OR*. Odds ratios can be expressed as marginal unit comparison. Since $odds = e^{z} = e^{w_0 + w_1 x_1 + w_2 x_2}$, then we can express an odds ratio as a marginal 1 unit increase in $x_1$ comparing $odds(x+1)$ over $odd(x+0)$:
 
 $$OR = \frac{e^{w_0 + w_1 (x_1+1) + w_2 x_2}}{e^{w_0 + w_1 (x_1+0) + w_2 x_2}} = e^{w_1}$$
 

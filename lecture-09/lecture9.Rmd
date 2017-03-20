@@ -10,46 +10,192 @@ output:
     toc: yes
 ---
 
-No, this is not an independent study session. Unsupervised learning techniques such as clustering and principal components analysis helps to identify recognizable patterns when no labels are provided. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.
+Not all data contain labels, but it does not mean the data do not have patterns. So as long as data is structured, some patterns -- weak or strong -- are always possible. Unlabeled data holds the potential to be a game cahnger of informing project and policy pursuits. For example, bank may be operating at steady state for decades without considering how segments of its user base may have divergent needs. But these user groups are often times not clearly indicated. An analyst could go through the data and use her intuition to manually identify *clusters* of personas (e.g. incomes over 50k, under 25 years of age, female). But this often times may be challenging as the number of features may be too voluminous to manually analyze and the choice of features may be somewhat arbitrary.
 
-##Overview
-###Three common unsupervised learning problems in public policy:
-####Example #1
-[Example goes here]
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.height= 4}
+#open flex library
+library("flexclust")
 
-####Example #2
-[Example goes here]
+#create data
+set.seed(123)
+data <- data.frame(x = rnorm(100,20,10), 
+                   y = rnorm(100,20,10))
 
-####Example #3
-[Example goes here]
+data2 <- data.frame(x = rnorm(100,0,5), 
+                   y = rnorm(100,30,5))
 
-##Unsupervised Learning
-###No, it's not independent study 
-[text goes here]
+data3 <- data.frame(x = rnorm(100,-10,5), 
+                   y = rnorm(100,-10,5))
 
-###Structure of an unsupervised learning problem
-- Target variables
-- Input variables
-- Objective function and evaluation measures
-- model experiment design
-- Cross validation versus train/validate/test
+data4 <- data.frame(x = rnorm(100,20,5), 
+                    y = rnorm(100,-30,5))
 
-###Framing Dataset
-[text goes here]
+data <- rbind(data, data2, data3, data4)
 
-###Types of unsupervised learning
-[text goes here]
+#Create clusters
+cl1 = kcca(data, k=4, kccaFamily("kmeans"))
+train <- predict(cl1)
 
-Models: statistical assumptions and mechanics, risks/strengths, implementation, sanity checks, non-technical explanation, K-means clustering (K-means), Principal Components Analysis (PCA)/Dimensionality Reduction, Hierarchical clustering (if time permits)
+#Plot
+image(cl1)
+points(data, col=train, pch=19, cex=0.3)
 
-##Applications of unsupervised learning
-###Appropriate uses 
-####Univariate clustering application: k-means
-```{r}
-#
+
 ```
 
-####Multivariate clustering application: Customer segmentation using Census American Community Survey
-```{r}
-#
+*Unsupervised learning* can help. It is a branch of machine learning that deals with unlabeled data to identify statistically-occurring patterns. Unsupervised learning can be described by *clustering*, which involves finding which observations or features tend to group together.  In sales and recruitment, the task of customer segmentation may dependent on customer data to find distinct customer profiles. In some law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. 
+
+This chapter provides a short survey of types of unsupervised learning and its uses.
+
+#Section 1 - An Overview 
+
+Whereas classifiers rely on both a labeled target and input features, unsupervised learning relies on unlabeled input features to find regularities in the data. Using various types of optimization techniques, unsupervised learning includes a wide variety of tasks, including clustering and dimensionality reduction.
+
+Clustering looks for cases where groups of observations have similar values in the feature space. Two commonly used approaches are connectivity-based clustering and centroid models. 
+
+- Connectivity-based approaches such as *Hierarchical Clustering* rely on point-wise comparisons to find which points are closest, then agglomerating points into larger hierarchical clusters.
+- Using the position points in the feature space, centroid-based approaches such as *k-means* assign records to the nearest of k-number of centroids, which is learned through optimization techniques. 
+
+Whereas clustering typically focuses on grouping records, dimensionality reduction techniques such as Principal Component Analysis reduces the number of features by mapping features into lower dimensions such that a series of components represent the variance and signal of multiple features. 
+
+#Section 2 - Methods
+
+[]
+
+## K-Means
+
+Technique for finding natural groups
+
+Uses
+
+- customer or persona segmentation, often used for strategic plans and operating plans
+- identifying hotspots 
+- finding natural breaks in data for colour coding
+
+
 ```
+  Let k > 1, R is the feature space.
+  Normalize all input features into same range.
+  Drop or impute all missing values NA
+  Select a value of k
+  Initialize by randomly select k centroids in feature space R
+    Calculate distance from each record to each of the k centroids
+  While each point's assignment changes:
+    Assignment Step: Assign each point to the nearest centroid
+    Update Step: Re-calculate centroid for each group of points
+  Stop when assignments no longer change
+```
+
+
+
+### Considerations
+
+- _Stability of Clusters_. A common error is to assume that the groups are stable
+- _Missing Values_. K-Means do not handle missing values well as each data point is essentially a coordinate. Thus, often times K-Means are calibrated on complete data sets.
+- _Normalization_. All features need to be standardized. Binary or discrete features do not perform well. 
+- _Stability_. Stability of clusters must be tested
+
+
+### K-Means and World Development Indiactors
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+#Example data
+setwd("/Users/jeff/Documents/Github/data-science/lecture-09/data")
+data <- read.csv("WDI-2016.csv")
+
+dropregions <- c('ARB', 'CEB', 'CSS', 'EAP', 'EAR', 'EAS', 'UMC','ECA', 'ECS','SAS', 'EMU','EUU', 'FCS', 'HIC', 'HPC', 'IBD', 'IBT', 'IDA','INX', 'IDB', 'IDX', 'LAC', 'LCN', 'LDC', 'LIC', 'LMC', 'LMY', 'LTE', 'MEA', 'MIC', 'MNA', 'NAC', 'OED', 'OSS', 'PRE', 'PSS', 'PST', 'SSA', 'SSF', 'SST', 'TEA', 'TEC', 'TLA', 'TMN', 'TSA', 'TSS', 'WLD')
+
+data2 <- data[!(data$Country.Code %in% dropregions), ]
+data2 <- data2[, c(1,2,3,4,55)]
+
+
+#Create indicators list
+indicators <- data2[!duplicated(data2[,c(3:4)]),c(3,4)]
+
+#Create wide data
+data2 <- data2[, c(2,4,5)]
+data3 <- reshape(data2, direction = "wide",
+                  idvar = "Country.Code",
+                  timevar = "Indicator.Code")
+
+#Drop 
+data4 <- data3
+tablist <- data.frame()
+for(k in ncol(data4):2){
+  tablist <- rbind(tablist,
+                   data.frame(var = k,
+                              count = sum(is.na(data4[,k]))/nrow(data4)))
+}
+
+
+#KNN Example
+  keeplist <- tablist[tablist$count < 0.1, 1]
+  data4 <- data4[,c(1,keeplist)]
+  
+  #
+  #stand
+  stand.vec <- function(vec, options = 1){
+    if(options == 1){
+      #mean-center, sd standard
+      vec <- (vec - mean(vec, na.rm = T))/sd(vec, na.rm = T)
+      
+    } else if(options == 2){
+      #range standardization
+      vec <- (vec - min(vec, na.rm = T))/(max(vec, na.rm = T) - min(vec, na.rm = T))
+    }
+    return(vec)
+  }
+  
+  for(k in 2:ncol(data4)){
+    data4[,k] <- stand.vec(data4[,k], 1)
+  }
+  
+    #library(VIM)
+    data4 <- kNN(data4, k=3)
+  
+  
+  
+  dim(data4)
+  
+  master <- data.frame()
+  for(i in 1:182){
+    cl <- kmeans(data4[,2:ncol(data4)], centers = i)
+    master <- rbind(master,data.frame(k = i, totss = cl$betweenss/cl$totss))
+  }
+
+```
+
+## Agglomerative Clustering
+asd
+
+## Principal Components
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.height= 4}
+library("flexclust")
+
+set.seed(123)
+data <- data.frame(x = rnorm(10,20,10), 
+                   y = rnorm(10,20,10),
+                   z = paste0("a",1:10))
+
+data2 <- data.frame(x = rnorm(5,0,5), 
+                   y = rnorm(5,30,5),
+                   z = paste0("b",1:5))
+
+data3 <- data.frame(x = rnorm(20,-10,5), 
+                   y = rnorm(20,-10,5),
+                   z = paste0("c",1:20))
+
+data4 <- data.frame(x = rnorm(3,20,5), 
+                    y = rnorm(3,-30,5),
+                    z = paste0("d",1:3))
+
+data <- rbind(data, data2, data3, data4)
+row.names(data) <- data$z
+
+d <- dist(as.matrix(data))  
+ hc <- hclust(d)              
+ plot(hc, main = "Hierarchical Clustering Example")                  
+```
+
