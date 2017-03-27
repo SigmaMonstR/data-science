@@ -12,12 +12,12 @@ Taking a data science class does not make one a data scientist. It’s just the 
 
 1. It is expected that data scientists are able to construct a data actionable question and experiment design -- if you don't know what a counterfactual is then don't progress to #2 until you know what it is;
 2. The main languages are Python, R or another scripting language;
-3. Only use a method or technique unless one is able to write the math and code from scratch (e.g. Do not use a random forest if you don't know how it works);
+3. Try only to use a method or technique unless one is able to write the math and code from scratch (e.g. Do not use a random forest if you don't know how it works);
 4. For a model to be pushed as a policy or product option the accuracy must be a minimum of 0.75. Coefficients alone are not enough;
 5. Do not be overly confident about being a data scientist, especially if the first requirements are not met; 
 6. Accept technical feedback as that's the only way to become the best.
 
-The objective of the class project is for you to develop a usable data science product so that you are able to signal some degree of control over the first four points. Working in teams of __2 to 4 people__ (3 people is optimal), you will:
+These are ideals, but attainable ideals. The objective of the class project is for you to develop a usable data science product so that you are able to signal some degree of control over the first four points. Working in teams of __1 to 4 people__ (3 people is optimal), you will:
 
 - Write a proposal for a project (for Homework #4 due __March 29th__)
 - Execute upon the proposal (Final Deliverable due __May 4th)__.
@@ -35,7 +35,7 @@ _Requirements_
 
 Produce a one-page research proposal, which outlines:
 
-- For homework #4, produce a one-page research proposal that outlines: (1) the hypothesis and research questions, (2) data experiment design, (3) the data, (4) proposed processing methods, (5) proposed analytical methods, (6) ethical considerations of such a project.
+- For homework #4, produce an one- to two-page research proposal that outlines: (1) the goal, hypothesis and research questions, (2) data experiment design, (3) the data, (4) proposed processing methods, (5) proposed analytical methods, (6) ethical considerations of such a project. On the proposal, please indicate who are members of the team. Submit this as a PDF via blackboard. Get us excited and sold on your idea. We will return with comments and feedback. 
 - For the final deliverable, provide a well-documented .Rmd file and generate a stylish PDF report.
 
 _Potential Ideas_
@@ -55,7 +55,7 @@ Big picture: A library is comprised of classes of methods that are designed to h
 
 _Requirements_ 
 
-- For homework #4, produce a one-page proposal that describes the specific case that the new library supports. 
+- For homework #4, produce a one-page proposal that describes the specific case that the new library supports. Provide a few high-level descriptions of types of methods your library will include. 
 - For the final deliverable:
   - Develop a Github-hosted library of at least four methods. Usage of each method should be well-documented and preferrably part of the Georgetown McCourt Github group (speak with Jeff and Dan for details).
   - Provide a well-documented .Rmd file that illustrates how to use the library, preferably using the same workflow but on two separate data sets (generalizability test)

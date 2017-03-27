@@ -64,31 +64,27 @@ Whereas clustering typically focuses on grouping records, dimensionality reducti
 
 ## K-Means
 
-Technique for finding natural groups
+The k-means algorithm is a technique to identify clusters of observations based on their features. Features are treated as coordinates in n-dimensional space. The goal is to identify $k$ partitions of observations such that the with-cluster sum of squares is minimized. Otherwise stated, given $k$ centroids that mark the center of each natural cluster, each observation in sample $S$ can be assigned the label of the nearest centroid. To do this, the statistical objective is to:
 
-Uses
+$$arg min \sum_{j=1}^k\sum_{i=1}^n ||x_{i,j} - \mu_j||^2$$
+where the goal is to find the minimum value of the equation ($arg min$) that is defined as the sum of the distance of each point $i$ in cluster $j$ to its corresponding centroid of $j$. Distance is calculated in terms of all input features $x$ and the $j^{th}$ cluster centroid $\mu$.
 
-- customer or persona segmentation, often used for strategic plans and operating plans
-- identifying hotspots 
-- finding natural breaks in data for colour coding
-
+The technique is fairly straight forward to optimize and is one that is iterative as shown in the pseudocode below:
 
 ```
-  Let k > 1, R is the feature space.
-  Normalize all input features into same range.
-  Drop or impute all missing values NA
-  Select a value of k
-  Initialize by randomly select k centroids in feature space R
-    Calculate distance from each record to each of the k centroids
-  While each point's assignment changes:
-    Assignment Step: Assign each point to the nearest centroid
-    Update Step: Re-calculate centroid for each group of points
-  Stop when assignments no longer change
+  Initialize k centroids 
+  Repeat until convergence:
+    Calculate distance between each record n and centroid k
+    Assign points to nearest centroid 
+    Update centroid coordinates as average of each feature per cluster
 ```
 
+The first step involves setting $k$ number centroids that are within the same scale as the features in the sample. For each point, calculate the distance to all centroids, then assign each point to the closest centroid. This is known as the *assignment* step. With the assignments to each of the $k$ clusters, *update* the centroid coordinates for each cluster, the re-run the assignment step. Repeat the assignment and update steps until cluster assignments no longer change.
 
+####Under the hood
+K-means are commonly used for segmenting customers to help characterize user needs, identify gene sequences that are similar, among other things. However, while it might not be apparent from the mathematics, k-means algorithms may suffer from convergence on local optima that yield unstable clusters. The algorithm will converge, but the results need to be and replicable in order for a cluster to be accurately identified. Over the last 70 years, various techniques have emerged to address stability. 
 
-### Considerations
+Furthermore, there tends to be lack of consensus as to how to identify the optimal number of clusters. 
 
 - _Stability of Clusters_. A common error is to assume that the groups are stable
 - _Missing Values_. K-Means do not handle missing values well as each data point is essentially a coordinate. Thus, often times K-Means are calibrated on complete data sets.
@@ -96,103 +92,103 @@ Uses
 - _Stability_. Stability of clusters must be tested
 
 
-### K-Means and World Development Indiactors
 
-```{r, echo=FALSE, message = FALSE, warning = FALSE}
+###In practice
+To illustate this, we will randomly generate six clusters of data in two-dimensional space. Each of these simulated clusters contain $n$ records and a standard deviation $sd = 10$. The mean coordinates are used to place the clusters at such a distance that is sufficiently far to distinguish each cluster.
 
-#Example data
-setwd("/Users/jeff/Documents/Github/data-science/lecture-09/data")
-data <- read.csv("WDI-2016.csv")
+```{r, fig.height=6, echo = FALSE, warning= FALSE, message=FALSE}
+sd <- 13
+n <- 500
+seed <- 100
+library(scales)
 
-dropregions <- c('ARB', 'CEB', 'CSS', 'EAP', 'EAR', 'EAS', 'UMC','ECA', 'ECS','SAS', 'EMU','EUU', 'FCS', 'HIC', 'HPC', 'IBD', 'IBT', 'IDA','INX', 'IDB', 'IDX', 'LAC', 'LCN', 'LDC', 'LIC', 'LMC', 'LMY', 'LTE', 'MEA', 'MIC', 'MNA', 'NAC', 'OED', 'OSS', 'PRE', 'PSS', 'PST', 'SSA', 'SSF', 'SST', 'TEA', 'TEC', 'TLA', 'TMN', 'TSA', 'TSS', 'WLD')
+#Generate data (6 clusters)
+set.seed(seed)
+df <- rbind(data.frame(x = rnorm(n,-70,sd), y = rnorm(n,10,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,20,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,-60,sd)),
+            data.frame(x = rnorm(n,70,sd), y = rnorm(n,-20,sd)),
+            data.frame(x = rnorm(n,90,sd), y = rnorm(n,50,sd)),
+            data.frame(x = rnorm(n,-10,sd), y = rnorm(n,90,sd)))
+df$cluster <- rep(1:6,rep(n,6))
+cent <- aggregate(df[,1:2], by = list(df[,3]), mean)
 
-data2 <- data[!(data$Country.Code %in% dropregions), ]
-data2 <- data2[, c(1,2,3,4,55)]
+par(mfrow=c(3,2))
+#Graph data
+  op <- par(mar = rep(0, 4)) 
+  plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+       frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+  text(-50,-50,"Simulated clusters")
 
-
-#Create indicators list
-indicators <- data2[!duplicated(data2[,c(3:4)]),c(3,4)]
-
-#Create wide data
-data2 <- data2[, c(2,4,5)]
-data3 <- reshape(data2, direction = "wide",
-                  idvar = "Country.Code",
-                  timevar = "Indicator.Code")
-
-#Drop 
-data4 <- data3
-tablist <- data.frame()
-for(k in ncol(data4):2){
-  tablist <- rbind(tablist,
-                   data.frame(var = k,
-                              count = sum(is.na(data4[,k]))/nrow(data4)))
+#Ideal
+  op <- par(mar = rep(0, 4)) 
+  plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+       frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+  text(-50,-50,"Ideal Outcome")
+  points(cent[,2], cent[,3], col = "purple", pch = 19, cex = 2)
+  par(op)
+  
+#Forgy
+op <- par(mar = rep(0, 4)) 
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"Forgy")
+for(i in 1:500){
+  cl <- kmeans(df, 6,  algorithm = "Forgy")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
 }
+par(op)
 
 
-#KNN Example
-  keeplist <- tablist[tablist$count < 0.1, 1]
-  data4 <- data4[,c(1,keeplist)]
-  
-  #
-  #stand
-  stand.vec <- function(vec, options = 1){
-    if(options == 1){
-      #mean-center, sd standard
-      vec <- (vec - mean(vec, na.rm = T))/sd(vec, na.rm = T)
-      
-    } else if(options == 2){
-      #range standardization
-      vec <- (vec - min(vec, na.rm = T))/(max(vec, na.rm = T) - min(vec, na.rm = T))
-    }
-    return(vec)
-  }
-  
-  for(k in 2:ncol(data4)){
-    data4[,k] <- stand.vec(data4[,k], 1)
-  }
-  
-    #library(VIM)
-    data4 <- kNN(data4, k=3)
-  
-  
-  
-  dim(data4)
-  
-  master <- data.frame()
-  for(i in 1:182){
-    cl <- kmeans(data4[,2:ncol(data4)], centers = i)
-    master <- rbind(master,data.frame(k = i, totss = cl$betweenss/cl$totss))
-  }
+#Hartigan-Wong
+op <- par(mar = rep(0, 4)) 
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"Hartigan-Wong")
 
+for(i in 1:500){
+  cl <- kmeans(df, 6, algorithm = "Hartigan-Wong")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
+}
+  par(op)
+
+#MacQueen
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"MacQueen")
+
+for(i in 1:500){
+  cl <- kmeans(df, 6, algorithm = "MacQueen")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
+}
+  par(op)
 ```
 
+
+
 ## Agglomerative Clustering
-asd
+
+```
+Calculate a n x n distance matrix between all observations
+Link points
+```
 
 ## Principal Components
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.height= 4}
 library("flexclust")
 
-set.seed(123)
-data <- data.frame(x = rnorm(10,20,10), 
-                   y = rnorm(10,20,10),
-                   z = paste0("a",1:10))
-
-data2 <- data.frame(x = rnorm(5,0,5), 
-                   y = rnorm(5,30,5),
-                   z = paste0("b",1:5))
-
-data3 <- data.frame(x = rnorm(20,-10,5), 
-                   y = rnorm(20,-10,5),
-                   z = paste0("c",1:20))
-
-data4 <- data.frame(x = rnorm(3,20,5), 
-                    y = rnorm(3,-30,5),
-                    z = paste0("d",1:3))
-
-data <- rbind(data, data2, data3, data4)
-row.names(data) <- data$z
+sd <- 13
+n <- 500
+df <- rbind(data.frame(x = rnorm(n,-70,sd), y = rnorm(n,10,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,20,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,-60,sd)),
+            data.frame(x = rnorm(n,70,sd), y = rnorm(n,-20,sd)),
+            data.frame(x = rnorm(n,90,sd), y = rnorm(n,50,sd)),
+            data.frame(x = rnorm(n,-10,sd), y = rnorm(n,90,sd)))
 
 d <- dist(as.matrix(data))  
  hc <- hclust(d)              
