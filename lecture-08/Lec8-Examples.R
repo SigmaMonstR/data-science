@@ -88,6 +88,13 @@
   #AUC
   calc_auc(roc.glm)[,2:3]
   
+  #Mean F1
+  pred.labels <- pred.glm.test > 0.5
+  pred.labels[pred.labels==TRUE ] <- "No Coverage"
+  pred.labels[pred.labels==FALSE ] <- "Coverage"
+  
+  meanf1(test$coverage, pred.labels)
+  
 ##################
 ##SUPPORT VECTORS##
 ##################  
@@ -96,7 +103,8 @@
   
   #TRAIN MODEL
   #Fit SVM  under default assumptions -- cost = 1, gamma = 0.055
-    svm.rbf.fit <- svm(coverage ~ age + cit, data=train, kernel = "radial", cost = 1, gamma = 0.05555)
+    svm.rbf.fit <- svm(coverage ~ age + cit, data=train, kernel = "radial", 
+                       cost = 1, gamma = 0.05555)
   
   #Tools to review output
     print(svm.rbf.fit)
@@ -120,8 +128,10 @@
 ##DECISION TREES##
 ##################  
     library(rpart)
-    fit.opt <- rpart(coverage ~ age + wage + cit + mar + educ + race, 
+    
+    fit.opt <- rpart(coverage ~ ., 
                      method = "class", data = train, cp = 1.0885e-03)
+    
     pred.default.test <- predict(fit.opt, test, type='prob')[,2]
     scores <- rbind(scores, data.frame(model = "Decision Tree", d = test$coverage,  m = pred.default.test >=0.5))
     
