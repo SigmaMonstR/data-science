@@ -190,7 +190,7 @@ df <- rbind(data.frame(x = rnorm(n,-70,sd), y = rnorm(n,10,sd)),
             data.frame(x = rnorm(n,90,sd), y = rnorm(n,50,sd)),
             data.frame(x = rnorm(n,-10,sd), y = rnorm(n,90,sd)))
 
-d <- dist(as.matrix(data))  
+d <- dist(as.matrix(df))  
  hc <- hclust(d)              
  plot(hc, main = "Hierarchical Clustering Example")                  
 ```

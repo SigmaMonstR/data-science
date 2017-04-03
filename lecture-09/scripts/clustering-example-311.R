@@ -114,7 +114,7 @@
   
   # draw dendogram with red borders around the X clusters 
   plot(hc, main = "Hierarchical Clustering Example", cex = 0.001) 
-  rect.hclust(hc, k=10, border="red")
+  rect.hclust(hc, k = 10, border="red")
   
   #Label groups
   groups <- cutree(hc, k=10) # cut tree into 5 clusters
