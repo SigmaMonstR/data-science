@@ -1,0 +1,31 @@
+INFO [2017-04-03 00:29:00] [[1]]
+INFO [2017-04-03 00:29:00] nrow(uk_out)
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] [[2]]
+INFO [2017-04-03 00:29:00] nrow(us_out)
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] [[3]]
+INFO [2017-04-03 00:29:00] nrow(comb_out)
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] $category
+INFO [2017-04-03 00:29:00] c("UK List", "US List")
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] $lty
+INFO [2017-04-03 00:29:00] rep("blank", 2)
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] $fill
+INFO [2017-04-03 00:29:00] c("light blue", "pink")
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] $alpha
+INFO [2017-04-03 00:29:00] rep(0.5, 2)
+INFO [2017-04-03 00:29:00] 
+INFO [2017-04-03 00:29:00] $cat.dist
+INFO [2017-04-03 00:29:00] rep(0.025, 2)
+INFO [2017-04-03 00:29:00] 
+ERROR [2017-04-03 00:29:00] Unexpected parameter length for 'category'
+ERROR [2017-04-03 00:29:53] Unexpected parameter length for 'cat.dist'
+ERROR [2017-04-03 00:30:22] Unexpected parameter length for 'cat.dist'
+ERROR [2017-04-03 00:30:27] Unexpected parameter length for 'cat.dist'
+ERROR [2017-04-03 00:31:57] Unexpected parameter length for 'fontfamily'
+ERROR [2017-04-03 00:32:01] Unexpected parameter length for 'fontfamily'
+ERROR [2017-04-03 00:32:15] Unexpected parameter length for 'fontfamily'

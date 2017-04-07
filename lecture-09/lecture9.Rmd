@@ -1,53 +1,197 @@
 ---
-title: "Lecture 8: Unsupervised Learning"
-subtitle: "Intro to Data Science for Public Policy, Spring 2016"
+title: "Lecture 9: Unsupervised Learning"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
-output: 
-  html_document: 
+subtitle: Intro to Data Science for Public Policy, Spring 2016
+output:
+  pdf_document:
+    toc: yes
+  html_document:
     theme: journal
     toc: yes
 ---
 
-No, this is not an independent study session. Unsupervised learning techniques such as clustering and principal components analysis helps to identify recognizable patterns when no labels are provided. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.
+Not all data contain labels, but it does not mean the data do not have patterns. So as long as data is structured, some patterns -- weak or strong -- are always possible. Unlabeled data holds the potential to be a game cahnger of informing project and policy pursuits. For example, bank may be operating at steady state for decades without considering how segments of its user base may have divergent needs. But these user groups are often times not clearly indicated. An analyst could go through the data and use her intuition to manually identify *clusters* of personas (e.g. incomes over 50k, under 25 years of age, female). But this often times may be challenging as the number of features may be too voluminous to manually analyze and the choice of features may be somewhat arbitrary.
 
-##Overview
-###Three common unsupervised learning problems in public policy:
-####Example #1
-[Example goes here]
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.height= 4}
+#open flex library
+library("flexclust")
 
-####Example #2
-[Example goes here]
+#create data
+set.seed(123)
+data <- data.frame(x = rnorm(100,20,10), 
+                   y = rnorm(100,20,10))
 
-####Example #3
-[Example goes here]
+data2 <- data.frame(x = rnorm(100,0,5), 
+                   y = rnorm(100,30,5))
 
-##Unsupervised Learning
-###No, it's not independent study 
-[text goes here]
+data3 <- data.frame(x = rnorm(100,-10,5), 
+                   y = rnorm(100,-10,5))
 
-###Structure of an unsupervised learning problem
-- Target variables
-- Input variables
-- Objective function and evaluation measures
-- model experiment design
-- Cross validation versus train/validate/test
+data4 <- data.frame(x = rnorm(100,20,5), 
+                    y = rnorm(100,-30,5))
 
-###Framing Dataset
-[text goes here]
+data <- rbind(data, data2, data3, data4)
 
-###Types of unsupervised learning
-[text goes here]
+#Create clusters
+cl1 = kcca(data, k=4, kccaFamily("kmeans"))
+train <- predict(cl1)
 
-Models: statistical assumptions and mechanics, risks/strengths, implementation, sanity checks, non-technical explanation, K-means clustering (K-means), Principal Components Analysis (PCA)/Dimensionality Reduction, Hierarchical clustering (if time permits)
+#Plot
+image(cl1)
+points(data, col=train, pch=19, cex=0.3)
 
-##Applications of unsupervised learning
-###Appropriate uses 
-####Univariate clustering application: k-means
-```{r}
-#
+
 ```
 
-####Multivariate clustering application: Customer segmentation using Census American Community Survey
-```{r}
-#
+*Unsupervised learning* can help. It is a branch of machine learning that deals with unlabeled data to identify statistically-occurring patterns. Unsupervised learning can be described by *clustering*, which involves finding which observations or features tend to group together.  In sales and recruitment, the task of customer segmentation may dependent on customer data to find distinct customer profiles. In some law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. 
+
+This chapter provides a short survey of types of unsupervised learning and its uses.
+
+#Section 1 - An Overview 
+
+Whereas classifiers rely on both a labeled target and input features, unsupervised learning relies on unlabeled input features to find regularities in the data. Using various types of optimization techniques, unsupervised learning includes a wide variety of tasks, including clustering and dimensionality reduction.
+
+Clustering looks for cases where groups of observations have similar values in the feature space. Two commonly used approaches are connectivity-based clustering and centroid models. 
+
+- Connectivity-based approaches such as *Hierarchical Clustering* rely on point-wise comparisons to find which points are closest, then agglomerating points into larger hierarchical clusters.
+- Using the position points in the feature space, centroid-based approaches such as *k-means* assign records to the nearest of k-number of centroids, which is learned through optimization techniques. 
+
+Whereas clustering typically focuses on grouping records, dimensionality reduction techniques such as Principal Component Analysis reduces the number of features by mapping features into lower dimensions such that a series of components represent the variance and signal of multiple features. 
+
+#Section 2 - Methods
+
+[]
+
+## K-Means
+
+The k-means algorithm is a technique to identify clusters of observations based on their features. Features are treated as coordinates in n-dimensional space. The goal is to identify $k$ partitions of observations such that the with-cluster sum of squares is minimized. Otherwise stated, given $k$ centroids that mark the center of each natural cluster, each observation in sample $S$ can be assigned the label of the nearest centroid. To do this, the statistical objective is to:
+
+$$arg min \sum_{j=1}^k\sum_{i=1}^n ||x_{i,j} - \mu_j||^2$$
+where the goal is to find the minimum value of the equation ($arg min$) that is defined as the sum of the distance of each point $i$ in cluster $j$ to its corresponding centroid of $j$. Distance is calculated in terms of all input features $x$ and the $j^{th}$ cluster centroid $\mu$.
+
+The technique is fairly straight forward to optimize and is one that is iterative as shown in the pseudocode below:
+
 ```
+  Initialize k centroids 
+  Repeat until convergence:
+    Calculate distance between each record n and centroid k
+    Assign points to nearest centroid 
+    Update centroid coordinates as average of each feature per cluster
+```
+
+The first step involves setting $k$ number centroids that are within the same scale as the features in the sample. For each point, calculate the distance to all centroids, then assign each point to the closest centroid. This is known as the *assignment* step. With the assignments to each of the $k$ clusters, *update* the centroid coordinates for each cluster, the re-run the assignment step. Repeat the assignment and update steps until cluster assignments no longer change.
+
+####Under the hood
+K-means are commonly used for segmenting customers to help characterize user needs, identify gene sequences that are similar, among other things. However, while it might not be apparent from the mathematics, k-means algorithms may suffer from convergence on local optima that yield unstable clusters. The algorithm will converge, but the results need to be and replicable in order for a cluster to be accurately identified. Over the last 70 years, various techniques have emerged to address stability. 
+
+Furthermore, there tends to be lack of consensus as to how to identify the optimal number of clusters. 
+
+- _Stability of Clusters_. A common error is to assume that the groups are stable
+- _Missing Values_. K-Means do not handle missing values well as each data point is essentially a coordinate. Thus, often times K-Means are calibrated on complete data sets.
+- _Normalization_. All features need to be standardized. Binary or discrete features do not perform well. 
+- _Stability_. Stability of clusters must be tested
+
+
+
+###In practice
+To illustate this, we will randomly generate six clusters of data in two-dimensional space. Each of these simulated clusters contain $n$ records and a standard deviation $sd = 10$. The mean coordinates are used to place the clusters at such a distance that is sufficiently far to distinguish each cluster.
+
+```{r, fig.height=6, echo = FALSE, warning= FALSE, message=FALSE}
+sd <- 13
+n <- 500
+seed <- 100
+library(scales)
+
+#Generate data (6 clusters)
+set.seed(seed)
+df <- rbind(data.frame(x = rnorm(n,-70,sd), y = rnorm(n,10,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,20,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,-60,sd)),
+            data.frame(x = rnorm(n,70,sd), y = rnorm(n,-20,sd)),
+            data.frame(x = rnorm(n,90,sd), y = rnorm(n,50,sd)),
+            data.frame(x = rnorm(n,-10,sd), y = rnorm(n,90,sd)))
+df$cluster <- rep(1:6,rep(n,6))
+cent <- aggregate(df[,1:2], by = list(df[,3]), mean)
+
+par(mfrow=c(3,2))
+#Graph data
+  op <- par(mar = rep(0, 4)) 
+  plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+       frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+  text(-50,-50,"Simulated clusters")
+
+#Ideal
+  op <- par(mar = rep(0, 4)) 
+  plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+       frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+  text(-50,-50,"Ideal Outcome")
+  points(cent[,2], cent[,3], col = "purple", pch = 19, cex = 2)
+  par(op)
+  
+#Forgy
+op <- par(mar = rep(0, 4)) 
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"Forgy")
+for(i in 1:500){
+  cl <- kmeans(df, 6,  algorithm = "Forgy")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
+}
+par(op)
+
+
+#Hartigan-Wong
+op <- par(mar = rep(0, 4)) 
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"Hartigan-Wong")
+
+for(i in 1:500){
+  cl <- kmeans(df, 6, algorithm = "Hartigan-Wong")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
+}
+  par(op)
+
+#MacQueen
+plot(df$x, df$y, yaxt='n', ann=FALSE, xaxt='n',  col = alpha("grey",0.1), 
+     frame.plot=FALSE, pch = 19, cex = 0.5, asp = 1)
+text(-50,-50,"MacQueen")
+
+for(i in 1:500){
+  cl <- kmeans(df, 6, algorithm = "MacQueen")
+  cent <- cbind(cl$centers, 1:6)
+  points(cent[,1], cent[,2], col = alpha("purple",1/50), pch = 19, cex = 2)
+}
+  par(op)
+```
+
+
+
+## Agglomerative Clustering
+
+```
+Calculate a n x n distance matrix between all observations
+Link points
+```
+
+## Principal Components
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.height= 4}
+library("flexclust")
+
+sd <- 13
+n <- 500
+df <- rbind(data.frame(x = rnorm(n,-70,sd), y = rnorm(n,10,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,20,sd)),
+            data.frame(x = rnorm(n,10,sd), y = rnorm(n,-60,sd)),
+            data.frame(x = rnorm(n,70,sd), y = rnorm(n,-20,sd)),
+            data.frame(x = rnorm(n,90,sd), y = rnorm(n,50,sd)),
+            data.frame(x = rnorm(n,-10,sd), y = rnorm(n,90,sd)))
+
+d <- dist(as.matrix(df))  
+ hc <- hclust(d)              
+ plot(hc, main = "Hierarchical Clustering Example")                  
+```
+

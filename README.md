@@ -117,30 +117,9 @@ Building upon basic data manipulation and high level analytical tasks, this sess
 
 The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
 
-##### Lecture 5: Introduction to Supervised Learning 
+The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
 
-Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
-
-*Lecture objectives*
-
-1. Three common data science problems in public policy: 
-2. Supervised: Scoring or prediction for application
-3. Supervised: Causal inference and evaluation for understanding
-4. Unsupervised: Clustering for structure
-5. What is supervised learning?
-6. Structure of a supervised learning project
-7. Target variables, Input variables, Objective function and evaluation measures, model experiment design, Cross validation versus train/validate/test,  Regression versus classifiers
-8. Ordinary Least Squares (OLS): Graphical illustration 
-9. Linear models in `R`
-10. Exporting results tables
-11. The limits of correlation coefficients and R-squared statistics
-12. Introduction to scoring and prediction: train/validate/test
-
-*Example application*
-
-- Economic data from BEA
-
-##### Lecture 6: Simulations, selection bias 
+##### Lecture 5: Ordinary Least Squares, Simulation and Bias
 
 Formal statistics offers methods to calculate closed-form, analytical answers to the limits of OLS regression.  Data science offers a more immediate and arguably a more accessible solution: simulate conditions and examine the outcomes.  We begin to use the early visualizations techniques taught in a previous lecture for analysis.
 
@@ -152,25 +131,31 @@ Formal statistics offers methods to calculate closed-form, analytical answers to
 
 *Example application*	
 
-- TBD
+- Schooling outcomes data
 
-##### Lecture 7: Regression discontinuity and difference-in-difference estimation
 
-An introduction to assessing the causal impact of public policy.
+##### Lecture 6: Introduction to Supervised Learning 
+
+Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
 
 *Lecture objectives*
 
-1. Interpretation of dummy variables
-2. Difference-in-differences (DiD) as a causal estimator
-3. Assumptions and potential issues with DiD
-4. Regression discontinuity (RD) analysis
-5. Visualizing RD analysis
+1. What is supervised learning?
+2. Structure of a supervised learning project
+3. Target variables, Input variables, Objective function and evaluation measures, model experiment design, Cross validation versus train/validate/test,  Regression versus classifiers
+4. Ordinary Least Squares (OLS)
+5. K-Nearest Neighbors (kNN)
 
-*Example application*	
+*Example application*
 
-- TBD
+- Prediction of missing values in satellite imagery using kNN
 
-##### Lecture 8: Classification techniques 
+*Homework Assignment*
+
+- Lec 6: Satellite imagery for predicting employment
+
+
+##### Lecture 7 + 8: Classification techniques 
 
 Classification models are one of the workhorses of data science. Classifiers enables data-driven applications such as risk scoring, lawsuit outcome prediction, marketing lead generation, facial detection and computer vision, spam filtering, among other use cases.  This session will focus on the fundamentals of classification models, types of models, and daily applications.
 
@@ -182,10 +167,15 @@ Classification models are one of the workhorses of data science. Classifiers ena
 4.	Models: statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation, Decision trees, Logistic Regression, K-Nearest Neighbors
 5.	Appropriate uses of classification techniques, Scoring, prediction and prioritization, Propensity score matching
 
-
 *Example application*
 
-- Classifying physical activity using a smart phone accelerometer
+- Healthcare insurance coverage data
+
+*Homework Assignments*
+
+- Lec 7: Predict activity using smartphone accelerometer data (due Lec 8).
+- Lec 8: Hand out class project instructions, one page proposal of what you'll do due by Lec 9.
+
 
 ##### Lecture 9: Unsupervised learning 
 
@@ -203,6 +193,9 @@ No, this is not an independent study session. Unsupervised learning techniques s
 
 - Univariate clustering application: k-means
 - Multivariate clustering application: Customer segmentation using Census American Community Survey
+
+*Homework Assignment*
+- Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
 
 
 #### Section 3: Data enhancement and visualization

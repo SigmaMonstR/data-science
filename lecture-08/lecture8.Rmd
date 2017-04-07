@@ -11,167 +11,803 @@ output:
     toc: yes
 ---
 
-Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable? In We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts. Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
+Building on Lecture 7, this section lightly introduces three more classification algorithms: Logistic Regression, Support Vector Machines, and Artificial Neural Networks. Logistic regression is a probabilistic cousin of Ordinary Least Squares known in a class of techniques known as Generalized Linear Models. In most of the social sciences, this is the de facto technique for modeling discrete outcomes as the weights can be loosely interpretted as point estimates of relationships. Support Vector Machines  (SVMs) is a geometry-inspired technique that fits a hyperplane (an n-dimensional plane). The method does not have an interpretation, but is often times hyper accurate. Typically SVMs are used for highdimensional with non-linear relationships and is a light weight method for conducting computer vision tasks. Artificial Neural Networks (ANNs) are the foundational technique for what is now known as 'deep learning' and 'artificial intelligence'. ANNs also do not lend themselves to direct interpretation and are computationally costly to build well. 
 
-Lecture objectives
+Before diving into the mechanics of these methodologies, we will load in the health data from Lecture 7 and partition the data into train-test samples. 
 
-##Overview
-###Three classification problems in public policy:
+```{r}
+  health <- read.csv("data/lecture8.csv")
 
-
-##Classifiers
-[text goes here]
-
-
-###Decision Trees
-In everyday policy setting and operations, decision trees are a common tool used for communicating complex processes, whether for how an actor moves through intricate and convoluted bureaucracy or how a subpopulation can be described based on a set of criteria. While the garden variety decision tree can be laid out qualitatively, supervised learning allows decision trees to be create in an empirical fashion that not only have the power to aesthetically communicate patterns, but also predict how a non-linear system behaves.
-
-According to the US Census Bureau's American Community Survey, approximately 16.5% of Georgians were without healthcare coverage in 2015. To some degree, this is surprising, but it is important to know to support public policy and outreach. This statistic on its own, however, is not useful; it needs to be contextualized and segmented so that government can conduct outreach to ensure that all citizens have access to a modern fundamental service. Using decision trees, it's possible to develop discrete profiles of the population based on observable characteristics such that discrete if-else criteria identify smaller subpopulations with similar membership. Below, a decision tree has been estimated following the specification: $Pr(Coverage) = f(\text{Sex, Age, Education, Marital Status, Race, Citizenship})$.  Based on this decision tree, we can identify well-defined cells of Georgians who have and do not have healthcare coverage. For example, non-citizens under the age of 64 without a college education are 90% likely to not have coverage, and citizens between 16 and 64 who are not married have a 71% chance of not having health coverage. 
-
-It is important to note that these cells are not arbitrarily defined nor does a black box guide their creation. The tree was grown using fundamental principles of a discipline known as _information theory_ that helps to identify when an empirical variable contains information. Whether its failure analysis of engineering mechanisms or developing customer profiles of program participation, decision trees can help characterize intricate, non-linear patterns in data.
-
-The point at which a feature is split is known as a decision node, the trunk of the tree from which all branches spring is known as the root node, and the termini of the tree with the most homogeneous subsamples are known as leafs. 
-
-```{r, echo=F}
-# Classification Tree with rpart
-  library(rpart)
-  library(rpart.plot)
-
-#Download
-  temp <- tempfile()
-  #download.file("https://www2.census.gov/programs-surveys/acs/data/pums/2015/1-Year/csv_pga.zip",temp, mode="wb")
-  #unz <- unzip(temp, exdir=getwd())
-  df <- read.csv("ss15pga.csv")
-
-#Recode
-  df <- df[df$AGEP>=16,]
-  df$SCHL2[df$SCHL<16 ] <- "Less than HS"
-  df$SCHL2[df$SCHL>=16 & df$SCHL<21] <- "HS Degree"
-  df$SCHL2[df$SCHL==21] <- "Undergraduate Degree"
-  df$SCHL2[df$SCHL>21] <- "Graduate Degree"
-  df$SCHL2 <- as.factor(df$SCHL2)
+#Create index of randomized booleans of the same length as the health data set
+  set.seed(100)
+  rand <- runif(nrow(health)) 
+  rand <- rand > 0.5
   
-  df$coverage <- NA
-  df$coverage[df$HICOV == 2] <- "No Coverage"
-  df$coverage[df$HICOV == 1] <- "Coverage"
-  df$coverage <- as.factor(df$coverage)
-  
-  df$CIT2 <- NA
-  df$CIT2[df$CIT != 5] <- "Citizen"
-  df$CIT2[df$CIT == 5] <- "Non-citizen"
-  df$CIT2 <- as.factor(df$CIT2)
-  
-  df$MAR2 <- NA
-  df$MAR2[df$MAR == 1] <- "Married"
-  df$MAR2[df$MAR == 2] <- "Widowed"
-  df$MAR2[df$MAR == 3] <- "Divorced"
-  df$MAR2[df$MAR == 4] <- "Separated"
-  df$MAR2[df$MAR == 5] <- "Never Married"
-  df$MAR2 <- as.factor(df$MAR2)
+#Create train test sets
+  train <- health[rand == T, ]
+  test <- health[rand == F, ]
+```
 
-#Coverage
-  wght <- grep("pwgtp",colnames(df))
-  est <- c()
-  for(k in wght){
-    est <- c(est, sum(df[df$coverage=="No Coverage",k])/sum(df[[k]]))
+##Logistic Regression
+Let's assume that you've been provided with a three feature dataset: a target label $z$ and two input features ($x1$ and $x2$). Upon graphing the features and color coding using the labels, you see that the points are clustered such that light blue points represent to $z = 1$ and gold points represent $z = 0$. We could, of course, use decision trees and random forests to determine some threshold to classify the two groups; but surely, there is a way to write an elegant statistical formula that would separate one group from the other? 
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 3, fig.width= 4}
+#Margin Example
+margin_size <- -0.2
+set.seed(123)
+df <- data.frame(x = runif(200),
+                 y = runif(200),
+                 supports = NA)
+  
+  
+#Best boundary
+  df$z <- -0.8 + df$x*2  
+  df$perp <- 0.6578033 + df$x*-0.5
+  df$perp[df$x >= 0.6951213] <- NA
+  df$perp[df$x <= 0.4711213] <- NA
+  
+#Cut out
+  df <- df[which((df$y > df$z + margin_size | df$y < df$z - margin_size | !is.na(df$supports))), ]
+  df$group <- "Side A"
+  df$group[df$y < df$z - margin_size] <- "Side B"
+  df$group[df$x >0.6] <- "Side B"
+  df$cols <- "blue"
+  df$cols[df$group == "Side B"] <- "green"
+  
+  
+#Plot
+library(ggplot2)
+
+ggplot(df, aes(group=factor(group))) + 
+    geom_point(aes(x = x, y = y,  colour = factor(group)))  +
+    ylim(0,1) + xlim(0,1) + 
+    ylab("x1") + xlab("x2") + scale_colour_manual(values=c("lightblue", "gold")) +
+    theme(plot.title = element_text(size = 10), 
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank())
+```
+
+
+As it turns out, we can express the relationship between $z$, $x_1$, and $x_2$ as a linear model similar to OLS:
+
+$$z = w_0 + w_1 x_1 + w_2 x_2 + \epsilon$$
+where $z$ is a binary outcome and, like OLS, $w_k$ are weights that are learned using some optimization process. If treated as a typical linear model with a continuous outcome variable, we run the risk that $\hat{z}$ would exceed the binary bounds of 0 and 1 and would thus make little sense. Imagine if $\hat{z}$, the predicted value of $z$ were -103 or +4: what would that mean in the case of a binary variable? This could easily be the shortcoming of a linear model approach.
+
+Statistical methodologists have, however, cleverly solved the bounding problem by inserting the predicted output into a logistic function:
+
+$$F(z) = \frac{1}{1+ e^{-z}}$$
+For a feature $x$ that ranges for -10 to +10, the logit transformation converges to +1 where $x > 0$ and to 0 where $x < 0$. This S-shaped curve is known as a *sigmoid* and is a well-used distribution for bounding variables to a 0/1 range.  
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height = 2}
+set.seed(123)
+l <- data.frame(x = seq(-10,10,.01))
+l$logit <- 1/(1+exp(-l$x))
+  
+ggplot(l) + 
+  geom_line(aes(x = x, y = logit),colour = "green") +
+  ylab("F(x)") + xlab("x")
+```
+
+By substituting the linear model output $z$ into the logistic function, we bound the output between 0 and 1 and interpret the result as a conditional probability:
+
+$$p = Pr(Y=1|X) = F(z) = \frac{1}{1+ e^{-(w_0 + w_1 x_1 + w_2 x_2 )}}  $$
+To interpret the coefficients, we need to start by defining what *odds* are:
+
+$$odds = \frac{p}{1-p}= \frac{F(z)}{1-F(z)}=e^z$$
+where $F(z)$ is a probability of some event $z = 1$and $1-F(z)$ is the probability of $z = 0$. The odds can be re-formulated as:
+
+$$pr(success) = \frac{e^{(w_0 + w_1 x_1 + w_2 x_2 )}}{1+e^{(w_0 + w_1 x_1 + w_2 x_2 )}}$$
+$$pr(failure) = \frac{1}{1+e^{(w_0 + w_1 x_1 + w_2 x_2 )}}$$
+
+Typically, we deal with *odds* in terms of *log odds* as the exponentiation may be challenging to work with:
+
+$$log(odds)=log(\frac{p}{1-p})= w_0 + w_1 x_1 + w_2 x_2 $$
+
+where *log* is a natural logarithm transformation. This relationship is particularly important as it allows for conversion of probabilities into odds and vice versa. 
+
+The underlying weights of the logistic regression can be interpretted using *Odds Ratios* or *OR*. Odds ratios can be expressed as marginal unit comparison. Since $odds = e^{z} = e^{w_0 + w_1 x_1 + w_2 x_2}$, then we can express an odds ratio as a marginal 1 unit increase in $x_1$ comparing $odds(x+1)$ over $odd(x+0)$:
+
+$$OR = \frac{e^{w_0 + w_1 (x_1+1) + w_2 x_2}}{e^{w_0 + w_1 (x_1+0) + w_2 x_2}} = e^{w_1}$$
+
+After a little exponential arithmetic, the OR is simply equal to $e^{w_1}$, which can be interpreted as a multiplicative effect or a percentage effect if transformed as $100 \times (1-e^{w_1})\%$. In practice, this means simply exponentiating the regression weights to interpret the point relationship. For example, if the following regression were estimated for healthcare non-coverage where $wage$ is a continuous variable and $non-citzen$ is a discrete binary:
+
+$$z(\text{non-coverage}) = 0.1878 - 0.000001845 \times wage + 1.69 \times \text{non-citizen} $$
+Then, the odds of coverage are as follows for each variable:
+
+- $OR_{wage} = e^{0.000001845} = 0.9999816$ translates to -0.00000184% lower chance of not being covered.
+- $OR_{non-citizen} = e^{1.690} = 5.419481$ translates to 441% higher chance of not being covered.
+
+
+
+####Optimization
+As in the case of all machine learning methods, the formulae need to be optimized. In order to estimate each weight $w_k$, we will rely on *maximum likelihood estimation* (MLE) as a framework, starting with a probability function for one record that is inspired by a Bernoulli random variable:
+
+$$ p(z = z_i | x) = [F(x)]^{z_i}[1-F(x)]^{1-z_i}$$
+If $z_i=1$, then the function is equal to the $[F(x)]^{z_i}$. Otherwise, if $z_i = 0$, then the function is equal to $[1-F(x)]^{1-z_i}$. For all records, we can define a likelihood function as the product of the above:
+
+$$L = \Pi_{i=1}^N [F(x)]^{z_i}[1-F(x)]^{1-z_i}$$
+Mathematically, it is easier to handle this formula by taking the natural logarithm, which is also known as the *log-likelihood*:
+
+$$ log(L) = z_ilog(F(x)) + (1-z_i)log(1-F(x))$$
+
+The goal here is to maximize $log(L)$, driven by a search for $w_k$ by taking partial derivatives of $L$ with respect to each $w_k$ and setting them to zero:
+
+$$\frac{\partial L}{\partial w_k} = 0$$
+
+This process can be driven using optimization algorithms such as gradient descent, the Newton-Raphson algorithm, among other commonly used techniques.
+
+####Practicals
+After all the derivation is done, keep the following points in mind when applying logistic regression:
+
+- Tuning is largely a matter of feature selection: it all depends on the variables that are available.
+- Logistic regression have strong probabilistic assumptions and assume that a linear combination of features is sufficient to describe a phenomenon.
+- The technique is well-suited for socializing an empirical problem, but often is outperformed in accuracy by more flexible techniques such as Random Forests. This trade off between narrative and accuracy is a common example of the bias-variance trade off.
+
+####Applying Logistic Regression
+Training a logistic regression can be easily done using the `glm()` function, which is a flexible algorithm class known as Generalized Linear Models. Using this one method, multiple types of linear models can be estimated including ordinary least squares for continuous outcomes, logistic regression for binary outcomes and Poisson regression for count outcomes. 
+
+At a minimum, four parameters are required:
+
+- input features: `<x>` 
+- target feature: `<y>`
+- data: `<data>`
+- family: `<probability func>`
+
+The family refers to the probability distribution family that underlies the specific estimation method. In the case of logistic regression, the probability family is *Binomial*.
+
+```{r, eval=FALSE}
+  glm(<y> ~ <x>, data = <data>, family = <probability func>)
+
+```
+
+To start, we will calibrate a logistic regression where `coverage` is trained on all other features in the dataset. Like `lm()`, by specifying `.` as the input feature, all features other than the target are included in the model. We store the regression output in the objection `glm.fit`, then take a look under the hood using `summary()`.
+
+```{r, message = FALSE, warning = FALSE}
+
+  glm.fit <- glm(coverage ~ ., data = train, family = binomial())
+  summary(glm.fit)
+
+```
+
+The coefficients can be extracted from the `glm.fit` object and exponentiated for ease of interpretation. For example, people who have not completed a high school degree are 5.3-times more likely to not have health care coverage compared with the reference group (graduate degree holders).
+
+```{r}
+  exp(glm.fit$coefficients)
+```
+
+In order to obtain the predicted values of $coverage$, we use `predict()`. Note that three types of values can be obtained using `predict()` via the `type = ` argument: 
+
+- `terms`: For each record $i$, `terms` returns the product of each $w_k$ with the corresponding input feature $x_k$.
+- `link`: For each record, the sum of `terms` is returned.
+- `response`: For each record, the `link` output is transformed using the logit link.
+
+We will now apply `predict()` to score the responses for each `train` and `test` samples.
+```{r}
+  pred.glm.train <- predict(glm.fit, train, type = "response")
+  pred.glm.test <- predict(glm.fit, test, type = "response")
+```
+
+A quick review of the predicted probabilities indicates confirms that we have the right response values, bound by 0 and 1.
+```{r}
+  summary(pred.glm.train)
+```
+
+Lastly, to calculate the prediction accuracy, we will once again rely on the combination of ``ggplot2`` and ``plotROC` libraries for the AUC. Interestingly, the test set AUC is greater than that of the train set. This occurs occassionally and is often times due to the luck of the draw.
+```{r, message = FALSE, warning = FALSE}
+#plotROC
+  library(plotROC)
+  library(ggplot2)
+
+#Set up ROC inputs
+  input.glm <- rbind(data.frame(model = "train", d = train$coverage, m = pred.glm.train), 
+                  data.frame(model = "test", d = test$coverage,  m = pred.glm.test))
+  
+#Graph all three ROCs
+  roc.glm <- ggplot(input.glm, aes(d = d, model = model, m = m, colour = model)) + 
+             geom_roc(show.legend = TRUE) + style_roc()  + ggtitle("ROC: GLM")
+
+#AUC
+  calc_auc(roc.glm)[,2:3]
+```
+
+
+##Support Vector Machines
+Logistic regression is a probabilistic approach. The linear formulation allows for ease of interpretation and is thus a technique of choice in many fields for general applications. But the predictive accuracy may be a whole magnitude lower relative to other methods. Support Vector Machines, on the other hand, take a purely geometric approach to classification. The technique often yields relatively higher accuracy, at the expense of interpretation. For technical tasks that involve organic relationships such as computer vision or genetic research, SVMs are particularly adept at pattern recognition and classification. It should be noted that it is due to the highly mathematical nature of SVMs in addition to the computational requirements that the technique is typically used for tasks where social interpretation is not required.
+
+Building upon the same three feature dataset once more, let's assume this time when data are plotted, there is a clear gap between groups such that a straight line can partition one group from the other (Figure 1). A line as simple as $wx + b = y$ may do the trick in two dimensional space, but can also be described as a plane in n-dimensional space $w^T + b = y$. That line may then serve as a boundary between the two groups where $w^T + b > y$ may describe the group above the boundary and $w^T + b < y$ describes the group below. 
+
+Given the space, however, you realize that multiple lines could do the job: there are almost infinite lines (Figure 2) that could serve as the boundary between the groups. But which is the best? There should, in theory, be one line that optimally describes the separation between the groups. 
+
+```{r, echo = FALSE, message = FALSE, warning= FALSE}
+#Margin Example
+margin_size <- 0.3
+set.seed(123)
+df <- data.frame(x = runif(200),
+                 y = runif(200),
+                 supports = NA)
+
+#Set up margin supports
+  supports <- data.frame( x = c(0.6, 0.7, 0.7), y = NA, supports = NA)
+  supports$supports[1:2] <- -1.08 + 2*supports$x[1:2]
+  supports$supports[3] <- -.52 + 2*supports$x[3]
+  
+df <- rbind(df,
+            supports)
+  
+  
+#Best boundary
+  df$z <- -0.8 + df$x*2 
+  df$perp <- 0.6578033 + df$x*-0.5
+  df$perp[df$x >= 0.6951213] <- NA
+  df$perp[df$x <= 0.4711213] <- NA
+  
+#Cut out
+  df <- df[which((df$y > df$z + margin_size | df$y < df$z - margin_size | !is.na(df$supports))), ]
+  df$group <- "Side A"
+  df$group[df$y < df$z - margin_size] <- "Side B"
+  df$cols <- "blue"
+  df$cols[df$group == "Side B"] <- "green"
+  
+  
+#Alternative boundaries
+  df$z1 <- -1.1 + df$x*2.1
+  df$z2 <- -0.5 + df$x*1.9
+  df$z3 <- -0.95 + df$x*2  
+  df$z4 <- -0.65 + df$x*2  
+  df$z5 <- -0.95 + df$x*2.3
+  df$z6 <- -0.65 + df$x*1.7
+  
+  df$margin2 <- -1.08 + df$x*2
+  df$margin1 <- -.52 + df$x*2
+  
+  df <- df[order(df$perp),]
+  
+#Plot
+library(ggplot2)
+
+base <- ggplot(df, aes(group=factor(group))) + 
+    geom_point(aes(x = x, y = y,  colour = factor(group)))  +
+    ylim(0,1) + xlim(0,1) + 
+    ylab("x1") + xlab("x2") +
+    ggtitle("(1)") + scale_colour_manual(values=c("lightblue", "gold")) +
+  coord_fixed(ratio = 1) +
+    theme(plot.title = element_text(size = 10), 
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm"))
+  
+options1 <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z1), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z2), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z3), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z4), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z5), alpha = 0.5, colour = "grey") + 
+  geom_line(aes(x = x, y = z6), alpha = 0.5, colour = "grey") + 
+  ylim(0,1) + xlim(0,1) +
+  ggtitle("(2)") +  scale_colour_manual(values=c("lightblue", "gold")) +
+  coord_fixed(ratio = 1) + 
+  ylab("x1") + xlab("x2") +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm"))
+
+
+optimal <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), size = 2, colour = "darkgrey") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "darkgrey") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "darkgrey") + 
+  geom_line(aes(x = x, y = perp), size = 0.5, colour = "black") + 
+  ylim(0,1) + xlim(0,1) + 
+  ylab("x1") + xlab("x2") +
+  ggtitle("(3)") +  scale_colour_manual(values=c("lightblue", "gold")) +
+  coord_fixed(ratio = 1) +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) + 
+  annotate("text", x = .75, y = .9, label = "H1", colour = "blue", size = 3) + 
+  annotate("text", x = .93, y = .85, label = "H2", colour = "blue", size = 3) + 
+  annotate("text", x = .52, y = .45, label = "d+", colour = "black", size = 3) + 
+  annotate("text", x = .68, y = .37, label = "d-", colour = "black", size = 3) + 
+  annotate("text", x = .2, y = .1, label = "wx-b = +1", colour = "black", size = 3)  + 
+  annotate("text", x = .39, y = .2, label = "wx-b = 0", colour = "black", size = 3) + 
+  annotate("text", x = .75, y = .1, label = "wx-b = -1", colour = "black", size = 3) 
+
+  
+supports <- ggplot(df) + 
+  geom_point(aes(x = x, y = y, colour = df$cols)) +
+  geom_line(aes(x = x, y = z), size = 2, colour = "darkgrey") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "darkgrey") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "darkgrey") +
+  geom_point(aes(x = x, y = supports, colour = "red", size=0.7)) +
+  ylim(0,1) + xlim(0,1) + 
+  ylab("x1") + xlab("x2") +
+  ggtitle("(4)") +  scale_colour_manual(values=c("lightblue", "gold", "darkgreen")) +
+  coord_fixed(ratio = 1) +theme_bw() +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) 
+```
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+library(gridExtra)
+grid.arrange(base, options1, ncol = 2)
+
+```
+
+#### Classification
+If we are to assume a straight line is appropriate, we can find a line that maximizes the distance between the groups. To intuit distance requires defining points of reference. Let's then assume that there exists two parallel planes: each sits at the edge of each respective group and the space, labeling the top plane as $y = +1$ and bottom plane as $y = -1$. As seen in Figure 3, the dashed grey lines and the solid purple lines are *hyperplanes*, but are simply lines in two dimensional space. H1 ($y = +1$) and H2 ($y = -1$) are hyperplanes that are defined by a set of "support vectors" -- points that serve as control or reference points for the location of the hyperplane (see Figure 4).  The elegance of this method is that not all points in a dataset are used to define H1 and H2: only select points on or near the hyperplanes are required to define the plane. These planes are defined using simple linear equations shown in dot-product form:  $$w^T x - b = +1$$  and $$w^T x - b = -1$$ for H2, where $w$ is a weight that needs to be calibrated.  H1 and H2 primarily serve as the boundaries of what is known as the *margin*, or the space that maximally separates the two classes that are linearly separable The optimal hyperplane or *decision boundary* is defined as $$w^T x - b = 0$$ and sits at a distance of $d+$ from H1 and $d-$ from H2.
+
+When H1, H2, and the decision boundary are determined through training, scoring essentially maps where a new record falls in the decision space. A point to the left of H1 is scored as $+1$ and to the right of H2 is $-1$. Note that thus far, a point that falls in between H1 and H2 is not considered.
+
+
+```{r, echo=F, warning=FALSE, message=FALSE}
+grid.arrange(optimal, supports, ncol = 2)
+```
+
+#### Learning Function
+To tune a SVM, we want to find the maximum distance between H1 and H2. This can be done by finding the distance of the line that is perpendicular to H1 and H2 since they are parallel.  The following equations are the points at which the perpendicular line intersects at two points:  $$w^T_1 + b =1$$ and $$w^T_2 + b =-1$$ 
+
+By subtract the two equations, we obtain $w^T(x_1 - x_2) = 2$, which then can be manipulated by dividing the normalized $w$ vector $||w||$ of the weights. This yields a distance formula for the *margin*:
+
+$$\text{margin} = x_1 - x_2 = \frac{2}{||w||}$$ 
+
+To maximize the margin in its current form may be challenging and is typically reformulated as a minimization problem that can be solved using quadratic programming: $$min \frac{1}{2}||w||^2$$ subject to $y_i(w^Tx_i+b) \geq 1$  for all records in the sample. Like gradient descent and Newton Raphson, these are problems that have standard implementations that are pre-packaged in R in the `e1071` library.
+
+For the sake of exposure, the learning function for $w$ is maximized using the following formulation:
+
+$$w(\alpha) = \sum_i{\alpha_i} - \frac{1}{2}\sum_i{\alpha_1\alpha_0 y_1 y_0 x_1^Tx_0}$$
+
+subject to $\alpha_i \geq 0$ (non-negatives), $\sum_i{\alpha_i y_i} = 0$ (sum of alpha and y are equal to zero). Otherwise stated: the equation is the sum of all points $i$ minus the product of alphas, labels, values. $\alpha$ are parameters that are being tuned in order to maximize $w$. An interesting observation of this formula is that since the hyperplanes H1 and H2 sit on the edge of their respective groups, the hyperplane will only intersect with only a few records or "vectors". Mathematically, many of the $\alpha$ values will be zero. Intuitively, that means that the optimization equation will retain only a fraction of the total vectors to support the calculation on the plane. This is the origin of the name of the method: only vectors that support the planar calculation are retained.
+
+Upon maximizing $w$, a vector of $w$ containing the weights associated with each feature can be extracted 
+$$w = \sum_i^N{\alpha_i y_i x_i + b}$$ 
+which in turn can be used to solve a planar equation to find the corresponding value of $b$ to define the plane. While there are weights in this method, they are not directly interpretable in the way as logistic regression, but the magnitude of the underlying weights correspond to the importance of each feature.
+
+#### In Actuality
+The first example provided is what is know as a *hard margin*, where classes are linearly separable. In actuality, most classification problems do not have a clear margin between classes, meaning that there may be points that are misclassified or lie in the margin. A *soft margin* formulation is more commonly used to handle cases where there is some fuzziness in the separation: the margin must be determined allowing for misclassification of points.  We can characterize the position of challenging-to-classify points using *slack variables*, or a variable $\xi$ that represents distance from the margin to a point. 
+
+Figure 6 illustrates a number of commonly observed scenarios: 
+
+- The green points are the support vectors that sit on H1 and H2, which are $\xi = 0$. 
+- The distance from each H2 and H1 to the decision boundary is $\frac{1}{||w||}$.  
+- The large gold points sit between H0 and H2 such that $0 \leq \xi \leq \frac{1}{||w||}$. While they still are correctly classified (correct side of the decision boundary), the points sit within the margin. These points are referred to as *margin violations*.
+- The large blue point is a misclassified record as it is to the left of H1, but should be to the right of H2. In terms of slack distance, $\xi > \frac{2}{||w||}$ as its distance from the correct hyperplane is greater than the width of the margin.
+
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+#Margin Example
+margin_size <- 0.3
+set.seed(123)
+df <- data.frame(x = runif(1000),
+                 y = runif(1000),
+                 supports = "",
+                 size = 0.3)
+
+#Set up margin supports
+supports <- data.frame( x = c(0.55, 0.71, 0.5), 
+                        y = c(0.14, 0.5, 0.75), 
+                        supports = c("margin violation","margin violation","Misclass"),
+                        size = 0.6)
+df <- rbind(df,
+            supports)
+
+
+supports <- data.frame( x = c( 0.7, 0.7), 
+                        y = NA, 
+                        supports = "support",
+                        size = 0.6)
+supports$y[1] <- -1.08 + 2*supports$x[1]
+supports$y[2] <- -.52 + 2*supports$x[2]
+
+df <- rbind(df,
+            supports)
+
+
+
+#Best boundary
+df$z <- -0.8 + df$x*2
+
+#Perp to misclass
+df$perp <- 1 + df$x*-0.5
+df$perp[df$x >= 0.83] <- NA
+df$perp[df$x <= 0.5] <- NA
+
+df$vio1 <- 0.85 + df$x*-0.5
+df$vio1[df$x >= 0.78] <- NA
+df$vio1[df$x <= 0.7] <- NA
+
+df$vio2 <- 0.42 + df$x*-0.5
+df$vio2[df$x >= 0.6] <- NA
+df$vio2[df$x <= 0.55] <- NA
+
+df <- df[c(1:200, (nrow(df)-5):nrow(df)),]
+
+#Cut out
+df <- df[which(df$y > df$z + margin_size | df$y < df$z - margin_size | df$supports != ""), ]
+df$group <- "Side A"
+df$group[df$y < df$z - margin_size] <- "Side B"
+df$group[df$supports == "margin violation"] <- "Margin Vio"
+df$group[df$supports == "Misclass"] <- "Misclass"
+df$group[df$supports == "support"] <- "Support"
+
+#margin
+df$margin2 <- -1.08 + df$x*2
+df$margin1 <- -.52 + df$x*2
+
+#sort
+df <- df[order(df$perp),]
+
+#Plot
+library(ggplot2)
+
+value <- 0
+labxi <- list(bquote(xi==.(value)))
+
+
+
+optimal2 <- ggplot(df, aes(x = x, y = y, group = factor(group),label = supports)) + 
+  ylim(0,1) + xlim(0,1) +  scale_colour_manual(values=c("gold", "gold","lightblue", "gold","darkgreen")) + ggtitle("(6) Soft Margin Issues") +
+  geom_line(aes(x = x, y = z), size = 1, colour = "darkgrey") + 
+  geom_line(aes(x = x, y = margin1), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = margin2), size = 1, linetype="dashed", colour = "grey") + 
+  geom_line(aes(x = x, y = perp), size = 0.4,  colour = "navy") + 
+  geom_line(aes(x = x, y = vio1), size = 0.4,  colour = "navy") + 
+  geom_line(aes(x = x, y = vio2), size = 0.4,  colour = "navy") + 
+  geom_point(aes(x = x, y = y, colour = factor(group), size = size)) +
+  geom_text(hjust = 0, nudge_x = 0.05, size = 3)+
+  ylim(0,1) + xlim(-.20,1.2)  + coord_fixed(ratio = 1) +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) + 
+  annotate("text", x = .21, y = .05, label = "H1", colour = "blue") + 
+  annotate("text", x = .7, y = .05, label = "H2", colour = "blue") 
+
+optimal2
+ 
+
+
+```
+
+What does this mean for optimizing the margin? The slack variables need to be accounted for in the optimization of $||w||$:
+
+$$min \frac{1}{2}||w||^2 + C\sum_i^N{\xi_i}$$
+
+subject to $y_i(w^Tx_i+b) \geq 1 - \xi_i$  for all records in the sample. The first half of the formula is the same as the hard margin formula. The second half adds a constraint where the new variable $C$ is known as a regularization variable or the *Cost*. If $C$ is small, the slack variables are ignored and thus allows for larger margins. If $C$ is large, then the slack variables reduce the size of the margin. It is worth noting that $C$ is one of two tuning parameters that data scientists will need to calibrate when running SVMs.
+
+
+####Extending the hypothesis space
+So far, the examples have focused on linear problems with hard and soft margins in two dimensional space. What if classes are clearly separated in a parabolic (1) or circular pattern (2)? A parabolic separation between classes can be described in terms of polynomials (e.g. $y = x^2$). A circular pattern may actually be separable if points are projected into higher dimensional space. Moving from two-dimensions (2) to three-dimensions (3),  the contour lines demonstrate that there may be some threshold of the third feature at which a hyperplane can separate the two classes. The projection of records into higher dimensional space to improve separability is known as the *kernel trick*.
+ 
+
+```{r, message = FALSE, warning = FALSE, fig.height = 2.5, echo=FALSE}
+#Margin Example
+margin_size <- 0.3
+set.seed(123)
+
+#Parabola
+  df <- data.frame(x = runif(300) - runif(300) ,
+                   y = runif(300) - runif(300) ,
+                   supports = "",
+                   size = 0.3)
+  
+  df$z <- -0.2 + 2*df$x^2  
+ 
+  df$group <- "Group 1"
+  df$group[df$y > df$z] <- "Group 2"
+
+
+#Parabola graph
+para <- ggplot(df, aes(x = x, y = y, group = factor(group),label = supports)) + 
+  geom_point(aes(x = x, y = y, colour = group)) + 
+  ylim(0,1) + xlim(0,1) +  scale_colour_manual(values=c("lightblue","gold")) +
+  geom_line(aes(x = x, y = z), colour = "darkgrey") +
+  geom_text(hjust = 0, nudge_x = 0.05, size = 3)+
+  ylim(-1,1) + xlim(-1,1)  + coord_fixed(ratio = 1) +
+  ggtitle("(1) Parabola") +
+  theme(plot.title = element_text(size = 10), 
+        axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),axis.ticks=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank(),
+        plot.margin=unit(c(-0.5,1,1,1), "cm")) 
+
+#Circle 
+
+  df <- data.frame(x = runif(10000) - runif(10000) ,
+                   y = runif(10000) - runif(10000) ,
+                   supports = "",
+                   size = 0.3)
+  
+  df$zp <- sqrt(0.05 - df$x^2) 
+  df$zm <- -sqrt(0.05 - df$x^2) 
+  
+  df$zp2 <- sqrt(0.1 - df$x^2) 
+  df$zm2 <- -sqrt(0.1 - df$x^2) 
+  
+  df$heights <- 0.1
+  df$heights[df$y > df$zm2 & df$y < df$zp2] <- 0.3
+  df$heights[df$y > df$zm & df$y < df$zp] <- 0.8
+  df$heights <- df$heights + runif(nrow(df))
+  
+  
+  
+  df$group <- "Group 1"
+  df$group[df$y > df$zm & df$y < df$zp ] <- "Group 2"
+  
+  circ <- ggplot(df, aes(x = x, y = y, group = factor(group))) + 
+    geom_point(aes(x = x, y = y, colour = factor(group))) + 
+    ylim(0,1) + xlim(0,1) +  scale_colour_manual(values=c("lightblue","gold")) +
+    geom_line(aes(x = x, y = zm), colour = "darkgrey") +
+    geom_line(aes(x = x, y = zp), colour = "darkgrey") +
+    ylim(-1,1) + xlim(-1,1)  + coord_fixed(ratio = 1) +
+    ggtitle("(2) Circle") +
+    theme(plot.title = element_text(size = 10), 
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank(),
+          plot.margin=unit(c(-0.5,1,1,1), "cm")) 
+  
+  library(dplyr)
+  ds <- tbl_df(df)
+  circ2 <- ggplot(df, aes(x = x, y = y, z = heights)) +
+    geom_point(aes(x = x, y = y, colour = factor(group))) + 
+    ylim(0,1) + xlim(0,1) +  
+    scale_colour_manual(values=c("lightblue","gold")) +
+    ylim(-1,1) + xlim(-1,1)  + coord_fixed(ratio = 1) +
+    stat_density2d(colour = "darkgrey") +
+    ggtitle("(3) Circle - 3-dimensional") +
+    theme(plot.title = element_text(size = 10), 
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank(),
+          plot.margin=unit(c(-0.5,1,1,1), "cm")) 
+  
+  grid.arrange(para, circ, circ2,ncol = 3)
+```
+
+In a paper by [Boser et al. (1992)]( http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.21.3818) modified the maximization function: 
+
+
+$$w(\alpha) = \sum_i{\alpha_i} - \frac{1}{2}\sum_i{\alpha_1\alpha_0 y_1 y_0 x_1^Tx_0}$$
+
+such that the dot products $x_1^Tx_0$ are replaced with non-linearkernel functions. Of particular significance are two common kernels: the Gaussian Radial Basis Function (RBF) and Polynomial kernels.
+
+RBP is defined as:
+
+$$RBF = exp(-\gamma ||x_1-x_0||^2)$$
+where $\gamma = \frac{1}{2\sigma^2}$ and $\sigma$ >0. The value of $\gamma$ determines the tightness of the kernel, where larger values of $\gamma$ yield a compact, tight kernel whereas smaller values of $\gamma$ are associated with wider-spread kernels. In `R`, the value of $\gamma$ is one of the tuning parameters that a data scientist would need to specify as RBFs are the default kernel. Note that one needs to use a grid search to find the appropriate value of $\gamma$ as it cannot be mathematically optimized, but rather analyzed.
+
+The polynomial kernel is defined as:
+
+$$Polynomial = (1+x_1^Tx_0)^d$$
+where the value of $d > 0$, indicates the polynomial degree, and assumes that all polynomials from 1 to $d$ are included.
+
+####Practical Details
+After all the derivation is done, keep the following points in mind when applying SVMs:
+
+- Tuning is centered on two variables: $C$ to manage the extent to which the margin is hard or soft, and $\gamma$ for when a RBF is applied. Note that the quantities of each are tuned using cross-validation in the form of a grid search (e.g. test multiple values at equal intervals).
+- Non-linear SVMs are computationally expensive. Very high dimensional data sets will likely take a long time to compute.
+- SVMs are particularly well-suited for a pattern recognition, computer vision among other computationally challenging problems. While they may yield more accurate results than many other classifiers, the ability for data scientists to give social policy decision makers control over the story is limited.
+- ROC and AUC may at times be challenging to calculate for SVM results. An alternative is to utilize the F1 statistic defined as: 
+
+$$F_1 =  2 \times \frac{\text{precision} \times \text{recall}}{\text{precision} +  \text{recall}}$$
+
+
+####Applying SVMs 
+SVMs are neatly packaged into an interface library called `e1071`. The library contains a suite of machine learning tools in addition to SVMs.
+```{r, message = FALSE, warning = FALSE}
+library(e1071)
+```
+
+Syntax is fairly simple and requires a minimum, six parameters are required:
+
+- input features: `<x>` 
+- target feature: `<y>`
+- data: `<data>`
+- cost: `<C>` regularization parameter -- needs to be grid searched. Default = 1.
+- gamma: `<g>` determines the "tightness" of a RBF. Default = 
+- kernel: `<kernel>` may include one of four kerels including *linear*, *polynomial*, *radial*, and *sigmoid*. Default = radial basis.
+
+
+```{r, eval=FALSE}
+  svm(<y> ~ <x>, data = <data>, cost = <C>, gamma = <g>, kernel = <kernel>)
+```
+
+To start, we will fit an SVM using a *radial* kernel assuming $cost = 1$ and $gamma = \frac{1}{\text{dim}}$, where $dim$ is the number of effective variables in our data (e.g. continuous variables, expanded dummies, and intercept). This effectively is 18 in the health data.
+```{r, message = FALSE, warning = FALSE}
+  svm.rbf.fit <- svm(coverage ~ ., data=train, kernel = "radial", cost = 1, gamma = 0.05555)
+```
+
+Typically, it is a good idea to test various values of `cost` and `gamma`, though noting that this process for SVMs is computationally expensive (takes a long time), especially for RBF kernels. The `e1071` library provides a method `tune.svm()` to find the best `cost` and `gamma` (see below). In this example, we will manually tune to develop a sense of how calibration works in practice.
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+#Tune SVM
+  tune <- tune.svm(coverage ~. ,
+                    data = train,
+                    kernel = "linear", 
+                    cost=10^(-1:2), gamma=c(.5,1,2))
+
+``` 
+
+
+To determine search for the best parameters, we will conduct a grid search: a combination of four values of `cost` and four values of `gamma` will be tested for a total of 16 models. We choose equally spaced values on on an exponential scale (e.g. $0.01$, $1$, $10$) to emphasize differences in model fit. To evaluate accuracy, we will rely on the F1-scores
+
+
+```{r, message = FALSE, warning = FALSE}
+
+#F1 score
+ meanf1 <- function(actual, predicted){
+    #Mean F1 score function
+    #actual = a vector of actual labels
+    #predicted = predicted labels
+    
+    classes <- unique(actual)
+    results <- data.frame()
+    for(k in classes){
+      results <- rbind(results, 
+                       data.frame(class.name = k,
+                                  weight = sum(actual == k)/length(actual),
+                                  precision = sum(predicted == k & actual == k)/sum(predicted == k), 
+                                  recall = sum(predicted == k & actual == k)/sum(actual == k)))
+    }
+    results$score <- results$weight * 2 * (results$precision * results$recall) / (results$precision + results$recall) 
+    return(sum(results$score))
+ }
+
+#Prep grid search
+  cost.vec <- 10^(-1:2)
+  gamma.vec <- 2^(seq(-5,2,2))
+  combo <- expand.grid(cost = cost.vec, gamma = gamma.vec)
+  combo$f1 <- NA
+  
+#Search
+  for(i in 1:nrow(combo)){
+    fit <- svm(coverage ~ ., data=train, kernel = "radial", cost = combo[i, 1], gamma = combo[i, 2])
+    pred <- predict(fit, train)
+    combo$f1[i] <- meanf1(train$coverage, pred)
   }
-
   
-#Resampling
-  temp <- df[df$coverage=="Coverage",]
-  set.seed(123)
-  df_sub <- rbind(df[df$coverage=="No Coverage",], temp[sample(row.names(temp),sum(df$coverage == "No Coverage")),])
-  # grow tree 
+#View table
+  print(combo)
+```
 
-fit <- rpart(coverage ~ AGEP+ CIT2 + MAR2 + SCHL2 +RAC1P + WAGP, method="class", data=df_sub)
+Based on the grid search, we find that the best model has a $C = 100$ and $gamma = 2$. We then train a model with those parameters, then predict the classes of the test set to find that a $F1 = 0.75$.
+```{r, message = FALSE, warning = FALSE}
+#Predict labels
+  pred.test <- svm(coverage ~ ., data = train, kernel = "radial", cost = 1, gamma = 8)
+  pred.rbf <- predict(pred.test, test)
+  
+#examine result
+  table(pred.rbf)
 
-#Accuracy
-  tree.pred <- predict(fit, df_sub, type='class')
-  tab <- table(tree.pred, df_sub$coverage)
-  #(tab[1] + tab[4])/nrow(df_sub)
+##RBF
+  meanf1(test$coverage, pred.rbf)
+```
 
-# plot tree 
-rpart.plot(fit,extra=104, box.palette="GnBu",
-           branch.lty=3, shadow.col="gray", nn=TRUE)
+
+
+##Artificial Neural Networks
+ANNs have gained much notoriety over the years, especially with the advent of "artificial intelligence". With origins in pattern detection methodologies in the 1940s and later implemented in the form of algorithms such as the perceptron in the 1950's, ANNs fluctuated into and out of popularity over the better part of the 80 years. While this is a hot topic, we will only cover it from a high level as the technical requirements are notably demanding.
+
+The technique is inspired by biological neurons that are located in the brain. In biology, neurons are part of a vast network of brain cells that store and transmit information. Information may be passed from one neuron to another in the form of an electrical and chemical impulses, and neurons are connected with many other neurons. Given a neuron that needs to transmit information to another neuron, the eletrical impulse needs to be sufficiently large to overcome inhibitory effects of the gap junction between neurons. 
+
+Similarly, ANNs are comprised of *nodes* that are organized into *layers* such that all nodes in each layer feed into all other neurons. The diagram below lays out a simple one layer neural network that follows the formulation: $Y = f(x_1)$:
+
+- *Input*.  Starting from the left, the green node is the input node (synapse). This is simply $X_1$.
+- *Hidden layers*. The input node is linked to the blue circles, which are five nodes that comprise a hidden layer. The grey node above the hidden layer contains the intercepts for equations leading into that layer. Each hidden node is associated with an *activation function* that is based on a weighted value of $X_1$. The activation function is analogous to what determines if an electrical impulse fires strongly enough to transmit a recognizable signal, except in ANNs, some value is always transmitted. Like other machine learning algorithms, the weight is learned from examples of $y$.  For example, the equation of the top blue node is $H1 = -0.073556019136 -1.168651424424 \times x_1$. As each of the equations feeds into another, we find that hidden layers are used to handle cases where classes are not linearly acceptable as hidden layers are essentially a non-linear series of equations. 
+- *Output*. The red node $y$ accepts the results of each of the formulae produced in the hidden layer.
+
+
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE, fig.height = 2}
+
+library("neuralnet")
+set.seed(123)
+input <-  data.frame(x1 = rnorm(50, 1000, 100), 
+                     x2 = rnorm(50, 10, 100), 
+                     x3 = rnorm(50, 10, 100), 
+                     x4 = rnorm(50, 10, 100), 
+                     x5 = rnorm(50, 10, 100), 
+                     x6 = rnorm(50, 10, 100), 
+                     x7 = rnorm(50, 10, 100), 
+                     x8 = rnorm(50, 10, 100))
+y <- sqrt(input$x1)
+
+train <- cbind(input,y)
+
+
+fit <- neuralnet(y ~ x1, data = train, hidden = c(5), threshold = 0.01)
+
+#Plot the neural network
+plot(fit, rep="best", col.entry = "green", col.out = "red", col.out.synapse = "red",
+     show.weights = TRUE, col.intercept = "grey", col.hidden = "blue", col.hidden.synapse = "blue",
+     col.entry.synapse = "green", fontsize = 8)
+
+
+```
+
+As more variables are added, more input nodes are added to the left. The case below, for example, illustrates an ANN where $Y = f(x_1, ..., x_8)$.
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE, fig.height = 2}
+
+
+fit <- neuralnet(y ~ x1 + x2 + x3+ x4 + x5 +x6 + x7 +x8, train, hidden = c(5), threshold = 0.01)
+
+#Plot the neural network
+plot(fit, rep="best", col.entry = "green", col.out = "red", col.out.synapse = "red",
+     show.weights = TRUE, col.intercept = "grey", col.hidden = "blue", col.hidden.synapse = "blue",
+     col.entry.synapse = "green", fontsize = 8)
 
 
 ```
 
 
-_The Gist_. The structure of a decision tree can be likened to branches of a tree: moving from the base of the tree upwards, the tree trunk splits into two or more large branches, which then in turn split into even smaller branches, eventually reaching even small twigs with leaves. Given a labeled set of data that contains input features, the branches of a decision tree is grown by subsetting a population into smaller, more homogeneous units. In other words, moving from the root of the tree to the terminating branches, each subsequent set of branches should contain records that are more similar, more homogeneous or purer. 
-
-How is a decision tree empirically grown? For this, we can rely on pseudocode to lay out the process for the C4.5 algorithm, which is perhaps the most commonly implemented decision tree algorithm described in [Quinlan (1993)]():
-
-```
-C4.5 (Sample = S, Target = Y, Input Features = X)
-  Screen records for cases that meet termination criteria.
-      If each base case that is met, partition sample to isolate homogeneous cases.
-  For each input feature X, calculate the normalized information gain IG from splitting X into two subsamples.
-  Partition S into two partitions using feature X that corresponds to the highest IG.
-  Repeat process for each sub-partition until termination criteria is met.
-```
-
-There are a number key concepts that guide the decision tree algorithm, including (1) termination criteria and (2) normalized information gain. 
-
-[Termination criteria]
-
-[Information gain] To understand information gain means to understand the concept of _entropy_, which is a measure of purity or certainty of information. Given discrete classes or "states", entropy is defined as:
-
-$$\text{Entropy} = \sum{-p_{i} log_2(p_{i})}$$
-where $i$ is an index of states, $p$ is the proportion of observations that are in state $i$, and $log_2(p_i)$ is the Base 2 logarithm of the proportion for state $i$. 
+A common strategy to help improve capture of non-linear patterns is to add an additional hidden layer. However, the additional hidden layers may not necessarily yield significant accuracy gains. Notice that the number of activation functions that are captured in this ANN with 8 hidden nodes. In the past, if an ANN required hundreds of inputs and hundreds of hidden nodes, the computation required was unwieldy and technique was less favored due to the required computation. However, advances in computing technology now allow for faster training of sophisticated and complex ANNs.
 
 
-###Random Forests
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
-```
+```{r, message = FALSE, warning = FALSE, echo = FALSE, fig.height = 2}
+
+fit <- neuralnet(y ~ x1 + x2 + x3+ x4 + x5 +x6 + x7 +x8, train, hidden = c(5, 3), threshold = 0.01)
+
+#Plot the neural network
+plot(fit, rep="best", col.entry = "green", col.out = "red", col.out.synapse = "red",
+     show.weights = TRUE, col.intercept = "grey", col.hidden = "blue", col.hidden.synapse = "blue",
+     col.entry.synapse = "green", fontsize = 8)
 
 
-###Support Vector Machines
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
 ```
 
 
 
-####Logistic Regression
-- statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation
-```{r}
-#
-```
 
+For further reading, please take a look at this text that is focused on [Neural Network Design](http://hagan.okstate.edu/NNDesign.pdf).
 
-
-##Applications of classifiers
-###Appropriate uses of classification techniques
-[text goes here]
-
-```{r}
-#
-```
-###Scoring
-[text goes here]
-
-```{r}
-#
-```
-
-###prediction and prioritization
-[text goes here]
-
-```{r}
-#
-```
-
-###Propensity score matching
-[text goes here]
-
-```{r}
-#
-```
-
-
-###Exercise Data
-- [Labor and wage analysis]
