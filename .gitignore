@@ -7,3 +7,7 @@ lecture-*/answer.R
 .Rhistory
 .RData
 .Ruserdata
+answers.R
+*/answers.R
+*.log
+*/*.log

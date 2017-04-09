@@ -1,5 +1,5 @@
 ---
-title: "Lecture 11: Web Service APIs"
+title: "Lecture 12: Spatial Data and Mapping"
 subtitle: "Intro to Data Science for Public Policy, Spring 2016"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
 output: 
@@ -8,186 +8,201 @@ output:
     toc: yes
 ---
 
-The purpose of this section is to showcase the ability to scrape and
-process web data using `R`.  The section notes draw heavily from a
-[post](http://schamberlain.github.com/2012/08/get-ecoevo-journal-titles/) on a great blog by Pascal Mickelson and Scott Chamberlain, two
-biologists and experienced `R` users.
 
-### Scraping
 
-Suppose we want to find the number of available economics journals.
-There are too many.  Definitely.  But suppose we want to find out just
-how many.  To do this, we can visit crossref.org, which is a
-citation-linking network with a list of all journals and their Digital
-Object Identifiers (DOIs).  We will query the list from within `R` and
-then parse the returned content to list journals with certain
-attributes.  For this, we'll need to load the following libraries:
+The objective of this section is to introduce spatial analysis and web service APIs in `R`.  The auxiliary objectives include learning basic web mapping through [Carto](https://www.carto.com) and practicing some classification techniques.  We will focus on two applications -- farmers markets and wind turbines in the United States.  
 
-```{r comment=NA, cache=TRUE, message=FALSE}
-library(XML)
-library(RCurl)
-library(stringr)
+### Categorizing farmers markets
 
-options(show.error.messages = FALSE)
+Start with a very compact, tangible question.  Does state-level policy has an appreciable impact on the composition of farmers' markets in the Southwest?  To answer this question, we pull [a data set from data.gov](https://explore.data.gov/d/wfna-38ey) on 7,863 farmers' markets in the United States. Rather than trusting that the federal government will continue to maintain the valuable public service, data.gov, I have saved the file as [`farmers-mkts.csv`](https://github.com/GeorgetownMcCourt/data-science/blob/master/lecture-12/farmers-mkts.csv) in this directory.  Download the CSV, open it with `read.csv()` and examine a few columns.
+
+```{r comment=NA, cache=FALSE, message=FALSE}
+# return(answer.1)
 ```
 
-Note the useful option for code with loops, especially loops over
-remote queries, to globally suppress error messages.  The next step is
-to repeatedly query crossref.org for journal titles.  Try to copy and
-paste the base URL address (`baseurl`) into your browser:
-[`http://oai.crossref.org/OAIHandler?verb=ListSets`](http://oai.crossref.org/OAIHandler?verb=ListSets).  The result is a
-long XML form.  The function =getURL= in the following code pulls this
-response into `R` as a string, and the outer functions `xmlParse` and
-`xmlToList` convert the output into an `R` data structure.  There are
-too many entries to fit into a single query, so the `while` loop
-continues to query until there are no more results.  The final results
-are stored in `nameslist`.  
+The only difference between this data set and the data tables we've dealt with in previous sections is that each record is tied to a specific place on earth.  The column `x` represents the farmers' market's longitude, and `y` represents the market's latitude.  Each record can therefore be represented as a point on a map.  There are two basic data models in geographic information systems (GIS):
 
-First, cut and paste the `baseurl` string in the browser to view what is returned.  This returned data structure is called eXtensible Markup Language (XML).  The `XML` library has parsers to convert XML into native `R` data structures (like lists).  
+1. **Vector**.  A representation of the world using points, lines, and polygons. Vector models are useful for storing data that has discrete boundaries, such as country borders, land parcels, and streets.
+2. **Raster**. A representation of the world as a surface divided into a regular grid of cells. Raster models are useful for storing data that varies continuously across space, like an aerial photograph, a satellite image, a surface of chemical concentrations, or an elevation surface.
+
+These are stored in multiple data formats, which have fragmented over time based on GIS software providers.  For example, for vector data, shapefiles (`.shp`) were invented by ESRI, whereas keyhold markup language (`.kml`) files were invented by Keyhole (which was acquired by Google and turned into Google Maps).  Raster formats may be even more diverse.  However, `R` has extension libraries to deal with most of these formats now.  For vector data, we will rely on open formats, and mainly [GeoJSON](http://geojson.org/), which is an extension of the basic [JSON](http://www.json.org/) data format to handle geographic information.  It is the direction GIS is headed.
+
+Ignore all that for a moment.  Use the [`maps`](https://cran.r-project.org/web/packages/maps/index.html) package to use map data that is already in `R` formats.  Note that there is another package, [`mapproj`](https://cran.r-project.org/web/packages/mapproj/index.html), that deals with reprojection.  There are many standards to convert a 3D globe into a 2D map, called projections.  We ignore this, too, for the time being, and rely on the sensible projection built into the [`maps`](https://cran.r-project.org/web/packages/maps/index.html) package.  Create a map of all farmers' markets in the U.S. with boundary lines (noting that the `"state"` map is built into the `maps` library).
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-baseurl <- "http://oai.crossref.org/OAIHandler?verb=ListSets"
-xml.query <- xmlParse(getURL(baseurl)) # grab and parse the returned data
-sets <- xmlToList(xml.query) # convert the returned data structure into an R list
+# return(answer.2)
 ```
 
-Most of the following work is reverse engineering.  The data for each web service is returned with different levels of nesting or with different data types.  The returned data from CrossRef is complicated.  The journal names are stored in a named list, tagged with the key `ListSets`.  The tenth name can be extracted with the following, nested dictionary query:
+Now consider the farmers' markets in Colorado, Utah, New Mexico, and Arizona.  How many farmers' markets are in these four states?  Create a subset of the data with markets in just these four states, and call it `state.data`.  Note that one market is mislabeled, and it is actually in Pennsylvania.  *Knock this out by limiting the farmers' markets based on longitude.*
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-sets[['ListSets']][10][['set']][['setName']]
+# return(answer.3)
 ```
 
-To grab all journal names, the same extraction must to be applied to all elements within `sets[['ListSets']]`:
+Each column of `state.data` contains information on a different attribute of the market.  The last 24 columns are binary variables with entries `"Y"` or `"N"`, indicating whether the market sells cheese, for example, or accepts credit cards.  Is it possible to predict the location of farmers' markets, based purely on these features?  If so, then there may be something about state policy that has an observable, immediate impact on the composition of the markets.  Clean up the features, assigning a numerical indicator to the `"Y"` response.  Put these binary variables into a data frame called `X`.
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-journal.names <- sapply(sets[['ListSets']], function (x) { x[['setName']] })
-head(journal.names)
+# return(answer.4)
 ```
 
-It's still a named list.  To convert it into a standard, easy-to-manipulate list, we can change the format of the returned object:
+Create a distance matrix (`dist.mat`) between the markets in `X` to measure how similar each market is to every other.  Distance does not refer to geographical distance.  Rather, here, it is measure of how similar one market from every other.  Note that all variables in the feature matrix `X` are binary.  Use the `"binary"` method to calculate distance in order to get a meaningful metric of similarity.
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-journal.names <- as.character(journal.names)
-head(journal.names)
+# return(answer.5)
 ```
 
-There is a slight complication.  If the returned object does not contain a journal name, even though it's listed at the same nesting level as a journal, then extracting a key-value pair that is tagged with `setName` will return `NULL`.  And `as.character(NULL)` &#8594; `"NULL"`. Let's filter out any journal name that is `"NULL"`.
+The `dist.mat` object is the basis for the hierarchical clustering algorithm in `R`, which sorts the markets to minimize distance between all elements.  Use the `hclust` function to create four clusters, one for each state.  Build and plot the tree.
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-journal.names <- Filter(function(x) {x != "NULL"}, journal.names)
-length(journal.names)
+# return(answer.6)
 ```
 
-There are more than 1,000 journals on CrossRef.  The base URL represents just one of many queries.  Only 1,000 results are returned at a time.  How do we adjust the URL to get the *next* 1,000 results?  There is a token that is stored in the response, which indicates where we should look next:
+Create a zoomed map, where the farmers' markets in the four states are colored by the label generated in the clustering algorithm.  The color is based on similarity among the bundle of goods sold at each market.  Is this related in some way to geographical clustering?  It is related in a weird way?  Something worth studying further?
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-sets[["request"]][[".attrs"]][["resumptionToken"]]
+# return(answer.7)
 ```
 
-Each page of results indicates the location of the next page of results via the resumption token.  The following list is called using a new `baseurl`:
+It seems clear from these figures that farmers' markets in New Mexico are distinctive from those in neighboring states, somehow.  We can force the analysis into a traditional-ish regression discontinuity test.  First, calculate the distance of each market to the New Mexico border between Arizona and Colorado.  I have plugged in the three points to define `segment`, the upside-down and backwards L-shaped border.  Use this within the function to calculate distance to the New Mexico border.
 
-[`http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken=1911d489-5fda-4a32-9aa2-7398057d1dc2`](http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken=1911d489-5fda-4a32-9aa2-7398057d1dc2)
-
-The final script, then, collects the results from each page (one thousand at a time) until there are no longer results available.
-
-```{r comment=NA, cache=TRUE, message=FALSE}
-# set initial values for variables to be used in while-loop
-token <- NULL
-continue <- TRUE
-nameslist <- list()
-
-while (continue == TRUE) {
-
-  baseurl <- "http://oai.crossref.org/OAIHandler?verb=ListSets&resumptionToken="
-  url <- paste(baseurl, token, sep = "")
-  xml.query <- xmlParse(getURL(url))
-  sets <- xmlToList(xml.query)
-  journal.names <- sapply(sets[['ListSets']], function (x) { x[['setName']] })
-  journal.names <- as.character(journal.names)
-  journal.names <- Filter(function(x) {x != 'NULL'}, journal.names)
-
-  # concatenate the new journal names to the old, master list; reassign as master list.
-  nameslist <- c(nameslist, journal.names)
-  
-  # If getting the resumption token throws an error, save the error to stop the process.
-  err <- try(token <- sets[["request"]][[".attrs"]][["resumptionToken"]])
-
-  if (class(err) == "try-error") { 
-  	continue <- FALSE
-  }
-  
- }
+```{r}
+segment <<- cbind(
+	c(-109.047546, -109.047546, -103.002319),
+	c(31.33487100, 36.99816600, 36.99816600)
+)
 ```
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-nameslist <- unlist(nameslist)
-length(nameslist)
+# return(answer.8)
 ```
 
+Note the use of `<<-`. The expressly local function `.segDistance` will return the distance between the supplied coordinate to the global line segment.  Apply this function to all coordinates.  The resulting object `dist` represents distance to the New Mexico border; and to indicate the side of the border, scale the distance for each market /within/ New Mexico by $-1$.  A distance of zero indicates the border itself.  This is beginning to look more and more like the regression discontinuity design, with the discontinuity at zero distance.
+
 ```{r comment=NA, cache=TRUE, message=FALSE}
-sample(nameslist, 5)
+# return(answer.9)
 ```
 
-Suppose we want to do something with this compiled data.  How many journal titles contain the word "economic" -- either lower or upper case?  We use *regular expressions* to examine each element of the list:
+Now, plot the predicted cluster with respect to distance from border.
+Figure  and indicates a clear discontinuity at the
+border.  Note, however, that the regression discontinuity analysis
+that we learn is generally for functions, not correspondences.
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-econtitles <- nameslist[str_detect(nameslist, "^[Ee]conomic|\\s[Ee]conomic")]
-length(econtitles)
+# return(answer.10)
 ```
 
-What in the hell? So many! I suppose that this is a good thing: at least one of the 461 journals should accept my crappy papers. If I blindly throw a dart in a bar, it may not hit the dartboard, but it will almost certainly hit one of the 461 patrons. Here is a random sample of ten journals:
+The plot indicates some discontinuity (technically the correspondence is not hemicontinuous).  All the figures combined offer reasonably strong evidence that the New Mexico border  alters the composition of markets.  Why?  What causes that?  More digging is required.
 
-```{r comment=NA, cache=TRUE, message=FALSE}
-sample(econtitles, 10)
+
+### Spatial queries via web services
+
+The Audobon Society estimates that around 250,000 birds are killed each year by wind turbines.  Policy to mitigate this problem will be inherently spatial -- optimizing turbine placement by factoring in bird routes.  We will work with a dataset of U.S. wind turbines and another of California bird routes to identify the number of turbines that are *close* to bird routes.  We will do this using `R` and Carto, an online spatial database.
+
+***
+
+##### Interacting with Carto (optional)
+
+Only follow the following steps if you want to explore Carto after class.  You will be able to query my account for the rest of this lecture, without one of your own.  That said, Carto is a powerful abstraction over a cloud SQL database with the PostGIS extension.  It's a neat way to view, convert, and store spatial data.  It's not cheap for production apps, but it's easily accessible for quick map visualizations.
+
+1. Go to [Carto](https://www.carto.com) and create a free account.  Sign up with your **.edu** address, since there are features available to students for free.  You can find these deals through the [GitHub student developer pack](https://education.github.com/pack).
+2. Connect the two datasets, [wind turbines](https://dangeorge.carto.com/tables/turbines/public) and [bird routes](https://dangeorge.carto.com/tables/bird_routes/public).  You can click the button `CREATE MAP` to connect the database from my account to your account.
+3. Open the data table view for the turbines layer.  Preview the data to make sure it looks right.  
+4. Write a query to count the number of turbines in California.
+```sql
+SELECT COUNT(*) 
+FROM turbines
+WHERE state = 'CA'
+```
+5. Write an SQL query to view just the turbines with a blade length greater than 10 meters in California.  Preview the result.
+```sql
+SELECT * 
+FROM turbines
+WHERE state = 'CA' AND blade_l > 10
+```
+6. Write a query to count the turbines that are within 5 miles of a California bird route.  Refer to the documentation for [`ST_DWithin`](https://postgis.net/docs/ST_DWithin.html).  Note that we use the variable `the_geom_webmercator`.  This is an automatic variable included in *all* Carto tables to run distance or area queries.  It is the standard geometry, but with a [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) projection.  *If you're interested, use the variable `the_geom`, see what happens, and try to explain it.*
+```sql
+SELECT 
+	COUNT(turbines.*)
+FROM 
+	bird_routes, turbines
+WHERE
+	ST_DWithin(
+		bird_routes.the_geom_webmercator,
+		turbines.the_geom_webmercator,
+		5 * 1609
+	)
 ```
 
-What are other things we can do with the data? Suppose we wanted to compare the relative frequencies of different subjects within journal titles. This offers a decent example for section, since we can refactor some of the code we already developed — a useful skill for writing clean code. We have already figured out how to count the number of journals for a particular regular expression. We can refactor the code into the following function, which accepts a regular expression and returns the length of the collection containint matching strings:
+***
 
-```{r comment=NA, cache=TRUE, message=FALSE}
-countJournals <- function(regex) {
-  titles <- as.character(nameslist[str_detect(nameslist, regex)])
-  return(length(titles))
+#### Spatial web services
+
+We can query Carto databases via web service APIs outside of the Carto environment.  Your public tables are available for SQL queries at the base URL:
+
+```
+https://<your_user_name>.carto.com/api/v2/sql
+```
+
+In my case, the base URL is:
+
+```
+https://dangeorge.carto.com/api/v2/sql
+```
+
+Anyone can hit this URL with a parameter `q` followed by the SQL code.  (There is no authentication required.) Copy and paste the SQL query from Item #4 above to count the number of turbines in California after the base URL and the parameter submission `?q=` as below:
+
+```
+https://dangeorge.carto.com/api/v2/sql?q=SELECT COUNT(*) FROM turbines WHERE state = 'CA'
+```
+
+```json
+{
+	rows: [
+		{
+			count: 14524
+		}
+	],
+	time: 0.031,
+	fields: {
+		count: {
+			type: "number"
+		}
+	},
+	total_rows: 1
 }
 ```
 
-Now the tedious process of converting a list of subjects into the appropriate regular expressions. If we have time, we’ll write a function to do this conversion for us.  For now, use this:
+This is a powerful tool to run massive, spatial queries on someone else's servers, and then just get back the processed result for use in `R`.  Within `R`, the only requirement is to write, submit, and process the results of a URL. For this, we rely heavily on the `paste`, `URLencode`, and `fromJSON` functions.  You will need to install the `jsonlite` and `curl` libraries.  Write a short `R` script to return just the count of turbines in California.
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-subj = c("economic", "business", "policy", "environment", "engineer", "history")
-regx = c(
-	"^[Ee]conomic|\\s[Ee]conomic", 
-	"^[Bb]usiness|\\s[Bb]usiness",
-	"^[Pp]olicy|\\s[Pp]olicy", 
-	"^[Ee]nvironment|\\s[Ee]nvironment",
-	"^[Ee]ngineer|\\s[Ee]ngineer", 
-	"^[Hh]istory|\\s[Hh]istory"
-)
-
-(subj.df <- data.frame(subject = subj, regex = regx))
+# return(answer.11)
 ```
 
-Finally, we simply apply our refactored function to the regular expressions, and graph the result:
+We can make this more complicated but more useful.  Write a function that accepts an integer number of miles and returns the number of turbines within that many miles of a California bird route.
+
 
 ```{r comment=NA, cache=TRUE, message=FALSE}
-library(ggplot2)
-subj.df[["count"]] <- sapply(regx, countJournals)
-ggplot(data = subj.df, aes(x = subject, y = count)) + geom_bar(stat="identity")
+# return(answer.12)
 ```
 
-### Importance to data science for public policy
+Test the function by running it with a few numbers.  
 
-A fair question is, "How is this helpful for public policy?"  Often, the most difficult part of policy analysis is compiling the data; and web scraping becomes an invaluable tool to assemble an analysis-ready data set.  Even if the scraping part is easy, the skill of reverse engineering a complex data object to build an `R` data frame is highly valuable. 
+### Web service APIs, practice
 
-Consider, for example, the Code of Federal Regulations.  The CFR is released in machine-readable form as an [XML document](https://www.gpo.gov/fdsys/bulkdata/CFR/).  Backing out the structure is difficult.  In fact, multiple projects like [this one](https://www.law.cornell.edu/cfr/text) and [this one](https://github.com/usgpo/bulk-data/blob/master/CFR-XML_User-Guide.md) were established to help parse or search the CFR.	The code in previous sections is a small sample of what is required to manage the CFR in `R`.
+Spatial data and web service APIs are, together, a very powerful combination for quick prototypes and motivating research questions.  Let's practice that hack.  Quickly hitting an API to create an `R` visualization or analysis.
 
-Other examples include [scraping election results](https://blog.openelections.net/2015/02/18/tackling-georgia-election-results-in-atlanta/) or [investigating food inspections](https://blog.openelections.net/2015/02/18/tackling-georgia-election-results-in-atlanta/).
+We will rely on the [ProPublica Nonprofit Explorer API (v1)](https://projects.propublica.org/nonprofits/api-v1).  Create a histogram of the revenue from the 100 top earning nonprofits in the database.  Note that only 25 results are returned per page.  Note, also, that there are multiple entries for each nonprofit.  Just get the average revenue for each of the filings in the first 20 pages of results.  This should be more than sufficient to collect the 100 top earners.
 
-#### Exercise 11.1
+```{r comment=NA, cache=TRUE, message=FALSE}
+# return(answer.13)
+```
 
-1. Create a histogram of the revenue for at least 200 of the highest-earning nonprofits related to "policy" in the United States. Restrict the histogram to organizations with annual revenue less than $10 million. Use the [ProPublica Nonprofit Explorer API](https://projects.propublica.org/nonprofits/api).
 
-**Hints**:
 
-- Use the `jsonlite` package.
-- Set the `q` parameter to `policy`; set the `sort_order` parameter to `desc`; and set the `order` parameter to `revenue`.
+
+
+
+
+
+
 
