@@ -1,5 +1,5 @@
 ---
-title: "Lecture 13: Interactivity"
+title: "Lecture 13: A brief introduction to Python"
 subtitle: "Intro to Data Science for Public Policy, Spring 2016"
 author: "by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public Policy"
 output: 
@@ -8,31 +8,23 @@ output:
     toc: yes
 ---
 
-Lecture 13: Export results and interactivity
 
-Often times, users like to interact with a product as opposed to reading curated results. Enter interactivity -- a well-proven mode of displaying results.
+The concepts that we have learned during this course are, for the most part,
+independent of `R`.  
 
-##Overview
-###Three examples of interactive data science
-```{r}
-#
-```
+The hardest part of learning a new programming language for data science is
+getting your environment set up. We have chosen [Jupyter](http://jupyter.org/)
+as the environment, since it is quick to set up and amazingly useful in data-
+driven research and reports.
 
-##Shiny
-####An Intro to R Shiny
-[text goes here]
-```{r}
-#
-```
+[Review the relative merits of Python and R for data science.](https://www.datacamp.com/community/tutorials/r-or-python-for-data-analysis)
 
-####Building a simple interactive tool
-[text goes here]
-```{r}
-#
-```
+### Try it out
 
-####Example application
-[text goes here]
-```{r}
-#
-```
+### Local installation
+
+
+### Create a notebook.
+
+
+

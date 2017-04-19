@@ -32,7 +32,7 @@
                 FROM us')
 
 #Basic select: 3 fields but first 10 records
-  out <- sqldf('SELECT names, dates_of_birth as dob, "nationalities" as nat 
+  out <- sqldf('SELECT names, dates_of_birth as dob, nationalities as nat 
                FROM us
                limit 10')
 
@@ -53,6 +53,8 @@
 #Get unique people in US file after turning person name into lower case
   out <- sqldf('SELECT DISTINCT LOWER(person)
                FROM us')
+  #command in R
+  out2 <- unique(tolower(us$person))
   
 #####################
 #STRING MANIPULATION#
@@ -63,6 +65,15 @@
          FROM uk
          limit 3')
   
+  #Concatenate example
+  sqldf('SELECT "Name.6", "Name.1" 
+         FROM uk
+        LIMIT 3')
+  
+  sqldf('SELECT ("Name.6" || "Name.1" ) as name
+         FROM uk
+         LIMIT 3')
+  
   #Concatenate to create full name 
   out <- sqldf('SELECT Nationality, ("Name.6" ||", " || "Name.1" ||" "|| "Name.2"  ||" "|| "Name.3"  ||" "|| "Name.4"  ||" "|| "Name.5") as name
          FROM uk')
@@ -72,7 +83,7 @@
                FROM uk')
 
   #Create cleaned up UK file
-  uk2 <- sqldf('SELECT Nationality, DOB, LOWER("Name.6" ||", " || "Name.1" ||" "|| "Name.2"  ||" "|| "Name.3"  ||" "|| "Name.4"  ||" "|| "Name.5") as names
+  uk2 <- sqldf('SELECT Nationality, DOB, LOWER("Name.6" || ", " || "Name.1" ||" "|| "Name.2"  ||" "|| "Name.3"  ||" "|| "Name.4"  ||" "|| "Name.5") as names
                FROM uk') 
   
 ###########
@@ -80,14 +91,17 @@
 ###########
 #Group by is the equivalent to aggregate()
     
-  #Unique list of Block and Lot
+    
+  #Unique list of person
+    unique(us$person)
     out <- sqldf('SELECT person
                  FROM us
-                 GROUP BY  person')
+                 GROUP BY person')
     out
     
-  
   #Count number of records per person
+    agg <- aggregate(us$person, by = list(person = us$person), length)
+    
     us.entities <- sqldf('SELECT person, COUNT(*) as count
                  FROM us
                  GROUP BY  person')
@@ -189,5 +203,8 @@
     us.blank <- sqldf('SELECT count(*) count
                     FROM us
                       WHERE nationalities == ""')
-    barplot(as.matrix(dat))
+    
+    dat <- data.frame(UK = c(uk.blank[1,1], nrow(uk)-uk.blank[1,1]),
+                      US = c(us.blank[1,1], nrow(us)- us.blank[1,1]))
+    barplot(as.matrix(dat), main = "Missing nationality data", col = c("pink","lightblue"))
     
