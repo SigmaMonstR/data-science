@@ -11,3 +11,7 @@ answers.R
 */answers.R
 *.log
 */*.log
+*/answers.mdown
+answers.mdown
+*/*.ipynb_checkpoints/*
+*.ipynb_checkpoints/*
