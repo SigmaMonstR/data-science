@@ -11,5 +11,7 @@
   start <- proc.time()[3]
   
   #Your code goes in between
+  mat <- as.data.frame(do.call("rbind", strsplit(combo, "\\|")))
+  out <- cbind(model.matrix(~ 0 + V1, mat), model.matrix(~ 0 + V2, mat),model.matrix(~ 0 + V3, mat))
   
   proc.time()[3] - start

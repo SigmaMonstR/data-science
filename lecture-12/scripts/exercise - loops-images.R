@@ -21,7 +21,7 @@ nasaGIBS <- function(inputs){
                 "width=",inputs$width,"&height=", round(inputs$width * abs(inputs$upper - inputs$bottom)/ abs(inputs$left - inputs$right) ))
   temp <- tempfile()
   download.file(url,  temp, mode = "wb")
-  return(temp)
+  return(readJPEG(temp))
 }
 
 #How to use Example
@@ -30,7 +30,7 @@ nasaGIBS <- function(inputs){
                 bottom = 31.625676874986674,
                 right = -72.47521284541976,
                 upper = 40.133489374986674,
-                width = 5000)
+                width = 1000)
   example_out <- nasaGIBS(inputs)
   trans <- t(as.vector(example_out))
   
@@ -46,13 +46,40 @@ nasaGIBS <- function(inputs){
   example_list <- paste0(2017,sprintf("%03d", seq(1,70,7)))
   
 
-#LAPPLY 
- 
-
-
-#FORLOOP
-
+#LAPPLY -- 
+  start <- proc.time()[3]
+  test <- lapply(example_list, function(x){
+    inputs = list(timeindex = x,
+                  left = -83.81310347041976,
+                  bottom = 31.625676874986674,
+                  right = -72.47521284541976,
+                  upper = 40.133489374986674,
+                  width = 1000)
+    example_out <- nasaGIBS(inputs)
+    trans <- t(as.vector(example_out))
+    return(trans)
+  })
+  test2 <- do.call("rbind", test)
+  proc.time()[3] - start
 
 
 #FOREACH
+  library(foreach)
+  library(doParallel)
   
+  cl <- makeCluster(2)
+  registerDoParallel(cl)
+  
+  start <- proc.time()[3]
+  test <- foreach( x = example_list, .combine = rbind) %dopar% {
+    inputs <- list(timeindex = x,
+                  left = -83.81310347041976,
+                  bottom = 31.625676874986674,
+                  right = -72.47521284541976,
+                  upper = 40.133489374986674,
+                  width = 1000)
+    example_out <- nasaGIBS(inputs)
+    trans <- t(as.vector(example_out))
+    return(trans)
+  }
+  proc.time()[3] - start

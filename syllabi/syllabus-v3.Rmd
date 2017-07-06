@@ -3,12 +3,10 @@ title: "PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017"
 subtitle: Jeff Chen ([jc2817@georgetown.edu](mailto:jc2817@georgetown.edu)) and Dan
   Hammer ([dan.hammer@georgetown.edu](mailto:dan.hammer@georgetown.edu))
 output:
-  html_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
+  html_document: default
 ---
-
-Updated: February 27, 2017
 
 #### Course Description
 
@@ -203,31 +201,32 @@ No, this is not an independent study session. Unsupervised learning techniques s
 - Multivariate clustering application: Customer segmentation using Census American Community Survey
 
 *Homework Assignment*
-- Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
 
-#### Section 3: Data enhancement and visualization
+- Lec 9: Write README for class project and provide any other indication of progress on project (e.g. preliminary models, prototype libraries, etc.). Due Lec 10.
+
+#### Section 3: BEYOND MODELING
 
 Beyond the data preparation and modeling, the ‘presentation layer’ is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
 
-##### Lecture 10: Data storytelling through graphical representation
+##### Lecture 10: Database querying (SQL) and Websites (HTML/CSS)
 
-Often times, the model is not enough to communicate the value of the data analysis. A well-designed visualization can illustrate patterns and allow target audiences to establish a connection with the analytical effort at hand. 
+Knowing how to develop models is not enough. Often times there is a need to extract data from databases as well as develop a web-based presentation to demonstrate results. This lesson focuses on the beginning and end of the data analytics process: the data extraction process typically relies on Structured Querying Language (SQL) to make requests from databases and the results of statistical models can be presented in websites using HyperText Markup Language (HTML) and styled using Cascading Style Sheets (CSS)
 
 *Lecture objectives*
 
-1. Three examples of the presentation layer
-2. Static visualizations: ggplot2
-3. Interactive visualizations: dygraphs, plotly, networkd3, threejs
+1. Understand how to write SQL queries
+2. Clean and join two or more datasets using SQL
+3. Understand the underlying architecture of websites and how to build a static webpage
 
 *Example application*
 
-- Phone gyroscopic data: time series
-- Developing a network map of global trade flows 
+- Entity resolution for individuals and organizations monitored by security agencies
+- Building a basic website
 
 
-##### Lecture 11: Web service APIs and spatial data
+##### Lecture 11: Spatial Data and Web Services
 
-There are many cases where you will rely on data or services that aren’t stored or built on your local machine, but rather are exposed as web service application programming interfaces (APIs).  These are the components of modern software development, and we will teach how to find and utilize these services from within the R programming environment.  We use this lecture as an opportunity to introduce spatial data within R by interacting with an API for geographic data.
+The objective of this section is to introduce spatial analysis and web service APIs in R. The auxiliary objectives include learning basic web mapping through Carto and practicing some classification techniques. We will focus on two applications – farmers markets and wind turbines in the United States.
 
 *Lecture objectives*
 
@@ -243,37 +242,26 @@ There are many cases where you will rely on data or services that aren’t store
 - Extracting elevation data from the Google Elevation API
 - Identifying the characteristics of farmers’ markets in the Southwest United States.
 
-##### Lecture 12:  Spatial Data and Maps
+##### Lecture 12:  Context and Efficiency
 
-The state of data is rapidly expanding in two principal directions: transactional-level and spatially. Maps are the principal mode of representing spatial data, which relies upon different types of GIS formats (e.g. shapefiles, raster, GeoJSON) and presentation medium. This lecture dives into spatial considerations in data science.
-
-*Lecture objectives*
-
-1. 	Three examples of spatial data
-2.	A framework for approaching GIS
-3. 	Preliminaries of GIS data, File types (shp, .nc, .tif, .json), Projections, Feature type (point, line, polygons, grids), Visualizations (choropleth, dot density, proportional)
-4.	Mapping choropleth maps using polygon shapefiles
-5.	Geoprocessing of points to polygon
-6.	Displaying multiple layers
-
-*Example application*	
-
-- Chicago crime data
-
-
-##### Lecture 13:  Export results and interactivity
-
-Often times, users like to interact with a product as opposed to reading curated results. Enter interactivity -- a well-proven mode of displaying results.
+This class provides an overview to two unrelated topics. To start, an overview to cloud computing, specifically opportunities to leverage parallel processing to make speed up computation. Particular emphasis is placed on parallelism and how it can be effectively applied. To provide context of the role of the data scientist in organizations, we will explore the other actors who contribute to data teams and how those teams are organized.
 
 *Lecture objectives*
 
-1. 	Three examples of interactive data science
-2.	An Intro to R Shiny 
-3. 	Building a simple interactive tool
+1. 	Understand the ecosystem of actors (e.g. data scientists, engineers, designers, data base administrators, etc.) who work in the data and technology space.
+2.  Set up and task an Amazon Web Services machine for parallel processing tasks.
 
-*Example application*
 
-- TBD
+##### Lecture 13:  A Brief Introduction to Python
+
+Data science, statistics, and machine learning are agnostic of languages. Each programming language offers different advantages. R is well-designed for modeling and research, but not web application development. Python is well-suited for production-grade web applications. This lesson extends basic statistical computing into the realm of Python.
+
+*Lecture objectives*
+
+1. 	Basic syntax
+2.  Installation of Python (Anacondas)
+3.  Create a iPython Notebook
+
 				
 <hr>
 

@@ -4,7 +4,7 @@
 
 speed <- data.frame()
 
-#For loop
+#lapply
   start <- proc.time()[3]
   out <- lapply(1:1000, function(x){ data.frame(id = x, res = runif(x))})
   out <- do.call("rbind", out)
@@ -26,16 +26,18 @@ speed <- data.frame()
   library(doParallel)
   library(foreach)
   
+  detectCores()
   cl <- makeCluster(2)
   registerDoParallel(cl)
   
   start <- proc.time()[3]
   
-  out <- foreach( 1:1000, .combine = rbind) %dopar% {
+  out <- foreach(x = 1:1000, .combine = rbind) %dopar% {
     temp <- data.frame(id = x, res = runif(x))
     return(temp)
   }
   timed <- proc.time()[3] - start
   speed <- rbind(speed, data.frame(type = "for", time = timed))
-
+  stopCluster(cl)
+  
 #What did we learn?
