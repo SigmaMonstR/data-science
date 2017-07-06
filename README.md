@@ -198,38 +198,28 @@ No, this is not an independent study session. Unsupervised learning techniques s
 - Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
 
 
-#### Section 3: Data enhancement and visualization
+#### Section 3: Beyond Models
 
 Beyond the data preparation and modeling, the ‘presentation layer’ is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
 
-##### Lecture 10: Data storytelling through graphical representation
+##### Lecture 10: Querying (SQL) and Websites (HTML/CSS)
 
-Often times, the model is not enough to communicate the value of the data analysis. A well-designed visualization can illustrate patterns and allow target audiences to establish a connection with the analytical effort at hand. 
+Knowing how to develop models is not enough. Often times there is a need to extract data from databases as well as develop a web-based presentation to demonstrate results. This lesson focuses on the beginning and end of the data analytics process: the data extraction process typically relies on Structured Querying Language (SQL) to make requests from databases and the results of statistical models can be presented in websites using HyperText Markup Language (HTML) and styled using Cascading Style Sheets (CSS).
 
 *Lecture objectives*
 
-1. Three examples of the presentation layer
-2. Static visualizations: ggplot2
-3. Interactive visualizations: dygraphs, plotly, networkd3, threejs
+1. Understand how to write SQL queries
+2. Clean and join two or more datasets using SQL
+3. Understand the underlying architecture of websites and how to build a static webpage
 
 *Example application*
 
-- Phone gyroscopic data: time series
-- Developing a network map of global trade flows 
-
+- Entity resolution for individuals and organizations monitored by security agencies
+- Building a basic website
 
 ##### Lecture 11: Web service APIs and spatial data
 
-There are many cases where you will rely on data or services that aren’t stored or built on your local machine, but rather are exposed as web service application programming interfaces (APIs).  These are the components of modern software development, and we will teach how to find and utilize these services from within the R programming environment.  We use this lecture as an opportunity to introduce spatial data within R by interacting with an API for geographic data.
-
-*Lecture objectives*
-
-1. 	Three examples of APIs and why they matter
-2.	Interacting with web service APIs from R
-3.	Writing a client-side function to simplify the remote interaction
-4.	Batch request for elevation data from the Google Elevation API
-5.	Viewing the spatial data in R
-
+The objective of this section is to introduce spatial analysis and web service APIs in R. The auxiliary objectives include learning basic web mapping through Carto and practicing some classification techniques. We will focus on two applications – farmers markets and wind turbines in the United States.
 
 *Example application*
 
@@ -237,37 +227,13 @@ There are many cases where you will rely on data or services that aren’t store
 - Identifying the characteristics of farmers’ markets in the Southwest United States.
 
 
-##### Lecture 12:  Spatial Data and Maps
+##### Lecture 12:  Context and Efficiency
 
-The state of data is rapidly expanding in two principal directions: transactional-level and spatially. Maps are the principal mode of representing spatial data, which relies upon different types of GIS formats (e.g. shapefiles, raster, GeoJSON) and presentation medium. This lecture dives into spatial considerations in data science.
+This class provides an overview to two unrelated topics. To start, an overview to cloud computing, specifically opportunities to leverage parallel processing to make speed up computation. Particular emphasis is placed on parallelism and how it can be effectively applied. To provide context of the role of the data scientist in organizations, we will explore the other actors who contribute to data teams and how those teams are organized.
 
-*Lecture objectives*
+##### Lecture 13:  A Brief Introduction to Python
 
-1. 	Three examples of spatial data
-2.	A framework for approaching GIS
-3. 	Preliminaries of GIS data, File types (shp, .nc, .tif, .json), Projections, Feature type (point, line, polygons, grids), Visualizations (choropleth, dot density, proportional)
-4.	Mapping choropleth maps using polygon shapefiles
-5.	Geoprocessing of points to polygon
-6.	Displaying multiple layers
-
-*Example application*	
-
-- Chicago crime data
-
-
-##### Lecture 13:  Export results and interactivity
-
-Often times, users like to interact with a product as opposed to reading curated results. Enter interactivity -- a well-proven mode of displaying results.
-
-*Lecture objectives*
-
-1. 	Three examples of interactive data science
-2.	An Intro to R Shiny 
-3. 	Building a simple interactive tool
-
-*Example application*
-
-- TBD
+Data science, statistics, and machine learning are agnostic of languages. Each programming language offers different advantages. R is well-designed for modeling and research, but not web application development. Python is well-suited for production-grade web applications. This lesson extends basic statistical computing into the realm of Python.
 				
 <hr>
 
