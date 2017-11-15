@@ -1,4 +1,4 @@
-# Course Description
+# PPOL 670 - Introduction to Data Science for Public Policy, Spring 2018
 
 The Introduction to Data Science for Public Policy is a survey course of fundamental concepts and techniques used in data science.  The course is focused on evaluating and analyzing public policy, telling stories with data to make compelling and fact-based arguments.  
 
