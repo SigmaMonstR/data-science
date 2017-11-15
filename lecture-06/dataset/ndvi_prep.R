@@ -1,23 +1,43 @@
+####################################
+##      NASA MODIS NDVI DATA     ### 
+##          Preparation          ###
+####################################
+
+# Notes: 
+# Format data from NASA -- 0.25 degree data for the month of February 2016
+# Link: https://neo.sci.gsfc.nasa.gov/view.php?datasetId=MOD13A2_M_NDVI
+
 #NDVI Processing: Cleaning the NDVI data
-#https://neo.sci.gsfc.nasa.gov/view.php?datasetId=MOD13A2_M_NDVI
-  setwd("/Users/jeff/Documents/Github/data-science/lecture-05/dataset")
+# Feb 2016: https://neo.sci.gsfc.nasa.gov/servlet/RenderData?si=1706147&cs=rgb&format=CSV&width=1440&height=720
 
-  df <- read.csv("MOD13A2_M_NDVI_2016-06-01_rgb_1440x720.SS.CSV")
+#Libraries
+  library(doParallel)
+  library(foreach)
 
-  master <- data.frame()
-  for(k in 2:ncol(df)){
+#Set directory
+  dir <- "/Users/jeff/Google Drive/Text Book/base-data/nasa-modis"
+  setwd(dir)
+
+#Download data -- comes as matrix -- 720 x 1441
+#Convert from wide to long
+  df <- read.csv("https://neo.sci.gsfc.nasa.gov/servlet/RenderData?si=1706147&cs=rgb&format=SS.CSV&width=1440&height=720")
+  dim(df)
+  
+  cl <- makeCluster(3)
+  registerDoParallel(cl)
+  ndvi <- foreach(k = 2:ncol(df), .combine = rbind) %dopar% {
     temp <- df[,c(1,k)]
     temp$lon <- colnames(temp)[2]
     colnames(temp) <- c("lat","ndvi","lon")
     temp <- temp[,c(1,3,2)]
-    
-    master <- rbind(master, temp)
-    print(k)
+    return(temp)
   }
 
+#Clean headers
+  ndvi$lon <- gsub("X\\.","-",ndvi$lon)
+  ndvi$lon <- gsub("X","",ndvi$lon)
+  ndvi$lon <- as.numeric(ndvi$lon)
   
-  master$lon <- gsub("X\\.","-",master$lon)
-  master$lon <- gsub("X","",master$lon)
-  master$lon <- as.numeric(master$lon)
-  
-  write.csv(master,"ndvi_sample_201606.csv",row.names = FALSE)
+#Saveout
+  write.csv(ndvi,"ready/ndvi_sample_201606.csv",row.names = FALSE)
+  save(ndvi, file = "ready/ndvi_sample_201606.Rda")

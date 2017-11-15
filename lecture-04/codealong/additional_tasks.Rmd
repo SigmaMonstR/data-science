@@ -1,0 +1,147 @@
+---
+title: "Additional Exercises"
+author: by Jeff Chen, Georgetown University McCourt School of Public
+  Policy
+subtitle: Intro to Data Science for Public Policy, Spring 2018
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: journal
+    toc: yes
+---
+
+##Additional Exercises! + Answers below
+
+1. Write a function "unique2" to calculate the number of unique values in the following series. The series below is normally distributed ( $n = 100$ with $\mu = 50$ and $\sigma = 10$), rounded to the nearest integer.
+```{r}
+  set.seed(123)
+  x <- round(rnorm(100,50,10))
+```
+
+
+2. Imputation of missing values is often times involves replacing unknown values with the mean, median, or mode.  Mean can be calculated using `mean()`, median using `percentile()`, and mode using a combination of `table()`, `sort()`, `names()`. For categorical data, the mode is most appropriate. In the vectors below, replace all `NA` values with the most common string value in `y1` and the mean for the `y2`.
+```{r}
+  y1 <- c("a","a",NA,"c","d","e", NA,"f", NA,"g","a", NA, "a","c","z","g")
+  y2 <- c(1, 10, NA, 5, 6, 1, NA, NA, 9, NA, 15, 3, NA, NA, 3, 9, 2)
+```
+
+
+3. Convert your imputation code into a function named `plug.it()` that accepts a vector of any kind. The logic of the function should be as follows:
+
+- function(vec)
+  - if class of vec is numeric, then impute with mean
+  - if class of vec is character, factor, or logical, then impute with mode
+  - return imputed set
+  
+Try out your function below.
+
+```{r}
+  y3 <- c("z","z",NA,"c","d","e", NA,"f", NA,"s","z", NA, "a","c","z","g")
+  y4 <- c(2, 11, NA, 3, NA, 5, 6, 1, NA, NA, 9, NA, 16, 3, NA, NA, 2, 4, 3)
+```
+
+4. Write a loop to impute each column of the following data frame using `plug.it()`. Since your function is flexible, all you'd need to do is loop column 1 through 3.
+```{r}
+  df <- data.frame( x1 = c(2, 11, NA, 3, NA, 5, 6, 1, NA, NA, 9, NA, 16, 3, NA, NA, 2, 4, 3),
+                    x2 = c(20, NA, NA, 30, NA, 15, 6, 1, 10, 11, 9, 2, 16, 3, 400, 500, 2, 4, 3),
+                    x3 = c(228, NA, NA, 39, NA, 2, 6, 1, 2, 5, 3, 2, NA, 3, NA, NA, 5, 2, 34))
+```
+
+
+##Answers!
+1. Answer. Steps:
+- create a placeholder `p`
+- loop through all values of vector `vec`
+  - if index `i` is not in placeholder `p`, then append index `i` to end of `p`
+- when done, return `p`
+```{r}
+  unique2 <- function(vec){
+    #create placeholder
+      p <- c()
+      
+    #loop
+      for(i in vec){
+        if(!(i %in% p)){
+          p <- c(p, i)
+        }
+      }
+    
+    #return
+      return(p)
+  }
+
+#test it
+  set.seed(123)
+  x <- round(rnorm(100,50,10))
+  a <- unique2(x)
+```
+
+2. Answer! 
+- Use `table()` to return a list of unique values with their frequencies
+- Sort the table descending, extract the first value (letter)
+- Replace all blanks with the letter
+```{r}
+#String 
+  y1 <- c("a","a",NA,"c","d","e", NA,"f", NA,"g","a", NA, "a","c","z","g")
+  tab <- table(y1)
+  letter <- names(sort(tab,decreasing=TRUE))[1]
+  y1[is.na(y1)] <- letter
+  print(y1)
+
+#Numeric 
+  y2 <- c(1, 10, NA, 5, 6, 1, NA, NA, 9, NA, 15, 3, NA, NA, 3, 9, 2)
+  mu <- mean(y2, na.rm = T)
+  y2[is.na(y2)] <- mu
+  print(y2)
+
+```
+
+
+3. Answer! 
+
+```{r}
+#Function
+  plug.it <- function(vec){
+    
+    if(class(vec)=="numeric"){
+      #numeric!
+        mu <- mean(vec, na.rm = T)
+        vec[is.na(vec)] <- mu
+        
+    } else if(class(vec) == "character" | class(vec) == "factor"){
+      
+      #string!
+        tab <- table(vec)
+        letter <- names(sort(tab,decreasing=TRUE))[1]
+        vec[is.na(vec)] <- letter
+    }
+    return(vec)
+  }
+
+#Test
+  y3 <- c("z","z",NA,"c","d","e", NA,"f", NA,"s","z", NA, "a","c","z","g")
+  y4 <- c(2, 11, NA, 3, NA, 5, 6, 1, NA, NA, 9, NA, 16, 3, NA, NA, 2, 4, 3)
+  
+  plug.it(y3)
+  plug.it(y4)
+
+```
+
+
+4. Answer! 
+
+```{r}
+  df <- data.frame( x1 = c(2, 11, NA, 3, NA, 5, 6, 1, NA, NA, 9, NA, 16, 3, NA, NA, 2, 4, 3),
+                    x2 = c("a","a", NA,"c","d","e", NA,"f", NA,"g","a", NA, "a","c","z","g", "x", "g", "z"),
+                    x3 = c(20, NA, NA, 30, NA, 15, 6, 1, 10, 11, 9, 2, 16, 3, 400, 500, 2, 4, 3),
+                    x4 = c(228, NA, NA, 39, NA, 2, 6, 1, 2, 5, 3, 2, NA, 3, NA, NA, 5, 2, 34))
+  #Loop it
+  for(i in 1:ncol(df)){
+    df[,i] <- plug.it(df[,i])
+  }
+  
+  #view
+  print(df)
+
+```

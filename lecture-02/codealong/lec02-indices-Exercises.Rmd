@@ -1,0 +1,44 @@
+---
+title: 'Lecture 2: Data Frames Warm Up'
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+#The Scenario
+
+Organizations always need some time to warm up to data. Often times, simple statistical reports are a way to build trust. Given the following data frame containing financials from organizational operations, write the appropriate expression to extract the right information. 
+
+Note that `revenue` is total revenue in millions, `rev_target` is the target revenue for a given month, `elec_bill` is the electricity bill in thousands, and `social_media` is the number of likes. All data are monthly numerical values.
+```{r, echo=FALSE}
+set.seed(123)
+df <- data.frame(month = seq(1,12,1),
+                   quarter = c(rep(1,3),rep(2,3),rep(3,3),rep(4,3)),
+                   revenue= round(sin(1:12)*100 +200 + rnorm(12,10,50)),
+                   rev_target = round(sin(1:12)*100)+200,
+                   elec_bill = round(sin((1:12)/5)*100 + rnorm(12,100,20)),
+                   social_media = round(runif(12)*300)) 
+df
+```
+
+#The Questions
+Assuming the data is in data frame format, write commands to answer the following questions.
+
+###Example:
+How many rows of data do you have?
+```{r}
+  nrow(df)
+```
+
+###Get into it
+
+1. What was the total revenue for the year?
+2. What was the most number of tweets?
+3. How much was the total elec bill for Q2 and Q3?
+4. What were the last 5 monthly electricity bill amounts and revenues?
+5. In which month did we hit our lowest number of likes?
+6. In which quarter did we hit our highest revenue?
+7. In how many months did we hit our revenue targets?
+8. In which months did we hit our target?
+9. In months where we missed the target, what was the total lost revenue?
+10. Provide the electric bills for the first month of each quarter.
