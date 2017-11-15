@@ -1,256 +1,268 @@
+# Course Description
 
-# PPOL 670 - Introduction to Data Science for Public Policy, Spring 2017 
+The Introduction to Data Science for Public Policy is a survey course of fundamental concepts and techniques used in data science.  The course is focused on evaluating and analyzing public policy, telling stories with data to make compelling and fact-based arguments.  
 
-
-#### Course Description
-
-The Introduction to Data Science for Public Policy is a survey course of the fundamentals of data science.  The course is focused on evaluating and analyzing public policy, telling stories with data to make compelling and fact-based arguments.  
-
-The objective of the course is to equip students with the skills to tell stories with data and drive action.  Public policy is part of a large and sprawling social system.  Parsing causality from a system of variables where everything is related requires a scalpel.  This refined approach can be assembled from pre-written code and routines; but it still requires skilled assembly.  We will teach an approach that leverages analytical routines that have already been written.  The value of this course is in the mortar, not the bricks.  
+The objective of the course is to equip students with the skills to allow data to take an active role in policy and strategy.  Public policy is part of a large and sprawling social system.  Parsing causality from a system of variables where everything is related requires a scalpel.  This refined approach can be assembled from pre-written code and routines; but it still requires skilled assembly.  We will teach an approach that leverages analytical routines that have already been written.  The value of this course is in the mortar, not the bricks.  
 
 
-#### Instructors
+# Instructor
 
-&nbsp;&nbsp;**Jeff Chen** is the Deputy Chief Data Officer of the U.S. Department of Commerce. He has led wide ranging initiatives across 30+ fields, from emergency services to international public health to legal affairs to trade economy. Jeff has previously served as the Director of Analytics at the NYC Fire Department leading development of fire prediction algorithms, senior data roles in the NYC Mayor’s Office during the Bloomberg Administration focusing on city operations and health + human services, and an advisor to governments, corporations, and non-profits on applied data for strategy and operations.  
+__Jeff Chen__ is a statistician and data scientist who currently serves as the Chief Innovation Officer of the US Bureau of Economic Analysis (BEA) -- the US agency responsible for the Gross Domestic Product.  He has experience launching and leading data initiatives in over 35 domains, working with diverse stakeholders such as firefighters, climatologists, technologists, among others to introduce data science and new technologies to advance their missions.  Prior to BEA, he has held various technical leadership positions, most recently serving as the Deputy Chief Data Officer and Chief Data Scientist at the US Department of Commerce; a White House Presidential Innovation Fellow with NASA and the White House Office of Science and Technology Policy focused on data science for environmental issues; the first Director of Analytics at the NYC Fire Department where he engineered pioneering algorithms for fire prediction; and was among the first data scientists at the NYC Mayor's Office under then-Mayor Mike Bloomberg. Jeff started his career as an econometrician at an international engineering consultancy working on large scale public-private partnerships for infrastructure. On the side, he serves as an advisor to a startup working on machine learning for operations research. Jeff holds a bachelor's in economics from Tufts University and a master's in applied statistics from Columbia University.
 
-&nbsp;&nbsp;**Dan Hammer** is currently a Senior Policy Advisor at the White House, where he works with the U.S. Chief Technology Officer and U.S. Chief Data Scientist on the public finance of data infrastructure.  He was previously the Chief Data Scientist at two environmental non-profits.  He cofounded Global Forest Watch, a web application to monitor forests from satellite imagery.  He is a Fellow at the Berkeley Institute for Data Science and a PhD candidate in environmental economics at UC Berkeley.  
+# Time and location
 
-&nbsp;&nbsp;Prior to their current positions, Jeff and Dan worked together as White House Presidential Innovation Fellows at NASA.  
+Classes will be held on Mondays from 6:30pm to 9:00pm in [TBD]. 
 
-#### Time and location
+# Website
 
-Classes will be held on Mondays from 6:30pm to 9:00pm in Reiss 283. 
+Students are expected to sign up for a Github account (https://github.com). A e-book and accompanying notes and materials has been written for this class and will be made available via a Github web page.
 
-- January: 11 (Wednesday), 23 (Monday), 30
-- February: 6, 13, 27
-- March 13, 20, 27
-- April 3, 10, 24
-- May 1
+# Workload and assignments
 
-#### Website
+- __Assignments.__ Students will be evaluated on the basis of six problem sets (60%) and one final project (40%). Late problem sets will be penalized by 10-percentage points per day.  To qualify for passing the class, students will need to make submissions for all six problem sets and final project for the period when points still can be earned. All problem sets will be submitted electronically. 
 
-Students are expected to sign up for a Github account (https://github.com). Readings and materials will be available from the class Github repository (https://github.com/GeorgetownMcCourt/data-science).
+- __Final Projects.__ The final project assignment details will be made available in late March and the final product will be due on _Monday May [TBD]_. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
 
-#### Workload and assignments
+- __Collaboration__ is the greatest source of creativity and innovation. Thus, collaboration should not result in verbatim submissions (e.g. no copy cats). As everyone writes code following their own unique logic, the chance of identical submissions is unlikely and easily detectable. Non-unique code will be penalized.
 
-Students will be evaluated on the basis of five problem sets (60%) and one final project (40%). Late
-problem sets will be penalized by 10% per day late. All problem sets will be submitted electronically. The final project will be due on Monday May 8th. As this class is quite hands-on, it is expected that students bring their computers to class to partake in computational activities.
+- __Do it the hard way__. Most of the programming in this class will be done in the R statistical programming languages. There are other languages in the data science realm such as Python and Julia, all of which rely on libraries of functions. In this class, where possible, build from scratch rather than an overly convenient library. This will allow you to become more creative down the line (e.g. difference between building lego sculptures from a factory blue print versus conceiving it on your own).
 
 
-### Course Outline
+# Course Outline
 
-Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.
+Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.  The section outlines are subject to change up to one week before the lecture.  Please continue to review the syllabus throughout the course.
 
-#### Section 1: Fundamentals
+## Section 1: Fundamentals
 Data science is about designing and building data products that derive insight. This first section will focus on developing fundamental skills required to build effective products.
 
-##### Lecture 1: Preliminaries
+## Lecture 1: Preliminaries 
 
-The objective of the first lecture is to overcome the coefficient of static friction in using R for data science.  Students will learn to execute simple R scripts to read, write, and extract data elements.
+Where does data science fit into this world? This lecture focuses on framing and presenting data science as an active approach to societal problems using quantitative methods. This requires not only an understand of the context, but the value of combining statistical theory with advanced programming to accomplish extraordinary tasks. 
 
-*Lecture objectives*
+__Topics__:
 
-1. Data science: What is it? What is the lay of the land?
-2. Languages of data science
-3. Basics of R progrmming
-4. Read data from CSV and JSON
-5. Data types and classes, including matrix, data.frame, list, and vectors
-6. Extracting rows, columns, and specific elements from a data frame
-7. Basic operations (e.g., sum, mean) on rows; useful as consistency checks.
-8. Write data to CSV and JSON
-9. Getting started with Github
+- Data science: What is it? What is the lay of the land?
+- A framework: Benchmarks, Explanations, and Predictions
+- Languages of data science
+- Intro to programming and the R statistical programming language 
+- Data types and classes, including matrix, data.frame, list, and vectors
+- Extracting rows, columns, and specific elements from a data frame
+- Basic operations (e.g., sum, mean) on rows.
 
-*Example application*
+__Example application__
 
-- Graphing photovoltaic energy data from the National Institute of Standard and Technology's Net Zero Energy Residential Test Facility
+- Graphing photo-voltaic energy data from the National Institute of Standard and Technology's Net Zero Energy Residential Test Facility
 
-##### Lecture 2: Data manipulation
+__Warm Up Assignment (Scored but does not count)__
+
+- Homework #0: Exercises to become familiar with `R`
+- Read Chapters 1 and 2 
+
+
+## Lecture 2: Manipulation / Wrangling / Feature Enginerring
 
 The objective of this lecture is to present the most important and fundamental elements of data manipulation.  These core operations include sort, merge, reshape, and collapse.  We will also present loops through multiple rows or columns, and other alternatives to operate on partitions of data frames.
 
-*Lecture objectives*
+__Topics__
 
-1. Sound data manipulation as the basis of good data science
-2. Sort data based on column values
-3. Subset data frames
-4. Reshape data table, wide <--> long
-5. Merge data frames
-6. Collapse data frames
-7. Text processing: capitalization, substring, regex
-8. Looping through basic operations (bonus: same idea without loops)
+- Import and export of data
+- Sort data based on column values
+- Subset vectors, matrices and data frames
+- Reshape data between wide and long form
+- Collapse data into aggregates
+- Merge two or more data sets
+- Text processing and feature engineering using regular expressions 
 
+__Example application(s)__
 
-##### Lecture 3: Exploratory Data Analysis (EDA)
+- Parsing and conducting basic text analysis using State of the Union Speeches (2009 to 2016)
+- Comparing and joining EU and UN sanction lists
+
+__Homework #1__
+
+- Convert individual police incidents into time series projections
+
+## Lecture 3: Control Structures, Functions and Etiquette
+Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
+
+__Topics__
+
+- Control structures: `for` loops, `while` loops, `if`/`else` statements as well as R-specific methods such as `apply`/`lapply`/`sapply`.
+- Suitable practices and etiquette such as the [Google Code Style Guide](https://google.github.io/styleguide/Rguide.xml).
+- Writing functions that make sense and are reliable
+
+__Homework #2__
+
+- Writing functions
+- Batch Extraction of Census Housing Permits data
+
+## Lecture 4: Exploratory Data Analysis (EDA)
 The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
 
-*Lecture objectives*
+__Topics__
 
-1. Understanding data structures
+1. Understanding data structures and idiosyncrasies
 2. Statistical measures
-3. Graph and visual analytics 
+3. Graph and visual analytics -- intro to `ggplot2` library
 
-*Example application*
+__Example application__
 
 - Finding health coverage patterns using the US Census American Community Survey
 - Conducting analysis of missing values analysis  of weather anomalies from 1880 to Present using the National Oceanographic and Atmospheric Administration's GHCN-M
 
+__Homework #3__
 
-##### Lecture 4: Functions and Control Structures 
-Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
-
-*Lecture objectives*
-
-1. Custom functions for consistency and efficiency
-2. Control structures: Loops, if statements
-3. Suitable practices
-
-*Example applications*
-
-- Smoothing conventional gasoline time series data from the Energy Information Administration (EIA)
-
-*Homework Assignment*
-
-- TBA
+- Exploratory Data Analysis of Washington Metropolitan Area Transit Authority's train delays data
 
 
-##### Section 2: Data Analysis + Modeling
+## Section 2: Building Insight
 
-The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
-
-The use case drives the technique. In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). Machine learning and data analysis enables both uses of data and will be the focus of the next five courses.
-
-##### Lecture 5: Ordinary Least Squares, Simulation and Bias
-
-Formal statistics offers methods to calculate closed-form, analytical answers to the limits of OLS regression.  Data science offers a more immediate and arguably a more accessible solution: simulate conditions and examine the outcomes.  We begin to use the early visualizations techniques taught in a previous lecture for analysis.
-
-*Lecture objectives*
-
-1. Simulating OLS and identifying p-values
-2. For-loops versus `apply` for simulations
-3. Visualizing distributions with ggplot
-
-*Example application*	
-
-- Schooling outcomes data
+In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). In this section, we extend data manipulation to the algorithmic intelligence necessary to make sound decisions.
 
 
-##### Lecture 6: Introduction to Supervised Learning 
+## Lecture 5 + 6: Introduction to Supervised Learning and Prediction
 
-Supervised learning is the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
+Supervised learning is arguably the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
 
-*Lecture objectives*
+__Lecture objectives__
 
-1. What is supervised learning?
-2. Structure of a supervised learning project
-3. Target variables, Input variables, Objective function and evaluation measures, model experiment design, Cross validation versus train/validate/test,  Regression versus classifiers
-4. Ordinary Least Squares (OLS)
-5. K-Nearest Neighbors (kNN)
+- Effect identification versus prediction -- what's the difference?
+- What is supervised learning? 
+- Prediction as a process: bias-variance trade off, model validation (e.g. train/test, k-folds cross-validation), feature selection
+- Types of supervised learning: discrete problems and continuous problems
+- K-Nearest Neighbors (kNN) 
+- Ordinary Least Squares (OLS) 
 
-*Example application*
+__Example application__
 
 - Prediction of missing values in satellite imagery using kNN
 
-*Homework Assignment*
+__Homework #4__
 
-- Lec 6: Satellite imagery for predicting employment
+- Write functions for cross-validation
+- Build a housing sales price prediction model
 
-
-##### Lecture 7 + 8: Classification techniques 
+## Lectures 7 + 8: Classification techniques 
 
 Classification models are one of the workhorses of data science. Classifiers enables data-driven applications such as risk scoring, lawsuit outcome prediction, marketing lead generation, facial detection and computer vision, spam filtering, among other use cases.  This session will focus on the fundamentals of classification models, types of models, and daily applications.
 
-*Lecture objectives*
+__Topics__
 
-1.	Three common problems using classifiers
-2.	Structure of a classification project, Target variables, Input variables, Objective function and evaluation measures, model experiment design, Cross validation versus train/validate/test, Confusion matrix, TPR, TNR, AUC
-3.	Framing dataset
-4.	Models: statistical assumptions and mechanics, risks/strengths, implementation, non-technical explanation, Decision trees, Logistic Regression, K-Nearest Neighbors
-5.	Appropriate uses of classification techniques, Scoring, prediction and prioritization, Propensity score matching
+-	Three common problems using classifiers
+-	Structure of a classification project, Target variables, Input variables, Objective function and evaluation measures, model experiment design, Cross validation versus train/validate/test, Confusion matrix, TPR, TNR, AUC
+- K-Nearest Neighbors
+- Linear Methods: Logistic Regression / Binomial Generalized Linear Models and General Additive Models
+- Decision trees 
+- Ensemble and Bagging methods: Random Forests
+- Boosting and other methods (time permitting)
+- Appropriate uses of classification techniques, Scoring, prediction and prioritization, Propensity score matching
 
-*Example application*
+__Example application__
 
 - Healthcare insurance coverage data
 
-*Homework Assignments*
+__Homework #5 and #6__
 
 - Lec 7: Predict activity using smartphone accelerometer data (due Lec 8).
 - Lec 8: Hand out class project instructions, one page proposal of what you'll do due by Lec 9.
 
 
-##### Lecture 9: Unsupervised learning 
+## Lecture 9: Unsupervised learning 
 
-No, this is not an independent study session. Unsupervised learning techniques such as clustering and principal components analysis help to identify recognizable patterns when no labels are provided. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.
+No, this is not an independent study session. Unsupervised learning techniques such as clustering help to identify recognizable patterns when no labels (e.g. outcomes, dependent variables) are available. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.
 
-*Lecture objectives*
+__Topics__
 
-1.	Three common problems using unsupervised learning 
-2.	Structure of unsupervised learning project, Input variables, optimization methods
-3.	Framing dataset
-4.	Models: statistical assumptions and mechanics, risks/strengths, implementation, sanity checks, non-technical explanation, K-means clustering (K-means), Principal Components Analysis (PCA)/Dimensionality Reduction, Hierarchical clustering (if time permits)
-5.	Appropriate uses of k-means and PCA
+- Defining clustering and distance
+-	Structure of unsupervised learning project, Input variables, optimization methods
+- Statistical assumptions and mechanics, risks/strengths, implementation, sanity checks, non-technical explanation of a few techniques
+- K-means clustering
+- Hierarchical clustering
+- Stability testing using silhouette coefficients
 
-*Example application*
+__Example application__
 
 - Univariate clustering application: k-means
 - Multivariate clustering application: Customer segmentation using Census American Community Survey
 
-*Homework Assignment*
-- Lec 9: Write prototypical functions that will help you do your project. Due Lec 10.
+__Homework Assignment__
+
+- Applying clustering
+
+## Lectures 10: Other Methods and Topics
+
+Supervised and unsupervised learning methods open the world up to many possibilities. But there are other techniques that are important, relatively simple, and widely applied. 
+
+__Topics__
+
+- Topic modeling for textual data
+
+__Example application__
+
+- This American Life podcast transcripts
+
+# Section 3: Beyond Algorithms
+
+Beyond the data preparation and modeling, the presentation layer is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
 
 
-#### Section 3: Beyond Models
+## Lecture 11: Data products
 
-Beyond the data preparation and modeling, the ‘presentation layer’ is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
+Data science presents organizations with the opportunity to allow data to play an active, action-oriented role in daily operations. Newspapers such as the New York Times and the Washington Post are increasingly relying upon visual narratives to illustrate the point. Tech giants like Facebook and Amazon rely on recommendation engines to drive sales. Political canvassing operations, direct-to-consumer marketers, and infrastructure engineers rely on prioritization models to increase their hit rates in the field. For data science to drive value, data products must be grounded in an audience and a well-defined need.
 
-##### Lecture 10: Querying (SQL) and Websites (HTML/CSS)
+__Topics__
 
-Knowing how to develop models is not enough. Often times there is a need to extract data from databases as well as develop a web-based presentation to demonstrate results. This lesson focuses on the beginning and end of the data analytics process: the data extraction process typically relies on Structured Querying Language (SQL) to make requests from databases and the results of statistical models can be presented in websites using HyperText Markup Language (HTML) and styled using Cascading Style Sheets (CSS).
+- Visual narratives -- reports with interactive graphical elements (e.g. policy reports, data journalism, maps)
+- Recommendations -- well-packaged lists of items that users may be interested in (e.g. eCommerce shopping, search)
+- Prioritization exercises --  rank ordered lists of things that an operation should act upon (e.g. targeted marketing list, inspection lists)
 
-*Lecture objectives*
+__Example application(s)__
 
-1. Understand how to write SQL queries
-2. Clean and join two or more datasets using SQL
-3. Understand the underlying architecture of websites and how to build a static webpage
-
-*Example application*
-
-- Entity resolution for individuals and organizations monitored by security agencies
-- Building a basic website
-
-##### Lecture 11: Web service APIs and spatial data
-
-The objective of this section is to introduce spatial analysis and web service APIs in R. The auxiliary objectives include learning basic web mapping through Carto and practicing some classification techniques. We will focus on two applications – farmers markets and wind turbines in the United States.
-
-*Example application*
-
-- Extracting elevation data from the Google Elevation API
-- Identifying the characteristics of farmers’ markets in the Southwest United States.
+- Build a recommendation engine for consumer purchases
+- Process spatial data (GIS) and produce an interactive web map
 
 
-##### Lecture 12:  Context and Efficiency
+## Lecture 12: SQL and Python
+
+Data science, statistics, and machine learning are agnostic of languages. That being said, there are a host of techniques and technologies that data scientists rely upon to be effective. In the increasingly more competitive labor market, knowing more than one language is to one's advantage. In addition to R, which is more of the research data scientist's tool, Python is a pseudo-code ("p-code") language that is relied upon for build full-scale web application. To extract data from databases, Structured Querying Language is also relied upon. 
+
+__Topics__
+
+- Understand how to write SQL queries
+- Intro to Python in iPython Notebook (Jupyter)
+
+__Pre-Class Activity__
+
+- Download and install [Anaconda](https://www.anaconda.com/download/#macos) -- a pre-packaged suite of Python-based tools
+
+
+## Lecture 13:  The Bigger Picture
 
 This class provides an overview to two unrelated topics. To start, an overview to cloud computing, specifically opportunities to leverage parallel processing to make speed up computation. Particular emphasis is placed on parallelism and how it can be effectively applied. To provide context of the role of the data scientist in organizations, we will explore the other actors who contribute to data teams and how those teams are organized.
 
-##### Lecture 13:  A Brief Introduction to Python
+__Topics__
 
-Data science, statistics, and machine learning are agnostic of languages. Each programming language offers different advantages. R is well-designed for modeling and research, but not web application development. Python is well-suited for production-grade web applications. This lesson extends basic statistical computing into the realm of Python.
-				
+- Understand the ecosystem of actors (e.g. data scientists, engineers, designers, data base administrators, etc.) who work in the data and technology space.
+- Technologies and statistical concepts that are common in the field
+- The Ethics of applying data science to real-world problems
+
+	
 <hr>
 
-#### Academic Resource Center/Disability Support 
+# Academic Resource Center/Disability Support 
 If you believe you have a disability, then you should contact the Academic Resource Center ([arc@georgetown.edu](arc@georgetown.edu)) for further information. The Center is located in the Leavey Center, Suite 335 (202-687-8354). The Academic Resource Center is the campus office responsible for reviewing documentation provided by students with disabilities and for determining reasonable accommodations in accordance with the Americans with Disabilities Act (ASA) and University policies. For more information, go to [http://academicsupport.georgetown.edu/disability/](http://academicsupport.georgetown.edu/disability/).
 
 					
-#### Important Academic Policies and Academic Integrity				
+# Important Academic Policies and Academic Integrity				
 McCourt School students are expected to uphold the academic policies set forth by Georgetown University and the Graduate School of Arts and Sciences. Students should therefore familiarize themselves with all the rules, regulations, and procedures relevant to their pursuit of a Graduate School degree. The policies are located at: http://grad.georgetown.edu/academics/policies/
 
 
 					
-#### Provosts Policy Accommodating Students Religious Observances			
+# Provosts Policy Accommodating Students Religious Observances			
 
 Georgetown University promotes respect for all religions. Any student who is unable to attend classes or to participate in any examination, presentation, or assignment on a given day because of the observance of a major religious holiday (see below) or related travel shall be excused and provided with the opportunity to make up, without unreasonable burden, any work that has been missed for this reason and shall not in any other way be penalized for the absence or rescheduled work. Students will remain responsible for all assigned work. Students should notify professors in writing at the beginning of the semester of religious observances that conflict with their classes. The Office of the Provost, in consultation with Campus Ministry and the Registrar, will publish, before classes begin for a given term, a list of major religious holidays likely to affect Georgetown students. The Provost and the Main Campus Executive Faculty encourage faculty to accommodate students whose bona fide religious observances in other ways impede normal participation in a course. Students who cannot be accommodated should discuss the matter with an advising dean.
 					
-#### Statement on Sexual Misconduct
+# Statement on Sexual Misconduct
 
 Please know that as a faculty member I am committed to supporting survivors of sexual misconduct, including relationship violence, sexual harassment and sexual assault. However, university policy also requires me to report any disclosures about sexual misconduct to the Title IX Coordinator, whose role is to coordinate the University’s response to sexual misconduct.
 					
