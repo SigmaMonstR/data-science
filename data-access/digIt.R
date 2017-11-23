@@ -5,11 +5,8 @@
 # Libraries required for use
   needed <- c("DT","rio","rgdal")
   index <- !(c("DT","rio","rgdal") %in% rownames(installed.packages()))
-  if(sum(index) > 0){
-    install.packages(needed[index])
-  } 
-    for(i in needed){library(i)}
-
+  if(sum(index) > 0){install.packages(needed[index])} 
+  invisible(lapply(needed, require, character.only = TRUE))
 
 # Load in base cache file
   digit.cache <- import("https://s3.amazonaws.com/whoa-data/digit_index.csv")
