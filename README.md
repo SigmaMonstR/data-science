@@ -27,7 +27,6 @@ Students are expected to sign up for a Github account (https://github.com). A e-
 
 - __Do it the hard way__. Most of the programming in this class will be done in the R statistical programming languages. There are other languages in the data science realm such as Python and Julia, all of which rely on libraries of functions. In this class, where possible, build from scratch rather than an overly convenient library. This will allow you to become more creative down the line (e.g. difference between building lego sculptures from a factory blue print versus conceiving it on your own).
 
-
 # Course Outline
 
 Data science is dependent on sound application of computer programming, mathematics/statistics, and communication. This course is thus organized into three units that dive into the fundamentals. Particular emphasis is placed on skilled assembly of empirical ideas, drawing from standard and non-standard data.  The section outlines are subject to change up to one week before the lecture.  Please continue to review the syllabus throughout the course.

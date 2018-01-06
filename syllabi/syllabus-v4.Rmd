@@ -194,7 +194,7 @@ __Topics__
 __Example application__
 
 - Univariate clustering application: k-means
-- Multivariate clustering application: Customer segmentation using Census American Community Survey
+- Multivariate clustering application: Customer segmentation using NYC 311
 
 __Homework Assignment__
 

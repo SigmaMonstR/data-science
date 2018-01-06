@@ -75,7 +75,7 @@ assignCentroid <- function(x, xref){
 #######  
   
   #Parameters
-  sd <- 3
+  sd <- 5
   n <- 200
   k <- 8
   
