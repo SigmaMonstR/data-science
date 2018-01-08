@@ -32,7 +32,7 @@ Classes will be held on Mondays from 6:30pm to 9:00pm:
 
 # Website
 
-Students are expected to sign up for a Github account (https://github.com). A e-book and accompanying notes and materials has been written for this class and will be made available via a Github web page.
+Students are expected to sign up for a Github account (https://github.com/GeorgetownMcCourt/data-science). A e-book and accompanying notes and materials has been written for this class and will be made available via a Github web page.
 
 # Workload and assignments
 
