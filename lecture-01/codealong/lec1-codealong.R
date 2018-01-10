@@ -226,7 +226,7 @@ new_df <- as.data.frame(mat)
 #For an initial demo, we will learn to load in a Comma Separated Values (CSV) file containing energy data from the [National Institute of Standards and Technology Net Zero Residential Test Facility](https://pages.nist.gov/netzero) -- a laboratory that produces as much energy as it uses and is a testbed for sustainable and efficient home technologies. The specific dataset that will be used is the hourly photovoltaic sensor dataset [https://s3.amazonaws.com/net-zero/2015-data-files/PV-hour.csv](https://s3.amazonaws.com/net-zero/2015-data-files/PV-hour.csv), which contains hourly estimates of solar energy production and exposure on the Net Zero home's solar panels. From a sustainability perspective, this data can eventually be used to inform home efficiency policies, solar panel siting, among other things. Our goal in this demonstration is to plot sun exposure by month to see the relative differences. 
 #To start, we'll use the `read.csv()` function to import the object at the `url` destination that contains the the CSV dataset and assign the resulting dataframe to the object `df`.
 
-  url <- "https://s3.amazonaws.com/net-zero/2015-data-files/PV-hour.csv"
+  url <- "https://s3.amazonaws.com/nist-netzero/2015-data-files/PV-hour.csv"
   df <- read.csv(url)
 
 #With the dataset imported, we will now check the data by using `head()` to print the first three lines of data, `colnames()` to see the names of all variables, and `str()` to look at the data structure.
