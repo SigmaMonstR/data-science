@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Data Science | McCourt School</title>
+
+    <!-- Javascript -->
+    <script src="https://code.jquery.com/jquery-2.2.2.min.js" integrity="sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="js/parallax.js"></script><!-- Parallax Banner -->
+    <script src="js/navbar.hide.js"></script><!-- Hide Navbar -->
+    <script src="js/scroll.js"></script><!-- Affix Sidebar/Scroll Functions -->
+
+    <!-- CSS -->
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/base.css">
+     <link rel="stylesheet" href='css/coda.css' rel='stylesheet' type='text/css'>
+
+    <!-- Syntax Highlighting -->
+    <!-- Support for the following languages: -->
+    <!-- Apache, Bash, C#, C++, CSS, CoffeeScript, Device Tree, Diff, HTML, XML, HTTP, Ini, JSON, Java, JavaScript, Makefile, Markdown, Nginx, Objective-C, PHP, Perl, Python, Ruby, SQL, Fortran, Julia, Lisp, Lua, Mathematica, Matlab, Python-Profile, R, Scilab, Scala, Stata, Swift -->
+    <link rel="stylesheet" type="text/css" href="css/styles/github.css"><!-- Style for highlighting Code: Default to Github -->
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script><!-- Activate Code Highlighting -->
+
+    <style>
+    .btn {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 28;
+  -moz-border-radius: 28;
+  border-radius: 28px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 5px 20px 5px 20px;
+  text-decoration: none;
+    
+}
+    
+
+.btn:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+
+        .btn2 {
+  background: red;
+  background-image: -webkit-linear-gradient(top,  darkred, red);
+  background-image: -moz-linear-gradient(top,  darkred, red);
+  background-image: -ms-linear-gradient(top,  darkred, red);
+  background-image: -o-linear-gradient(top,  darkred, red);
+  background-image: linear-gradient(to bottom,  darkred, red);
+  -webkit-border-radius: 28;
+  -moz-border-radius: 28;
+  border-radius: 28px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 5px 20px 5px 20px;
+  text-decoration: none;
+    
+}
+    
+
+.btn2:hover {
+  background: red;
+  background-image: -webkit-linear-gradient(top, darkred, red);
+  background-image: -moz-linear-gradient(top, darkred, red);
+  background-image: -ms-linear-gradient(top,  darkred, red);
+  background-image: -o-linear-gradient(top,  darkred, red);
+  background-image: linear-gradient(to bottom,  darkred, red);
+  text-decoration: none;
+}
+        
+    </style>
+</head>
+<body>
+    <nav id='navbar' class="nav navbar-default navbar-fixed-top navbar-border"><!-- Navbar -->
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-links" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand navbar-color" href="#">PPOL 670</a>
+            </div> <!-- navbar-header -->
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="collapse-links">
+                <ul class="nav navbar-nav navbar-color">
+                    <li class="disclaimer"><a href="#">Georgetown McCourt School of Public Policy</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right navbar-color">
+                    <li><a href="https://github.com/GeorgetownMcCourt/data-science">Github Repo</a></li>
+                </ul>
+            </div><!-- navbar-collapse -->
+        </div><!-- container-fluid -->
+    </nav>
+
+    <!-- Banner -->
+    <br><section class="scroll " >
+        <div class="scroll-overlay">
+            <div class="title" >
+                <h1><span style="background-color:black;  color:white;font-family:Verdana;"> DATA SCIENCE <br>FOR PUBLIC POLICY</span></h1>
+                <h3><span style="background-color:black;  color:white;font-family:Verdana;">Readings & Lecture Materials</span></h3>
+                <h5><span style="background-color:black;  color:white;font-family:Verdana;"> JEFF CHEN</span></h5>
+                    <h6><span style="background-color:black;  color:white;font-family:Verdana;">SPRING 2018</span></h6>
+            </div>
+        </div>
+    </section>
+
+    <!-- Body -->
+    <br><section>
+        <div class="container-fluid content" style="font-family:Verdana;">
+            <div class="row">
+                <div id='content' class="col-lg-10 col-md-10"><!-- Content -->
+                <br><section id='lecture01'>
+                    <p>Below are links to zipped files of materials and repositories for each lecture for PPOL 670. Note that the zipped files are also available on the Github repository and are only current as of the day of class. </p>
+                    <p>Speak up and post an issue on Github if there are any issues, needs, or concerns.</p>
+                    <a class = "btn2" href="https://github.com/GeorgetownMcCourt/data-science/issues">Post an issue</a>
+                    
+                    
+                    <h3>Lecture 1: INTRO</h3>
+                    <p>Where does data science fit into this world? This lecture focuses on framing and presenting data science as an active approach to societal problems using quantitative methods. This requires not only an understand of the context, but the value of combining statistical theory with advanced programming to accomplish extraordinary tasks. </p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-01.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-01">Go to repo</a>
+                </section>
+                
+                 <br><section id='lecture02'>
+                    <h3>Lecture 2: DATA MANIPULATION</h3>
+                    <p>The objective of this lecture is to present the most important and fundamental elements of data manipulation.  These core operations include sort, merge, reshape, and collapse.  We will also present loops through multiple rows or columns, and other alternatives to operate on partitions of data frames.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-02.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-02">Go to repo</a>
+                </section>
+                    
+                
+                 <br><section id='lecture03'>
+                    <h3>Lecture 3: CONTROL STRUCTURES + ETIQUETTE(EDA)</h3>
+                    <p>Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. </p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-03.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-03">Go to repo</a>
+                </section>
+                    
+                                
+                 <br><section id='lecture04'>
+                    <h3>Lecture 4: EXPLORATORY DATA ANALYSIS</h3>
+                    <p>The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to examine computational optimization techniques, like taking advantage of multiple cores for heavy duty operations.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-04.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-04">Go to repo</a>
+                </section>
+                                   
+                 <br><section id='lecture05'>
+                    <h3>Lecture 5: INTRO TO SUPERVISED LEARNING, MODEL VALIDATION + OLS </h3>
+                    <p>Supervised learning is arguably the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-05.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-05">Go to repo</a>
+                </section>
+                    
+                    
+                 <br><section id='lecture06'>
+                    <h3>Lecture 6: REGUARLIZED METHODS + KNN</h3>
+                    <p>Extension to Lecture 5 focused on other continuous variable problems</p>
+                    <a class = "btn" href="#">To be posted</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-06">Go to repo</a>
+                </section>
+                    
+                
+                 <br><section id='lecture07'>
+                    <h3>Lecture 7: CLASSIFIERS I</h3>
+                    <p>Classification models are one of the workhorses of data science. Classifiers enables data-driven applications such as risk scoring, lawsuit outcome prediction, marketing lead generation, facial detection and computer vision, spam filtering, among other use cases. This session will focus on the fundamentals of classification models, types of models, and daily applications.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-07.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-07">Go to repo</a>
+                </section>
+                    
+                     
+                 <br><section id='lecture08'>
+                    <h3>Lecture 8: CLASSIFIERS II</h3>
+                    <p>Classification models are one of the workhorses of data science. Classifiers enables data-driven applications such as risk scoring, lawsuit outcome prediction, marketing lead generation, facial detection and computer vision, spam filtering, among other use cases. This session will focus on the fundamentals of classification models, types of models, and daily applications.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-08.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-08">Go to repo</a>
+                </section>
+                    
+                    
+                 <br><section id='lecture09'>
+                    <h3>Lecture 9: UNSUPERVISED LEARNING</h3>
+                    <p>No, this is not an independent study session. Unsupervised learning techniques such as clustering and principal components analysis help to identify recognizable patterns when no labels are provided. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.</p>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/raw/master/lecture-09.zip">Download Files</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-09">Go to repo</a>
+                </section>
+                
+                <br><section id='lecture10'>
+                    <h3>Lecture 10: OTHER METHODS + TOPICS</h3>
+                    <p>Supervised and unsupervised learning methods open the world up to many possibilities. But there are other techniques that are important, relatively simple, and widely applied. </p>
+                    <a class = "btn" href="#">To be posted</a>
+                    <a class = "btn"
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-10">Go to repo</a>
+                </section>
+                 
+                <br><section id='lecture11'>
+                    <h3>Lecture 11: DATA PRODUCTS</h3>
+                    <p>Data science presents organizations with the opportunity to allow data to play an active, action-oriented role in daily operations. Newspapers such as the New York Times and the Washington Post are increasingly relying upon visual narratives to illustrate the point. Tech giants like Facebook and Amazon rely on recommendation engines to drive sales. Political canvassing operations, direct-to-consumer marketers, and infrastructure engineers rely on prioritization models to increase their hit rates in the field. For data science to drive value, data products must be grounded in an audience and a well-defined need.</p>
+                    <a class = "btn" href="#">To be posted</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-11">Go to repo</a>
+                </section>
+                
+                <br><section id='lecture12'>
+                    <h3>Lecture 12: SQL + Python </h3>
+                    <p>Data science, statistics, and machine learning are agnostic of languages. That being said, there are a host of techniques and technologies that data scientists rely upon to be effective. In the increasingly more competitive labor market, knowing more than one language is to one's advantage. In addition to R, which is more of the research data scientist's tool, Python is a pseudo-code ("p-code") language that is relied upon for build full-scale web application. To extract data from databases, Structured Querying Language is also relied upon. </p>
+                    <a class = "btn" href="#">To be posted</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-12">Go to repo</a>
+                </section>
+                
+                <br><section id='lecture13'>
+                    <h3>Lecture 13: THE BIGGER PICTURE</h3>
+                    <p>This class provides an overview to two unrelated topics. To start, an overview to cloud computing, specifically opportunities to leverage parallel processing to make speed up computation. Particular emphasis is placed on parallelism and how it can be effectively applied. To provide context of the role of the data scientist in organizations, we will explore the other actors who contribute to data teams and how those teams are organized.</p>
+                    <a class = "btn" href="#">To be posted</a>
+                    <a class = "btn" href="https://github.com/GeorgetownMcCourt/data-science/tree/master/lecture-13">Go to repo</a>
+                </section>
+                </div><!-- Content -->
+                <div id='sidebar' class="hidden-xs hidden-sm col-lg-2 col-md-2"><!-- Sidebar -->
+                    <ul id='featured-nav' class="nav nav-list featured-nav nav-stacked">
+                        <li>
+                            <ul class="fa-style"><!-- Font Awesome -->
+                                <li><a href="https://github.com/GeorgetownMcCourt/data-science/archive/master.zip"><i class="fa fa-file-archive-o fa-lg"></i></a></li>
+                                <li><a href="https://github.com/GeorgetownMcCourt/data-science"><i class="fa fa-github-square fa-lg"></i></a></li>
+                            </ul>
+                        </li>
+                        
+                        <li><a href="#lecture01">Lecture 1</a></li>
+                        <li><a href="#lecture02">Lecture 2</a></li>
+                        <li><a href="#lecture03">Lecture 3</a></li>
+                        <li><a href="#lecture04">Lecture 4</a></li>
+                        <li><a href="#lecture05">Lecture 5</a></li>
+                        <li><a href="#lecture06">Lecture 6</a></li>
+                        <li><a href="#lecture07">Lecture 7</a></li>
+                        <li><a href="#lecture08">Lecture 8</a></li>
+                        <li><a href="#lecture09">Lecture 9</a></li>
+                        <li><a href="#lecture10">Lecture 10</a></li>
+                        <li><a href="#lecture11">Lecture 11</a></li>
+                        <li><a href="#lecture12">Lecture 12</a></li>
+                        <li><a href="#lecture13">Lecture 13</a></li>
+                    </ul>
+                </div><!-- Sidebar -->
+            </div><!-- Row -->
+        </div><!-- Container-fluid -->
+    </div>
+
+</body>
+</html>

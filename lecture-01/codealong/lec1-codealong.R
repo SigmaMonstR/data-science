@@ -28,12 +28,12 @@
   asd <- c(1,2,3)
   
 # PASTE
-  tot_people = sum(people) #Sum of x
-  num_offices = length(people) #count number of elements
+  tot_people <- sum(people) #Sum of x
+  num_offices <- length(people) #count number of elements
   units1 <- "satisfied constituents served" #string variable
   units2 <- "field offices!" #another string variable
   
-  statement <- paste(tot_people, units1, "in", num_offices, units2)
+  statement <- paste(tot_people, units1, "in", num_offices, units2, sep = " llama ")
   print(statement)
 
 
