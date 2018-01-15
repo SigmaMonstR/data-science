@@ -69,8 +69,8 @@
 # This task would require the use of logical operators, which evaluate a statement and return 
 # a boolean that indicates if a statement is `TRUE`. Below, we compare two quantities: `y` and `x`
   
-  x <- 10
-  y <- 2
+  x <- c(10, 1, 3, 1)
+  y <- c(2, 1, 3, 2)
   
   x > y   #4 is greater than 2
   x >= y  #4 greater than or equal to 2
@@ -127,7 +127,7 @@
   cities[3:6]
 
 ##**EXERCISE**: How to get cities with populations of > 2 million
-
+cities[pop > 2000000]
 
 
 # MATRICES
@@ -145,7 +145,7 @@
   mat[,2]
 
 #Extract 2nd to 3rd rows and the 1st and 3rd column
-mat[2:3,c(1,3)]
+mat[2:3, c(1,3)]
 
 # Data frames
 #If a dataset will have more than one data type, consider using data frames. To create a data frame, use the `data.frame()` to put two or more vectors together. 
@@ -230,7 +230,7 @@ new_df <- as.data.frame(mat)
   df <- read.csv(url)
 
 #With the dataset imported, we will now check the data by using `head()` to print the first three lines of data, `colnames()` to see the names of all variables, and `str()` to look at the data structure.
-  head(df,3)
+  head(df, 3)
   str(df)
 
 

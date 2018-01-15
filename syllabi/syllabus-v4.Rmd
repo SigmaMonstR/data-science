@@ -114,7 +114,7 @@ __Homework #2 assigned, due by 2/5__
 - Batch Extraction of Census Housing Permits data
 
 ## Lecture 4: Exploratory Data Analysis (EDA) - 2/5
-The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
+The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to examine computational optimization techniques, like taking advantage of multiple cores for heavy duty operations.
 
 __Topics__
 
