@@ -11,14 +11,19 @@ __Professor__: Jeff Chen ([jeff.chen@georgetown.edu](mailto:jeff.chen@georgetown
 
 __TA__: __Bryan Baird__ ([beb53@georgetown.edu](mailto:beb53@georgetown.edu))  is a recent graduate of the McCourt School, having earned his MPP in May of 2017. Since then, he worked as a technology policy analyst and has now transitioned to a data science bootcamp to be a data practitioner in industry. Prior to Georgetown, worked in technology and politics, including time managing tech products at Microsoft in Seattle and CHIEF in DC. He received his Bachelor's Degree from Washington University in St. Louis, with double majors in Systems Engineering and Political Science.
 
-
 # Time and location
 
-Classes will be held on Mondays from 6:30pm to 9:00pm in [TBD]. 
+Classes will be held on Mondays from 6:30pm to 9:00pm: 
+
+- January 10 (Wednesday), 22, 29
+- February 5, 12, 26 
+- March 12, 19, 26
+- April 9, 16, 23, 30 
+- May 7 - Final Presentations
 
 # Website
 
-Students are expected to sign up for a Github account (https://github.com). A e-book and accompanying notes and materials has been written for this class and will be made available via a Github web page.
+Students are expected to sign up for a Github account (https://github.com/GeorgetownMcCourt/data-science). A e-book and accompanying notes and materials has been written for this class and will be made available via a Github web page.
 
 # Workload and assignments
 
@@ -28,7 +33,8 @@ Students are expected to sign up for a Github account (https://github.com). A e-
 
 - __Collaboration__ is the greatest source of creativity and innovation. Thus, collaboration should not result in verbatim submissions (e.g. no copy cats). As everyone writes code following their own unique logic, the chance of identical submissions is unlikely and easily detectable. Non-unique code will be penalized.
 
-- __Do it the hard way__. Most of the programming in this class will be done in the R statistical programming languages. There are other languages in the data science realm such as Python and Julia, all of which rely on libraries of functions. In this class, where possible, build from scratch rather than an overly convenient library. This will allow you to become more creative down the line (e.g. difference between building lego sculptures from a factory blue print versus conceiving it on your own).
+- __Do it the hard way__. A core factor in the success of a data scientist is being able to explain how an algorithm or analysis was constructed, not just use software.  In this class, where possible, build from scratch rather than an overly convenient library. This will allow you to become more creative down the line (e.g. difference between building lego sculptures from a factory blue print versus conceiving it on your own).
+
 
 # Course Outline
 
@@ -37,7 +43,7 @@ Data science is dependent on sound application of computer programming, mathemat
 ## Section 1: Fundamentals
 Data science is about designing and building data products that derive insight. This first section will focus on developing fundamental skills required to build effective products.
 
-## Lecture 1: Preliminaries 
+## Lecture 1: Preliminaries (1/10)
 
 Where does data science fit into this world? This lecture focuses on framing and presenting data science as an active approach to societal problems using quantitative methods. This requires not only an understand of the context, but the value of combining statistical theory with advanced programming to accomplish extraordinary tasks. 
 
@@ -58,10 +64,9 @@ __Example application__
 __Warm Up Assignment (Scored but does not count)__
 
 - Homework #0: Exercises to become familiar with `R`
-- Read Chapters 1 and 2 
 
 
-## Lecture 2: Manipulation / Wrangling / Feature Enginerring
+## Lecture 2: Manipulation / Wrangling / Feature Engineering (1/22)
 
 The objective of this lecture is to present the most important and fundamental elements of data manipulation.  These core operations include sort, merge, reshape, and collapse.  We will also present loops through multiple rows or columns, and other alternatives to operate on partitions of data frames.
 
@@ -80,11 +85,11 @@ __Example application(s)__
 - Parsing and conducting basic text analysis using State of the Union Speeches (2009 to 2016)
 - Comparing and joining EU and UN sanction lists
 
-__Homework #1__
+__Homework #1 Assigned, due by 1/29__
 
 - Convert individual police incidents into time series projections
 
-## Lecture 3: Control Structures, Functions and Etiquette
+## Lecture 3: Control Structures, Functions and Etiquette (1/29)
 Building upon basic data manipulation and high level analytical tasks, this session will focus on programming paradigms that are commonly relied upon when practicing data science. 
 
 __Topics__
@@ -93,13 +98,13 @@ __Topics__
 - Suitable practices and etiquette such as the [Google Code Style Guide](https://google.github.io/styleguide/Rguide.xml).
 - Writing functions that make sense and are reliable
 
-__Homework #2__
+__Homework #2 assigned, due by 2/5__
 
 - Writing functions
 - Batch Extraction of Census Housing Permits data
 
-## Lecture 4: Exploratory Data Analysis (EDA)
-The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to view computational optimization techniques, like taking advantage of multiple cores for heavy duty operations (parallel processing).
+## Lecture 4: Exploratory Data Analysis (EDA) - 2/5
+The objective of this lecture is to handle missing values appropriately and script visual checks to find errors introduced in data input/output.  We will also start to examine computational optimization techniques, like taking advantage of multiple cores for heavy duty operations.
 
 __Topics__
 
@@ -112,7 +117,7 @@ __Example application__
 - Finding health coverage patterns using the US Census American Community Survey
 - Conducting analysis of missing values analysis  of weather anomalies from 1880 to Present using the National Oceanographic and Atmospheric Administration's GHCN-M
 
-__Homework #3__
+__Homework #3 assigned, due by 2/12__
 
 - Exploratory Data Analysis of Washington Metropolitan Area Transit Authority's train delays data
 
@@ -122,7 +127,7 @@ __Homework #3__
 In public policy, data can be used to support evaluation of programs to understand causal mechanisms (e.g. retrospective focus) or enable the creation of data-rooted products that drive action (e.g. deployed applications). In this section, we extend data manipulation to the algorithmic intelligence necessary to make sound decisions.
 
 
-## Lecture 5 + 6: Introduction to Supervised Learning and Prediction
+## Lecture 5 + 6: Introduction to Supervised Learning and Prediction - 2/12, 2/26
 
 Supervised learning is arguably the most relied upon class of techniques that enable causal inference but also deployed precision policy. How does changing one variable independently impact another variable?  We begin to introduce basic regression analysis, correlation coefficients, ordinary least squares, and the relationship between the concepts.  Note that this is a very cursory review, and the deep assumptions are not tested or expounded upon.
 
@@ -139,12 +144,12 @@ __Example application__
 
 - Prediction of missing values in satellite imagery using kNN
 
-__Homework #4__
+__Homework #4 assigned 2/12, due by 2/26__
 
 - Write functions for cross-validation
 - Build a housing sales price prediction model
 
-## Lectures 7 + 8: Classification techniques 
+## Lectures 7 + 8: Classification techniques - 3/12 and 3/19
 
 Classification models are one of the workhorses of data science. Classifiers enables data-driven applications such as risk scoring, lawsuit outcome prediction, marketing lead generation, facial detection and computer vision, spam filtering, among other use cases.  This session will focus on the fundamentals of classification models, types of models, and daily applications.
 
@@ -169,7 +174,7 @@ __Homework #5 and #6__
 - Lec 8: Hand out class project instructions, one page proposal of what you'll do due by Lec 9.
 
 
-## Lecture 9: Unsupervised learning 
+## Lecture 9: Unsupervised learning (3/26)
 
 No, this is not an independent study session. Unsupervised learning techniques such as clustering help to identify recognizable patterns when no labels (e.g. outcomes, dependent variables) are available. In sales and recruitment offices, customer segmentation may use current customer data, then use clustering techniques to identify k-number of distinct customer profiles. In resourceful law firms, data scientists may develop topic modeling algorithms to automatically tag and cluster hundreds of thousands of documents for improved search. This session will focus on clustering methodologies that are commonly employed in applied research.
 
@@ -185,13 +190,10 @@ __Topics__
 __Example application__
 
 - Univariate clustering application: k-means
-- Multivariate clustering application: Customer segmentation using Census American Community Survey
+- Multivariate clustering application: Customer segmentation using NYC 311
 
-__Homework Assignment__
 
-- Applying clustering
-
-## Lectures 10: Other Methods and Topics
+## Lectures 10: Other Methods and Topics (4/9)
 
 Supervised and unsupervised learning methods open the world up to many possibilities. But there are other techniques that are important, relatively simple, and widely applied. 
 
@@ -208,7 +210,7 @@ __Example application__
 Beyond the data preparation and modeling, the presentation layer is the glue that will allow a data science project to stick with target audiences. Often times, presentation is graphical and relies upon a rich ecosystem of visualization, web services, and interactive applications to communicate pertinent issues.
 
 
-## Lecture 11: Data products
+## Lecture 11: Data products (4/16)
 
 Data science presents organizations with the opportunity to allow data to play an active, action-oriented role in daily operations. Newspapers such as the New York Times and the Washington Post are increasingly relying upon visual narratives to illustrate the point. Tech giants like Facebook and Amazon rely on recommendation engines to drive sales. Political canvassing operations, direct-to-consumer marketers, and infrastructure engineers rely on prioritization models to increase their hit rates in the field. For data science to drive value, data products must be grounded in an audience and a well-defined need.
 
@@ -224,7 +226,7 @@ __Example application(s)__
 - Process spatial data (GIS) and produce an interactive web map
 
 
-## Lecture 12: SQL and Python
+## Lecture 12: SQL and Python (4/23)
 
 Data science, statistics, and machine learning are agnostic of languages. That being said, there are a host of techniques and technologies that data scientists rely upon to be effective. In the increasingly more competitive labor market, knowing more than one language is to one's advantage. In addition to R, which is more of the research data scientist's tool, Python is a pseudo-code ("p-code") language that is relied upon for build full-scale web application. To extract data from databases, Structured Querying Language is also relied upon. 
 
@@ -238,7 +240,7 @@ __Pre-Class Activity__
 - Download and install [Anaconda](https://www.anaconda.com/download/#macos) -- a pre-packaged suite of Python-based tools
 
 
-## Lecture 13:  The Bigger Picture
+## Lecture 13:  The Bigger Picture (4/30)
 
 This class provides an overview to two unrelated topics. To start, an overview to cloud computing, specifically opportunities to leverage parallel processing to make speed up computation. Particular emphasis is placed on parallelism and how it can be effectively applied. To provide context of the role of the data scientist in organizations, we will explore the other actors who contribute to data teams and how those teams are organized.
 
@@ -251,12 +253,12 @@ __Topics__
 	
 <hr>
 
-# Academic Resource Center/Disability Support 
-If you believe you have a disability, then you should contact the Academic Resource Center ([arc@georgetown.edu](arc@georgetown.edu)) for further information. The Center is located in the Leavey Center, Suite 335 (202-687-8354). The Academic Resource Center is the campus office responsible for reviewing documentation provided by students with disabilities and for determining reasonable accommodations in accordance with the Americans with Disabilities Act (ASA) and University policies. For more information, go to [http://academicsupport.georgetown.edu/disability/](http://academicsupport.georgetown.edu/disability/).
+# Academic Resource Center/Disability'Support 
+If you believe you have a'disability, then you should contact the Academic Resource Center ([arc@georgetown.edu](arc@georgetown.edu)) for further information. The Center is located in the Leavey Center, Suite 335 (202-687-8354). The Academic Resource Center is the campus office responsible for reviewing documentation provided by students with disabilities and for determining reasonable accommodations in accordance with the Americans with Disabilities Act (ASA) and University policies. For more information, go to [http://academicsupport.georgetown.edu/disability/](http://academicsupport.georgetown.edu/disability/).
 
 					
 # Important Academic Policies and Academic Integrity				
-McCourt School students are expected to uphold the academic policies set forth by Georgetown University and the Graduate School of Arts and Sciences. Students should therefore familiarize themselves with all the rules, regulations, and procedures relevant to their pursuit of a Graduate School degree. The policies are located at: http://grad.georgetown.edu/academics/policies/
+McCourt School students are expected to uphold the academic policies set forth by Georgetown University and the Graduate School of Arts and Sciences. Students should therefore familiarize themselves with all the rules, regulations, and procedures relevant to their pursuit of a Graduate School degree. The policies are located at:'http://grad.georgetown.edu/academics/policies/
 
 
 					
@@ -266,7 +268,7 @@ Georgetown University promotes respect for all religions. Any student who is una
 					
 # Statement on Sexual Misconduct
 
-Please know that as a faculty member I am committed to supporting survivors of sexual misconduct, including relationship violence, sexual harassment and sexual assault. However, university policy also requires me to report any disclosures about sexual misconduct to the Title IX Coordinator, whose role is to coordinate the University’s response to sexual misconduct.
+Please know that as a faculty member I am committed to supporting survivors of sexual misconduct, including relationship violence, sexual harassment and sexual assault. However, university policy also requires me to report any disclosures about sexual misconduct to the Title IX Coordinator, whose role is to coordinate the University's response to sexual misconduct.
 					
 Georgetown has a number of fully confidential professional resources who can provide support and assistance to survivors of sexual assault and other forms of sexual misconduct. These resources include:
 
