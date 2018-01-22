@@ -1,5 +1,5 @@
 #####################
-# Example of RegEx #
+# Lecture 2 - RegEx #
 #####################
 
 #Create a hypothetical data frame 
