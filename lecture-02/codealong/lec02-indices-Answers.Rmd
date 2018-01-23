@@ -84,7 +84,7 @@ How many months of data do you have?
 
 6. In which quarter did we hit our highest revenue?
 ```{r, eval=FALSE}
-  df[max(df$revenue) == df$revenue, 1]
+  df[max(df$revenue) == df$revenue, 2]
 ```
 
 7. In how many months did we hit our revenue targets?

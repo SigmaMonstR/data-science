@@ -6,15 +6,16 @@
   setwd("/Users/jeff/Documents/Github/data-science/lecture-02/data")
 
 # Install packages
-  install.packages(c("devtools", "wordcloud"))
+  install.packages(c("devtools", "wordcloud", "rio"))
   library(devtools)
   install_github("SigmaMonstR/digIt")
+  library(digIt)
   
 # (1) How many planned applause breaks in 2010 versus 2016? ------
   
   #2010
   #read in lines from the text
-    speech10 <- readLines("sotu_2010.txt")
+    speech10 <- digIt("speech_2010")
   
   #remove any blank lines
     speech10 <- speech10[speech10 != ""]
@@ -22,9 +23,11 @@
   #get string position of each Applause (returns positive values if matched)
     ind <- regexpr("Applause", speech10)
     sum(attr(ind,"match.length") > 1)
+    
+    length(grep("Applause", speech10))
   
   #2016
-    speech16 <- readLines("sotu_2016.txt")
+    speech16 <- digIt("speech_2016")
     speech16 <- speech16[speech16 != ""]
     ind <- regexpr("Applause", speech16)
     sum(attr(ind,"match.length") > 1)
