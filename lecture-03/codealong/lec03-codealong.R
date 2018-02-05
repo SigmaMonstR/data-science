@@ -7,7 +7,7 @@
 ####################
 
   #Set your WD
-  setwd("/Users/jeff/Google Drive/Text Book/Chapters/base_data/lastfm/ready")
+  setwd("/Users/jeff/Documents/Github/data-science/lecture-03/data/ready")
   
   #transactions
   df <- read.table("user_artists.dat", sep="\t", header = TRUE)
@@ -64,7 +64,7 @@
   }
   
 #Try out the cosine similarity
-  cosSim(items[,2], items[,5])
+  cosSim(mat[,2], mat[,5])
   
 #Step 2: Set up data 
   
