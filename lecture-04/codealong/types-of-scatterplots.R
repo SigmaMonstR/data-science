@@ -9,6 +9,8 @@
 
 #Import library
   library(ggplot2)
+  library(gridExtra)
+  library(hexbin)
 
 ##Scatter plot
   p = ggplot(df,aes(x = x,y = y))  +

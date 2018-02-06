@@ -43,7 +43,7 @@ To make the analysis a bit more manageable, we will extract 14 demographic varia
 
 ```{r}
   var_list <- c("HICOV","RAC1P","MAR","SEX","ESR","CIT","AGEP","PINCP","POVPIP","WKHP","SCHL")
-  df <- acs[acs$AGEP>=16, var_list]
+  df <- acs[acs$AGEP >= 16, var_list]
 
   #Healthcare coverage (target variable): 
   #Create one binary variable for calculations
@@ -142,7 +142,7 @@ In ```ggplot2```, we use the ```ggplot()``` method to specify the data frame and
 
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
   library(ggplot2)
-  ggplot(df, aes(x = AGEP)) + geom_histogram() 
+  ggplot(df, aes(x = AGEP)) + geom_histogram(binwidth = 1) 
 ```
 ```AGEP``` can be replaced with ```PINCP```(personal income). Notice that the distribution occupies only a small part of the graph.
 
@@ -154,7 +154,9 @@ In ```ggplot2```, we use the ```ggplot()``` method to specify the data frame and
 
 This can be adjusted by adding the ```+ scale_x_log10()``` argument in order to transform the $x$ variable using a $log_{10}$ transformation. Within the ```geom_histogram()``` arguement, we change the color of the histogram to "navy", add a title using ```ggtitle()``` and adjust the size of the label text using ```theme()```.
 ```{r, warning=FALSE, message=FALSE, fig.height=2.5}
-  ggplot(df, aes(x =  PINCP)) + geom_histogram(fill = "navy") + scale_x_log10() + 
+  ggplot(df, aes(x =  PINCP)) + 
+    geom_histogram(fill = "navy") + 
+    scale_x_log10() + 
     ggtitle("Histogram: log10(Personal Income)") + 
     theme(plot.title = element_text(size=10))
 ```
@@ -164,7 +166,9 @@ Another type of univariate graph is the kernel density graph. Whereas the histog
 ```ggplot``` provides facility to use a kernel density graph using the ```+ geom_density()```. Kernel density diagrams provide a more organic representation of a distribution and are more sensitive to small fluctuations in the frequencies. This is useful for finding more discrete natural breaks in the data that can be used for classification. Furthermore, kernel densities are generally easier to compare when overlaying two more or more distributions.
 
 ```{r, warning=FALSE, message=FALSE, fig.height=2.5}
-  ggplot(df, aes(x = PINCP)) + geom_density(fill = "navy") + scale_x_log10() + 
+  ggplot(df, aes(x = PINCP)) + 
+    geom_density(fill = "navy") + 
+    scale_x_log10() + 
     ggtitle("Kernel Density: log10(Personal Income)") + 
     theme(plot.title = element_text(size=10))
 ```
@@ -194,13 +198,16 @@ Scatter plots are among the most standard bivariate graphs and can be easily cal
 
 To move the mass of points above the x-axis, we can apply a $log_{10}$ transformation to the ```PINCP``` variable. In addition, changing the ```alpha``` to a value less than 1.0 will allow us to take advantage of additive transparency -- that is allowing the transparencies of multiple overlapping points to darken areas of creater density. We now can see that income generally rises quickly before the age of 25, then plateaus.
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
-  ggplot(df, aes(x = AGEP, y = PINCP)) + geom_point(alpha = 0.01) + scale_y_log10() 
+  ggplot(df, aes(x = AGEP, y = PINCP)) + 
+    geom_point(alpha = 0.01) + 
+    scale_y_log10() 
 ```
 
 In addition, we can apply a kernel density smoothed line to show the moving average trend of income as a function of age.
 
 ```{r, warning=FALSE, message=FALSE, fig.height=2}
-  ggplot(df, aes(x = AGEP, y = PINCP)) + geom_point(alpha = 0.01) + scale_y_log10() +
+  ggplot(df, aes(x = AGEP, y = PINCP)) + 
+    geom_point(alpha = 0.01) + scale_y_log10() +
     geom_smooth()
 ```
 
