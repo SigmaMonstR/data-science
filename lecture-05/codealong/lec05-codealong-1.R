@@ -36,6 +36,7 @@
   set.seed(50)
   x$norm <- rnorm(nrow(x), mean(x$resid), sd(x$resid))
   
+#Graph errors to check for normality
   ggplot(x, aes(resid)) + 
     geom_density(aes(norm), alpha = 0.4, fill = "yellow") + 
     geom_density(fill = "navy", alpha = 0.6) 
@@ -56,7 +57,7 @@
 #Predict
   df$yhat <- predict(fit, newdata = df) 
   mape <- function(y_hat, y){
-    return(mean(abs(y_hat/y-1), na.rm=T))
+    return(100*mean(abs(y_hat/y-1), na.rm = T))
   }
   
 #Check train versus test
