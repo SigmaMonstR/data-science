@@ -57,6 +57,7 @@
 #Predict
   df$yhat <- predict(fit, newdata = df) 
   mape <- function(y_hat, y){
+    
     return(100*mean(abs(y_hat/y-1), na.rm = T))
   }
   
