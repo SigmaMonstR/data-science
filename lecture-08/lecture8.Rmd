@@ -1,8 +1,8 @@
 ---
 title: 'Lecture 8: Classifiers'
-author: by Jeff Chen & Dan Hammer, Georgetown University McCourt School of Public
+author: by Jeff Chen , Georgetown University McCourt School of Public
   Policy
-subtitle: Intro to Data Science for Public Policy, Spring 2016
+subtitle: Intro to Data Science for Public Policy
 output:
   pdf_document:
     toc: yes
@@ -682,27 +682,42 @@ Typically, it is a good idea to test various values of `cost` and `gamma`, thoug
 To determine search for the best parameters, we will conduct a grid search: a combination of four values of `cost` and four values of `gamma` will be tested for a total of 16 models. We choose equally spaced values on on an exponential scale (e.g. $0.01$, $1$, $10$) to emphasize differences in model fit. To evaluate accuracy, we will rely on the F1-scores
 
 
-```{r, message = FALSE, warning = FALSE}
+```{r}
 
-#F1 score
- meanf1 <- function(actual, predicted){
-    #Mean F1 score function
-    #actual = a vector of actual labels
-    #predicted = predicted labels
+  meanf1 <- function(actual, predicted){
+    # Desc: 
+    #   Weighted mean F1 score function
+    #
+    # Args:
+    #   actual = a vector of actual labels
+    #   predicted = predicted labels
+    #
+    # Returns:
+    #   Single value F1 score
+    #
     
     classes <- unique(actual)
     results <- data.frame()
+    
+    #Loop through all classes
     for(k in classes){
+      prec <- sum(predicted == k & actual == k)/sum(predicted == k)
+      rec <- sum(predicted == k & actual == k)/sum(actual == k)
       results <- rbind(results, 
                        data.frame(class.name = k,
                                   weight = sum(actual == k)/length(actual),
-                                  precision = sum(predicted == k & actual == k)/sum(predicted == k), 
-                                  recall = sum(predicted == k & actual == k)/sum(actual == k)))
+                                  precision = prec, 
+                                  recall = rec))
     }
-    results$score <- results$weight * 2 * (results$precision * results$recall) / (results$precision + results$recall) 
+    
+    #Calculate weighted mean
+    score <- results[,2] * 2 * (results[,3] * results[,4]) / (results[,3] + results[,4]) 
     return(sum(results$score))
- }
+  }
+  
+```
 
+```{r, message = FALSE, warning = FALSE}
 #Prep grid search
   cost.vec <- 10^(-1:2)
   gamma.vec <- 2^(seq(-5,2,2))
@@ -711,7 +726,10 @@ To determine search for the best parameters, we will conduct a grid search: a co
   
 #Search
   for(i in 1:nrow(combo)){
-    fit <- svm(coverage ~ ., data=train, kernel = "radial", cost = combo[i, 1], gamma = combo[i, 2])
+    fit <- svm(coverage ~ ., data=train, 
+               kernel = "radial", 
+               cost = combo[i, 1], 
+               gamma = combo[i, 2])
     pred <- predict(fit, train)
     combo$f1[i] <- meanf1(train$coverage, pred)
   }
