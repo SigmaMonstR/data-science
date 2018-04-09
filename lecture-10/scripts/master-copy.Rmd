@@ -1,0 +1,263 @@
+---
+title: "Lecture 11: Textual Data"
+author: "Jeff Chen / PPOL670"
+output: ioslides_presentation
+---
+
+## Working with text
+
+Text and narratives are the main mode that people store and communicate ideas and information. In modern media, the text of news articles, for example, are stored within Hyper Text Markup Language (HTML) and JavaScript (JS) objects. This is in contrast with the typical structured data in, say, a spreadsheet or csv. 
+
+
+## Web Scraping
+
+The whole point of webscraping is to obtain and structure data that is otherwise locked in a webpage format. 
+
+Set a URL from the This American Life website, starting from episode 300
+```{r, warning=FALSE, message=FALSE}
+library(rvest)
+ep_num <- 300
+url <- paste0("https://www.thisamericanlife.org/",ep_num,"/transcript")
+tal <- read_html(url)
+```
+
+Extract the title of the episode from the title tag
+```{r}
+#Get Title
+  title <- tal %>%
+    html_node("title") %>%
+    html_text()
+```
+
+Get the content in a specific div tag labeled 'act' that is nested in 'content' 
+```{r}
+#Get all sections
+  sections <- tal %>%
+    html_nodes("div.content > div.act") 
+```
+
+Treat each act as an index number, starting from the prologue = 1. We can scrape the act title that is in the h3 tag.
+
+```{r}
+#Act Number
+  act_num <- 1
+
+#Parse
+ act_title <- html_nodes(sections[[act_num]], "h3") %>% html_text()
+        
+#Inner Content
+  a <- html_nodes(sections[[act_num]], "div.act-inner > div")
+```
+
+Then, for the remainder of the acts, loop through the div content section one act at a time.
+
+```{r}
+dialogue <- data.frame()
+
+for(j in 1:length(a)){
+    b <- a[j]
+    
+    #Within each speaking turn
+    for(m in 1:length(b)){
+      
+      #Identify the speaker
+      speaker <- html_nodes(b[m], "h4") %>% html_text() 
+      if(length(speaker) <=1){
+        speaker <- ""
+      } 
+      
+      #The type of speaker (e.g. host, interviewer, subject)
+      speaker.type <- html_attr(b[m],"class")
+
+      #Extract what they said and the timing
+      line <- html_nodes(b[m], "p") %>% html_text() 
+      times <- html_nodes(b[m], "p") %>% html_attr("begin") 
+      para <- 1:length(times)
+      
+      #Log the speaker turn, parapgraph, text, etc.
+      if(length(line) >=1 && length(times) >= 1){
+        dialogue <- rbind(dialogue, 
+                          data.frame(ep_num = ep_num,
+                                     title = title,
+                                     act_title = act_title, 
+                                     act_num = act_num,
+                                     speaker = speaker,
+                                     speaker_type = speaker.type,
+                                     turn = j,
+                                     paragraph = para,
+                                     times = times,
+                                     text = line))
+      }
+    }
+  }
+
+```
+
+# Sentiment Analysis
+Sentiment analysis summarizes textual data in terms of attitudes and emotions of the author. 
+
+Load in text processing libraries.
+```{r}
+library(tidytext) #for easy text manipulation
+library(SnowballC) #for stemming words
+```
+
+## Step 1: Get a sentiment dictionary
+Note that you could create your own as well.
+```{r}
+  dict <- get_sentiments("bing")
+```
+
+## Step 2: Parse your text
+
+Mildly clean up dialogue text
+```{r}
+dialogue$text <- tolower(as.character(dialogue$text))
+dialogue$text <- gsub("[.,]","",dialogue$text)
+dialogue$text <- gsub("[[:digit:]]", "", dialogue$text)
+```
+
+Tokenize the text, stem the words, then remove punctuation
+```{r}
+library(dplyr)
+toks <- dialogue %>%
+  unnest_tokens(word, text)  %>%
+  mutate(word = wordStem(word))
+toks$word <- gsub("[[:punct:]]", "", toks$word)
+```
+
+As the stemmed words look odd, we'll create a dictionary of canonical words using the `tm` package in order to fill in the missing endings.
+```{r}
+library(tm)
+
+#Import text data
+corp <- Corpus(VectorSource(dialogue$text))
+
+#Create term matrix 
+tdm <- TermDocumentMatrix(corp, control = list(stemming = TRUE))
+
+#Complete the stems in toks
+toks$word <- stemCompletion(toks$word, corp)
+```
+
+Also, we'll want to remove stopwords and blank tokens
+```{r}
+data(stop_words)
+toks <- toks %>%
+  anti_join(stop_words)
+toks <- toks[toks$word != "",]
+```
+
+## Step 3: Get Average Sentiment
+Get the average positive sentiment in the act.
+```{r}
+toks <- toks %>% inner_join(dict)
+mean(toks$sentiment == "positive")
+```
+
+For each paragraph/stanza in sequential order, calculate the mean positive sentiment.
+```{r}
+out <- aggregate(toks$sentiment=="positive", by = list(speaker_turn = toks$turn), FUN = mean)
+plot(out, type = "l") 
+```
+
+##DIY! 
+Spend 10 minutes to modify the above sentiment analysis code in order to apply it to the first 15 TAL episodes. These have already be scraped and can be downloaded below [Github Repo](https://github.com/SigmaMonstR/getThisAmericanLife). Your goal is to calculate the average positive sentiment for each TAL episode-act. Use the `key` variable that is created below.
+
+Skip the stem completion step as it takes a long time to complete.
+```{r}
+#Download files
+  url <- "https://github.com/SigmaMonstR/getThisAmericanLife/blob/master/data/TAL1to641.Rda?raw=true"
+  new_file <- tempfile()
+  download.file(url, "temp.Rda")
+  load("temp.Rda")
+
+#Create keys
+  episodes$key <- paste0("ep ", episodes$ep_num, " - act ", episodes$act_num)
+  #episodes <- episodes[episodes$ep_num <= 15, ]
+```
+
+Reprocessing
+```{r}
+
+#Clean up
+  episodes$text <- tolower(as.character(episodes$text))
+  episodes$text <- gsub("[.,]","",episodes$text)
+  episodes$text <- gsub("[[:digit:]]", "", episodes$text)
+
+#Tokenize
+  toks <- episodes %>%
+    unnest_tokens(word, text)  %>%
+    mutate(word = wordStem(word))
+  toks$word <- gsub("[[:punct:]]", "", toks$word)
+  
+#Remove Stopwords
+  data(stop_words)
+  toks <- toks %>%
+    anti_join(stop_words)
+  toks <- toks[toks$word != "",]
+
+#Calculate sentiment by episode-act
+  toks <- toks %>% inner_join(dict)
+  out <- aggregate(toks$sentiment=="positive", by = list(speaker_turn = toks$key), FUN = mean)
+  hist(out$x) 
+```
+
+
+##Topic Modeling
+
+Goal of topic modeling is to bring structure to textual data -- assign topics and clusters.
+
+First step is not a common step, but is meant to speed up the calculation. We'll take the top 50.
+
+```{r}
+#Count words
+  toks.count <- episodes %>%
+    unnest_tokens(word, text) %>%
+    count(key, word, sort = TRUE)  %>%
+    anti_join(stop_words)
+
+#Calculate TF-IDF
+  toks.count <- toks.count %>%
+    bind_tf_idf(word, key, n)
+  
+#Keep top 50 TFIDF by group
+  toks.count <- toks.count %>%
+      group_by(key) %>%
+      top_n(n = 50, wt = tf_idf)
+  
+#Create Document Term Matrix
+  dtm <- toks.count %>% cast_dtm(key, word, n)
+```
+
+##K-means
+```{r}
+a <- kmeans(dtm.mat, 50)
+
+```
+
+##Alternative currently popular method: Latent Dirichlet Allocaiton
+```{r}
+#LDA
+  library(topicmodels)
+  library(ggplot2)
+
+#Run LDA
+ tal_lda <- LDA(dtm, k = 30, control = list(seed = 1234))
+ tal_top <- tidy(tal_lda, matrix = "beta")
+
+#
+  tal_top_terms <- tal_top %>%
+    group_by(topic) %>%
+    top_n(10, beta) %>%
+    ungroup() %>%
+    arrange(topic, -beta)
+
+tal_top_terms %>%
+    mutate(term = reorder(term, beta)) %>%
+    ggplot(aes(term, beta, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) + 
+    theme(text = element_text(size=10)) +
+    facet_wrap(~ topic, scales = "free") +
+    coord_flip()
+```
