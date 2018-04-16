@@ -1,0 +1,43 @@
+---
+title: "Dygraphs"
+output: html_document
+---
+
+### Single Graph
+
+```{r, echo = FALSE, warning=FALSE, message = FALSE}
+library(dygraphs)
+
+#Create fake data
+x <- 1:1000
+y <- sin(x/200) + cos(x/10)
+
+#Create time series object
+ts_obj <- ts(y, frequency = 12, start = c(2010,1))
+
+#Make Graph
+dygraph(ts_obj, main = "Example") %>% 
+  dyRangeSelector()
+
+```
+
+
+### Synchronize two or more graphs 
+
+Using the quantmod library, we'll create a pair of synchronized area charts of Facebook's and Amazon's adjusted stock prices.
+```{r, echo = FALSE, warning=FALSE, message = FALSE, fig.height = 3}
+library(quantmod)
+library(dygraphs)
+
+#Get stock tickers using the quantmod library
+getSymbols(c("AMZN", "FB"), 
+                  src = "yahoo", 
+                  from = "2013-01-01",
+                  to = Sys.Date())
+
+#Synchronize
+dygraph(AMZN$AMZN.Adjusted, main = "Amazon", group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+dygraph(FB$FB.Adjusted, main = "Facebook", group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```

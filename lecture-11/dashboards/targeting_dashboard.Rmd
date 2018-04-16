@@ -1,0 +1,125 @@
+---
+title: "Market Segmentation"
+output: flexdashboard::flex_dashboard
+---
+ 
+```{r, echo = FALSE}
+
+#Create fake data set
+n <- 1000
+
+set.seed(123)
+
+#Set up data to create segments
+rand <- c(rnorm(n/2, 10, 5), rnorm(n/2, 30, 10))
+
+#Time
+time <- c(rnorm(n/2, 100, 3), rnorm(n/2, 120, 3))
+time <- round(24 * ((time - min(time)) / (max(time) - min(time))),0)
+time <- paste0(sprintf("%02d", time),"00")
+
+#Coverage Region
+region <- c(rep("East", n/2), rep("West", n/2))
+
+#Probability of conversion
+prob <- round(runif(n),4)
+
+#Mode of targeting
+modet <- c(rep("Direct Mail", 500), rep("Email Promo", 250), rep("Phone Call", 250))
+
+#Unique ID
+customer.id  <- paste0(region, "-", 1:n)
+
+#Segments
+groups <- paste0("G-", sprintf("%02d", cut(rand, breaks = 10, labels = FALSE)))
+
+#Data
+data <- data.frame(customer_id = customer.id, 
+                   segment = groups,
+                   prob = prob,
+                   region = region,
+                   time_to_contact = time,
+                   best_channel = modet,
+                   phone = "(XXX) XXX XXXX")
+```
+   
+Column {data-width=500}
+-------------------------------------
+
+### High Priority Targets
+    
+```{r}
+library(DT)
+data <- data[order(-data$prob),]
+datatable(data, rownames = FALSE)
+
+```
+    
+      
+Column {data-width=500, .tabset}
+-------------------------------------
+
+### Market Segment Distribution
+    
+```{r}
+library(plotly)
+
+agg <- aggregate(data$customer_id, by = list(region = data$region, segment = data$segment), FUN = length)
+
+wide <- reshape(agg,
+                idvar = "segment",
+                timevar = "region",
+                direction = "wide")
+colnames(wide)[2:3] <- c("East", "West")
+
+
+p <- plot_ly(wide, x = ~ segment, y = ~ East, type = 'bar', name = 'East') %>%
+  add_trace(y = ~West, name = 'West') %>%
+  layout(yaxis = list(title = 'Count'), barmode = 'group')
+p
+```
+
+    
+### Staffing Requirements by Hour
+
+```{r}
+library(plotly)
+
+#Set up data:
+#Roll up East and West
+  agg1 <- aggregate(customer_id ~ time_to_contact + region,
+                    data = data, 
+                   FUN = length)
+  agg1$customer_id <- agg1$customer_id/10
+
+#Reshape wide
+  agg.c <- reshape(agg1,
+                   idvar = "time_to_contact",
+                   timevar = "region",
+                   direction = "wide")
+  agg.c[is.na(agg.c)] <- 0
+  colnames(agg.c) <- c("time", "staffing.west", "staffing.east")
+
+#Create plot
+  p <- plot_ly(agg.c, x = ~time) %>%
+    add_lines(y = ~staffing.west, name = "East") %>%
+    add_lines(y = ~staffing.east, name = "West", visible = F) %>%
+    layout(
+      xaxis = list(domain = c(0.1, 1)),
+      yaxis = list(title = "Staffing Levels"),
+      updatemenus = list(
+        list(
+          y = 0.7,
+          buttons = list(
+            list(method = "restyle",
+                 args = list("visible", list(TRUE, FALSE)),
+                 label = "East"),
+  
+            list(method = "restyle",
+                 args = list("visible", list(FALSE, TRUE)),
+                 label = "West")))
+      )
+    )
+
+p
+```

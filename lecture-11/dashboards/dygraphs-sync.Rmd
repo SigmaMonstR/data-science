@@ -1,0 +1,106 @@
+---
+title: "Stock Comparisons"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+    
+    
+```{r, echo = FALSE, warning=FALSE, message = FALSE, fig.height = 3}
+library(quantmod)
+library(dygraphs)
+
+#Get stock tickers using the quantmod library
+invisible(getSymbols(
+  c("AMZN", "FB", "INTC", "AAPL", "MSFT", "TSLA", "PYPL", "GE", "BA"), 
+                  src = "yahoo", 
+                  from = "2013-01-01",
+                  to = Sys.Date()))
+
+```
+
+Row
+-------------------------------------
+    
+### Amazon
+    
+```{r}
+#Synchronize
+dygraph(AMZN$AMZN.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+### Facebook
+    
+```{r}
+#Synchronize
+dygraph(FB$FB.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+   
+### Intel
+    
+```{r}
+#Synchronize
+dygraph(INTC$INTC.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+Row
+-------------------------------------
+    
+### Apple
+       
+```{r}
+#Synchronize
+dygraph(AAPL$AAPL.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+
+### Microsoft
+       
+```{r}
+#Synchronize
+dygraph(MSFT$MSFT.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+
+### Tesla
+       
+```{r}
+#Synchronize
+dygraph(TSLA$TSLA.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+Row
+-------------------------------------
+    
+### PayPal
+       
+```{r}
+#Synchronize
+dygraph(PYPL$PYPL.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+
+### GE
+       
+```{r}
+#Synchronize
+dygraph(GE$GE.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4)
+```
+
+
+### BOEING
+       
+```{r}
+#Synchronize
+dygraph(BA$BA.Adjusted, group = "synced") %>%
+  dyOptions(fillGraph = TRUE, fillAlpha = 0.4) 
+```
+

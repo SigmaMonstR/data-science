@@ -133,9 +133,6 @@ library(tm)
 #Import text data
 corp <- Corpus(VectorSource(dialogue$text))
 
-#Create term matrix 
-tdm <- TermDocumentMatrix(corp, control = list(stemming = TRUE))
-
 #Complete the stems in toks
 toks$word <- stemCompletion(toks$word, corp)
 ```
@@ -162,7 +159,7 @@ plot(out, type = "l")
 ```
 
 ##DIY! 
-Spend 10 minutes to modify the above sentiment analysis code in order to apply it to the first 15 TAL episodes. These have already be scraped and can be downloaded below [Github Repo](https://github.com/SigmaMonstR/getThisAmericanLife). Your goal is to calculate the average positive sentiment for each TAL episode-act. Use the `key` variable that is created below.
+Spend 10 minutes to modify the above sentiment analysis code in order to apply it to TAL episodes. These have already be scraped and can be downloaded below [Github Repo](https://github.com/SigmaMonstR/getThisAmericanLife). Your goal is to calculate the average positive sentiment for each TAL episode-act. Use the `key` variable that is created below.
 
 Skip the stem completion step as it takes a long time to complete.
 ```{r}
