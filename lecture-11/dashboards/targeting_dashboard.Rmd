@@ -64,7 +64,9 @@ Column {data-width=500, .tabset}
 ```{r}
 library(plotly)
 
-agg <- aggregate(data$customer_id, by = list(region = data$region, segment = data$segment), FUN = length)
+agg <- aggregate(data$customer_id, 
+                 by = list(region = data$region, segment = data$segment), 
+                 FUN = length)
 
 wide <- reshape(agg,
                 idvar = "segment",
