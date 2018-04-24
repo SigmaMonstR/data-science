@@ -119,7 +119,7 @@
   
   #AVG: Get average number of entities per person
     sqldf('SELECT AVG(count) as avg
-           FROM entities')
+           FROM "uk.entities"')
     
   #SUM: Get total number of electrical permits
     sqldf('SELECT SUM(count) as sum
@@ -179,6 +179,10 @@
                        FROM us_out
                        INNER JOIN uk_out ON us_out.names = uk_out.names')
     
+    #(R version)
+    comb_out2 <- merge(us_out[, c("names", "us_nat", "us_cnt")],
+                       uk_out[, c("names", "uk_nat", "uk_cnt")],
+                       by = "names")
 ##########
 #  VISUALS  #
 ##########

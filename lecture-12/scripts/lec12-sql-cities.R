@@ -6,7 +6,7 @@
 #"https://data.sfgov.org/Housing-and-Buildings/Plumbing-Permits/a6aw-rudh"
 
 #WD
-  setwd("/Users/jeff/Documents/Github/data-science/lecture-10/data")
+  setwd("/Users/jeff/Documents/Github/data-science/lecture-12/data")
   elec <- read.csv("Electrical_Permits.csv")
   plumb <- read.csv("Plumbing_Permits.csv")
 
